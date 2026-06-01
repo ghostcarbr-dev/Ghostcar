@@ -1,98 +1,378 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { Image } from 'expo-image';
+import { StatusBar } from 'expo-status-bar';
+import { useState } from 'react';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
-
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
-  return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
-
 export default function HomeScreen() {
+  const [authExpanded, setAuthExpanded] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
   return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      style={styles.screen}>
+      <StatusBar style="light" />
+      <Image
+        contentFit="cover"
+        contentPosition={{ left: '43%', top: '50%' }}
+        source={require('@/assets/images/ghostcar-hero-v2.png')}
+        style={StyleSheet.absoluteFill}
+      />
+      <ScrollView
+        bounces={false}
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}>
+        <SafeAreaView edges={['top', 'bottom']} style={styles.safeArea}>
+          <View style={styles.brandBlock}>
+            <Text style={styles.brand}>Ghostcar</Text>
+            <Text style={styles.tagline}>ALUGUEL DE CARROS</Text>
+          </View>
 
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
+          {!authExpanded && (
+            <View style={styles.welcomeActions}>
+              <Pressable
+                onPress={() => setAuthExpanded(true)}
+                style={({ pressed }) => [styles.openAccountButton, pressed && styles.pressed]}>
+                <Text style={styles.openAccountText}>Abrir conta</Text>
+              </Pressable>
 
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
+              <Pressable
+                onPress={() => setAuthExpanded(true)}
+                style={({ pressed }) => [styles.existingAccountButton, pressed && styles.pressed]}>
+                <Text style={styles.existingAccountText}>Já tenho conta</Text>
+              </Pressable>
+            </View>
+          )}
 
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+          {authExpanded && (
+            <View style={styles.card}>
+              <Pressable
+                accessibilityLabel="Voltar"
+                onPress={() => setAuthExpanded(false)}
+                style={styles.cardBackButton}>
+                <Text style={styles.cardBackIcon}>‹</Text>
+              </Pressable>
+
+              <Text style={styles.title}>Olá!</Text>
+              <Text style={styles.subtitle}>Acesse sua conta ou cadastre-se</Text>
+
+              <Pressable style={({ pressed }) => [styles.googleButton, pressed && styles.pressed]}>
+                <Image
+                  contentFit="contain"
+                  source={require('@/assets/images/google-g-logo.png')}
+                  style={styles.googleIcon}
+                />
+                <Text style={styles.socialButtonText}>Continuar com Google</Text>
+              </Pressable>
+
+              <Pressable style={({ pressed }) => [styles.appleButton, pressed && styles.pressed]}>
+                <Ionicons color="#FFFFFF" name="logo-apple" size={26} />
+                <Text style={styles.appleButtonText}>Continuar com Apple</Text>
+              </Pressable>
+
+              <View style={styles.dividerRow}>
+                <View style={styles.divider} />
+                <Text style={styles.dividerText}>ou</Text>
+                <View style={styles.divider} />
+              </View>
+
+              <Text style={styles.label}>E-mail</Text>
+              <TextInput
+                autoCapitalize="none"
+                autoComplete="email"
+                keyboardType="email-address"
+                placeholder="Insira seu e-mail"
+                placeholderTextColor="#9B9B9B"
+                style={styles.input}
+              />
+
+              <Text style={styles.label}>Senha</Text>
+              <View style={styles.passwordInput}>
+                <TextInput
+                  autoCapitalize="none"
+                  autoComplete="password"
+                  placeholder="Insira sua senha"
+                  placeholderTextColor="#9B9B9B"
+                  secureTextEntry={!showPassword}
+                  style={styles.passwordTextInput}
+                />
+                <Pressable
+                  accessibilityLabel={
+                    showPassword ? 'Ocultar senha' : 'Mostrar senha'
+                  }
+                  onPress={() => setShowPassword((visible) => !visible)}
+                  style={styles.eyeButton}>
+                  <Text style={styles.eyeIcon}>{showPassword ? '◉' : '◌'}</Text>
+                </Pressable>
+              </View>
+
+              <Pressable style={({ pressed }) => [styles.loginButton, pressed && styles.pressed]}>
+                <Text style={styles.loginButtonText}>Entrar</Text>
+              </Pressable>
+
+              <Pressable style={styles.forgotButton}>
+                <Text style={styles.forgotText}>Esqueci minha senha</Text>
+              </Pressable>
+
+              <Pressable style={({ pressed }) => [styles.createButton, pressed && styles.pressed]}>
+                <Text style={styles.createButtonText}>Criar conta</Text>
+              </Pressable>
+            </View>
+          )}
+        </SafeAreaView>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
+    backgroundColor: '#00102D',
+  },
+  scrollContent: {
+    flexGrow: 1,
   },
   safeArea: {
     flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
   },
-  heroSection: {
+  brandBlock: {
+    alignItems: 'center',
+    marginTop: 22,
+  },
+  brand: {
+    color: '#FFFFFF',
+    fontSize: 40,
+    fontWeight: '800',
+    letterSpacing: -2,
+    lineHeight: 44,
+  },
+  tagline: {
+    color: '#FFFFFF',
+    fontSize: 9,
+    fontWeight: '700',
+    letterSpacing: 3.2,
+  },
+  welcomeActions: {
+    marginTop: 'auto',
+    paddingHorizontal: 16,
+    paddingBottom: 18,
+    gap: 14,
+  },
+  openAccountButton: {
     alignItems: 'center',
     justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
+    height: 58,
+    borderRadius: 18,
+    backgroundColor: '#FFCC2D',
+  },
+  openAccountText: {
+    color: '#171717',
+    fontSize: 17,
+    fontWeight: '500',
+  },
+  existingAccountButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 58,
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.84)',
+    borderRadius: 18,
+    backgroundColor: 'rgba(0, 0, 0, 0.16)',
+  },
+  existingAccountText: {
+    color: '#FFFFFF',
+    fontSize: 17,
+    fontWeight: '500',
+  },
+  card: {
+    width: '92%',
+    maxWidth: 660,
+    alignSelf: 'center',
+    marginTop: 28,
+    marginBottom: 28,
+    paddingHorizontal: 30,
+    paddingTop: 22,
+    paddingBottom: 38,
+    borderRadius: 22,
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 5,
+  },
+  cardBackButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 38,
+    height: 38,
+    marginBottom: 8,
+    borderRadius: 19,
+    backgroundColor: '#F0F0F0',
+  },
+  cardBackIcon: {
+    marginTop: -5,
+    color: '#333333',
+    fontSize: 43,
+    fontWeight: '200',
+    lineHeight: 43,
   },
   title: {
-    textAlign: 'center',
+    color: '#111111',
+    fontSize: 34,
+    fontWeight: '800',
+    letterSpacing: -1,
   },
-  code: {
-    textTransform: 'uppercase',
+  subtitle: {
+    marginTop: 2,
+    color: '#656565',
+    fontSize: 18,
   },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
+  googleButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 64,
+    marginTop: 36,
+    borderWidth: 1,
+    borderColor: '#ECECEC',
+    borderRadius: 4,
+    backgroundColor: '#FFFFFF',
+    gap: 14,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+  },
+  googleIcon: {
+    width: 22,
+    height: 22,
+  },
+  socialButtonText: {
+    color: '#252525',
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  appleButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 64,
+    marginTop: 14,
+    borderRadius: 4,
+    backgroundColor: '#111111',
+    gap: 14,
+  },
+  appleButtonText: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  dividerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 18,
+    marginVertical: 34,
+  },
+  divider: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#D6D6D6',
+  },
+  dividerText: {
+    color: '#989898',
+    fontSize: 18,
+  },
+  label: {
+    marginBottom: 8,
+    color: '#3B3B3B',
+    fontSize: 17,
+  },
+  input: {
+    height: 62,
+    marginBottom: 25,
+    paddingHorizontal: 18,
+    borderWidth: 1,
+    borderColor: '#C8C8C8',
+    borderRadius: 11,
+    color: '#202020',
+    fontSize: 18,
+  },
+  passwordInput: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 62,
+    marginBottom: 28,
+    borderWidth: 1,
+    borderColor: '#C8C8C8',
+    borderRadius: 11,
+  },
+  passwordTextInput: {
+    flex: 1,
+    height: '100%',
+    paddingHorizontal: 18,
+    color: '#202020',
+    fontSize: 18,
+  },
+  eyeButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 58,
+    height: '100%',
+  },
+  eyeIcon: {
+    color: '#737373',
+    fontSize: 34,
+    lineHeight: 38,
+  },
+  loginButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 62,
+    borderRadius: 7,
+    backgroundColor: '#08735D',
+  },
+  loginButtonText: {
+    color: '#FFFFFF',
+    fontSize: 20,
+    fontWeight: '800',
+  },
+  forgotButton: {
+    alignSelf: 'flex-start',
+    marginVertical: 24,
+  },
+  forgotText: {
+    color: '#08735D',
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  createButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 62,
+    borderWidth: 1.5,
+    borderColor: '#08735D',
+    borderRadius: 7,
+  },
+  createButtonText: {
+    color: '#08735D',
+    fontSize: 20,
+    fontWeight: '800',
+  },
+  pressed: {
+    opacity: 0.76,
   },
 });
