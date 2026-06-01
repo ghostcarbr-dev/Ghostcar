@@ -15,7 +15,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function HomeScreen() {
-  const [authExpanded, setAuthExpanded] = useState(false);
+  const [authMode, setAuthMode] = useState<'login' | 'signup' | null>(null);
   const [showPassword, setShowPassword] = useState(false);
 
   return (
@@ -40,27 +40,83 @@ export default function HomeScreen() {
             <Text style={styles.tagline}>ALUGUEL DE CARROS</Text>
           </View>
 
-          {!authExpanded && (
+          {!authMode && (
             <View style={styles.welcomeActions}>
               <Pressable
-                onPress={() => setAuthExpanded(true)}
+                onPress={() => setAuthMode('signup')}
                 style={({ pressed }) => [styles.openAccountButton, pressed && styles.pressed]}>
                 <Text style={styles.openAccountText}>Abrir conta</Text>
               </Pressable>
 
               <Pressable
-                onPress={() => setAuthExpanded(true)}
+                onPress={() => setAuthMode('login')}
                 style={({ pressed }) => [styles.existingAccountButton, pressed && styles.pressed]}>
                 <Text style={styles.existingAccountText}>Já tenho conta</Text>
               </Pressable>
             </View>
           )}
 
-          {authExpanded && (
+          {authMode === 'signup' && (
+            <View style={styles.signupCard}>
+              <View style={styles.signupHeader}>
+                <View style={styles.profileIcon}>
+                  <Ionicons color="#079B65" name="person-outline" size={30} />
+                </View>
+                <Pressable
+                  accessibilityLabel="Fechar"
+                  onPress={() => setAuthMode(null)}
+                  style={styles.closeButton}>
+                  <Ionicons color="#737373" name="close" size={30} />
+                </Pressable>
+              </View>
+
+              <Text style={styles.signupTitle}>Entre ou crie sua conta</Text>
+              <Text style={styles.signupSubtitle}>
+                Faça login ou cadastre-se para acompanhar suas reservas e obter benefícios exclusivos!
+              </Text>
+
+              <Text style={styles.signupLabel}>E-mail</Text>
+              <TextInput
+                autoCapitalize="none"
+                autoComplete="email"
+                keyboardType="email-address"
+                placeholder="Digite seu e-mail"
+                placeholderTextColor="#7B7B7B"
+                style={styles.signupInput}
+              />
+
+              <Pressable
+                style={({ pressed }) => [styles.emailContinueButton, pressed && styles.pressed]}>
+                <Text style={styles.emailContinueText}>Continuar com e-mail</Text>
+              </Pressable>
+
+              <View style={styles.dividerRow}>
+                <View style={styles.divider} />
+                <Text style={styles.dividerText}>ou</Text>
+                <View style={styles.divider} />
+              </View>
+
+              <Pressable style={({ pressed }) => [styles.googleButton, styles.signupSocialButton, pressed && styles.pressed]}>
+                <Image
+                  contentFit="contain"
+                  source={require('@/assets/images/google-g-logo.png')}
+                  style={styles.googleIcon}
+                />
+                <Text style={styles.socialButtonText}>Continuar com Google</Text>
+              </Pressable>
+
+              <Pressable style={({ pressed }) => [styles.appleButton, pressed && styles.pressed]}>
+                <Ionicons color="#FFFFFF" name="logo-apple" size={26} />
+                <Text style={styles.appleButtonText}>Continuar com Apple</Text>
+              </Pressable>
+            </View>
+          )}
+
+          {authMode === 'login' && (
             <View style={styles.card}>
               <Pressable
                 accessibilityLabel="Voltar"
-                onPress={() => setAuthExpanded(false)}
+                onPress={() => setAuthMode(null)}
                 style={styles.cardBackButton}>
                 <Text style={styles.cardBackIcon}>‹</Text>
               </Pressable>
@@ -197,6 +253,80 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontWeight: '500',
   },
+  signupCard: {
+    width: '94%',
+    maxWidth: 660,
+    alignSelf: 'center',
+    marginTop: 18,
+    marginBottom: 24,
+    paddingHorizontal: 26,
+    paddingTop: 24,
+    paddingBottom: 34,
+    borderRadius: 22,
+    backgroundColor: '#FFFFFF',
+  },
+  signupHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 28,
+  },
+  profileIcon: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 62,
+    height: 62,
+    borderRadius: 31,
+    backgroundColor: '#ECFFF5',
+  },
+  closeButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#E7E7E7',
+  },
+  signupTitle: {
+    color: '#111111',
+    fontSize: 29,
+    fontWeight: '800',
+    letterSpacing: -0.8,
+  },
+  signupSubtitle: {
+    marginTop: 18,
+    marginBottom: 30,
+    color: '#666666',
+    fontSize: 17,
+    lineHeight: 24,
+  },
+  signupLabel: {
+    marginBottom: 9,
+    color: '#555555',
+    fontSize: 17,
+  },
+  signupInput: {
+    height: 64,
+    paddingHorizontal: 18,
+    borderWidth: 1,
+    borderColor: '#C8CECC',
+    borderRadius: 11,
+    color: '#202020',
+    fontSize: 18,
+  },
+  emailContinueButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 60,
+    marginTop: 26,
+    borderRadius: 10,
+    backgroundColor: '#C8E7DA',
+  },
+  emailContinueText: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: '700',
+  },
   card: {
     width: '92%',
     maxWidth: 660,
@@ -256,6 +386,9 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
+  },
+  signupSocialButton: {
+    marginTop: 0,
   },
   googleIcon: {
     width: 22,
