@@ -1,0 +1,19 @@
+{
+  "name": "ghostcar-api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Ghostcar car listing API for Render",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "check": "node --check src/index.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "pg": "^8.16.3"
+  }
+}
