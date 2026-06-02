@@ -36,6 +36,7 @@ type PhotonFeature = {
 const personalMenuItems = [
   { icon: 'home-outline', key: 'home' },
   { icon: 'ticket-outline', key: 'bookings' },
+  { icon: 'car-sport-outline', key: 'publishCar' },
   { icon: 'trophy-outline', key: 'rentRewards' },
   { icon: 'gift-outline', key: 'promotions' },
   { icon: 'settings-outline', key: 'settings' },
@@ -674,53 +675,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 28,
     paddingTop: 24,
   },
-  bookingsContent: {
-    flex: 1,
-    justifyContent: 'space-between',
-    paddingHorizontal: 24,
-    paddingTop: 72,
-    paddingBottom: 22,
-  },
-  bookingsEmptyState: {
-    alignItems: 'center',
-  },
-  bookingsIcon: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: 78,
-    height: 78,
-    borderRadius: 39,
-    backgroundColor: '#EAF8F3',
-  },
-  bookingsTitle: {
-    marginTop: 20,
-    color: '#242424',
-    fontSize: 17,
-    fontWeight: '800',
-    textAlign: 'center',
-  },
-  bookingsSubtitle: {
-    width: '86%',
-    marginTop: 9,
-    color: '#777777',
-    fontSize: 14,
-    lineHeight: 19,
-    textAlign: 'center',
-  },
-  publishCarButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: 56,
-    borderRadius: 18,
-    backgroundColor: '#08735D',
-    gap: 8,
-  },
-  publishCarButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '800',
-  },
   settingsLinkRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -813,7 +767,6 @@ function ClientMenu({ languageCode, onBack, setLanguageCode, t }: ClientMenuProp
   const [isSettingsScreenOpen, setIsSettingsScreenOpen] = useState(false);
   const [isLanguageScreenOpen, setIsLanguageScreenOpen] = useState(false);
   const [isCurrencyScreenOpen, setIsCurrencyScreenOpen] = useState(false);
-  const [isBookingsScreenOpen, setIsBookingsScreenOpen] = useState(false);
   const [pendingLanguageCode, setPendingLanguageCode] = useState(languageCode);
   const [selectedCurrencyCode, setSelectedCurrencyCode] = useState<(typeof currencies)[number]['code']>('BRL');
   const selectedCurrency =
@@ -861,10 +814,6 @@ function ClientMenu({ languageCode, onBack, setLanguageCode, t }: ClientMenuProp
     );
   }
 
-  if (isBookingsScreenOpen) {
-    return <BookingsScreen onBack={() => setIsBookingsScreenOpen(false)} t={t} />;
-  }
-
   return (
     <SafeAreaView edges={['top']} style={styles.menuScreen}>
       <View style={styles.menuHeader}>
@@ -890,12 +839,7 @@ function ClientMenu({ languageCode, onBack, setLanguageCode, t }: ClientMenuProp
 
         <Text style={styles.menuSectionTitle}>{t('forYou')}</Text>
         {personalMenuItems.map((item) => (
-          <MenuRow
-            icon={item.icon}
-            key={item.key}
-            label={t(item.key)}
-            onPress={item.key === 'bookings' ? () => setIsBookingsScreenOpen(true) : undefined}
-          />
+          <MenuRow icon={item.icon} key={item.key} label={t(item.key)} />
         ))}
 
         <Text style={styles.menuSectionTitle}>Ghostcar</Text>
@@ -912,35 +856,6 @@ function ClientMenu({ languageCode, onBack, setLanguageCode, t }: ClientMenuProp
           </View>
         </View>
       </ScrollView>
-    </SafeAreaView>
-  );
-}
-
-function BookingsScreen({ onBack, t }: { onBack: () => void; t: (key: string) => string }) {
-  return (
-    <SafeAreaView edges={['top', 'bottom']} style={styles.menuScreen}>
-      <View style={styles.menuHeader}>
-        <Pressable accessibilityLabel="Voltar" onPress={onBack}>
-          <Ionicons color="#242424" name="arrow-back" size={30} />
-        </Pressable>
-        <Text style={styles.settingsHeaderTitle}>{t('bookings')}</Text>
-        <Ionicons color="#242424" name="menu" size={31} />
-      </View>
-
-      <View style={styles.bookingsContent}>
-        <View style={styles.bookingsEmptyState}>
-          <View style={styles.bookingsIcon}>
-            <Ionicons color="#08735D" name="car-sport-outline" size={39} />
-          </View>
-          <Text style={styles.bookingsTitle}>{t('noBookings')}</Text>
-          <Text style={styles.bookingsSubtitle}>{t('noBookingsInfo')}</Text>
-        </View>
-
-        <Pressable style={({ pressed }) => [styles.publishCarButton, pressed && styles.pressed]}>
-          <Ionicons color="#FFFFFF" name="add-circle-outline" size={21} />
-          <Text style={styles.publishCarButtonText}>{t('publishCar')}</Text>
-        </Pressable>
-      </View>
     </SafeAreaView>
   );
 }
