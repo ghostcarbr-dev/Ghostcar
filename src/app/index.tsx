@@ -206,9 +206,7 @@ function WebHomeScreen() {
   const [destination, setDestination] = useState('');
 
   return (
-    <ScrollView
-      contentContainerStyle={styles.webPage}
-      showsVerticalScrollIndicator>
+    <View style={styles.webPage}>
       <StatusBar style="dark" />
       <View style={styles.webHeader}>
         <View>
@@ -314,7 +312,7 @@ function WebHomeScreen() {
         </View>
         <Text style={styles.webCopyright}>© 2026 Ghostcar. Todos os direitos reservados.</Text>
       </View>
-    </ScrollView>
+    </View>
   );
 }
 
@@ -844,6 +842,7 @@ const styles = StyleSheet.create({
   },
   webPage: {
     backgroundColor: '#FFFFFF',
+    minHeight: '100%',
   },
   webHeader: {
     flexDirection: 'row',
