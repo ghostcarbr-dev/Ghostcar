@@ -1,0 +1,125 @@
+import { createContext, PropsWithChildren, useContext, useMemo, useState } from 'react';
+
+export const languages = [
+  { code: 'pt', flag: '🇧🇷', label: 'Português' },
+  { code: 'fr', flag: '🇫🇷', label: 'Français' },
+  { code: 'en', flag: '🇺🇸', label: 'English' },
+  { code: 'zh', flag: '🇨🇳', label: '中文' },
+  { code: 'hi', flag: '🇮🇳', label: 'हिन्दी' },
+  { code: 'es', flag: '🇪🇸', label: 'Español' },
+  { code: 'ar', flag: '🇸🇦', label: 'العربية' },
+] as const;
+
+type LanguageCode = (typeof languages)[number]['code'];
+
+const translations: Record<LanguageCode, Record<string, string>> = {
+  pt: {
+    rentCars: 'ALUGUEL DE CARROS', openAccount: 'Abrir conta', haveAccount: 'Já tenho conta',
+    enterOrCreate: 'Entre ou crie sua conta', signupInfo: 'Faça login ou cadastre-se para acompanhar suas reservas e obter benefícios exclusivos!',
+    email: 'E-mail', typeEmail: 'Digite seu e-mail', continueEmail: 'Continuar com e-mail', or: 'ou',
+    continueGoogle: 'Continuar com Google', continueApple: 'Continuar com Apple', hello: 'Olá!',
+    accountInfo: 'Acesse sua conta ou cadastre-se', password: 'Senha', typePassword: 'Insira sua senha',
+    enter: 'Entrar', forgotPassword: 'Esqueci minha senha', createAccount: 'Criar conta',
+    nextDestination: 'Qual é o seu próximo destino?', searchDestinations: 'Buscar destinos', search: 'Buscar',
+    planTrip: 'PLANEJE SUA VIAGEM', nextPath: 'Seu próximo caminho começa aqui.',
+    idealCar: 'Encontre o carro ideal para aproveitar cada momento.', seeOffers: 'VER OFERTAS',
+    rewards: 'Quanto mais você viaja, mais vantagens ganha.', rewardsInfo: 'Reserve com a Ghostcar e acompanhe benefícios exclusivos.',
+    discoverBenefits: 'CONHECER BENEFÍCIOS', locationDenied: 'Permita o acesso à localização para usar sua posição atual.',
+    locationFailed: 'Não foi possível obter sua localização. Tente novamente.', suggestions: 'Sugestões © OpenStreetMap contributors',
+  },
+  fr: {
+    rentCars: 'LOCATION DE VOITURES', openAccount: 'Ouvrir un compte', haveAccount: "J'ai déjà un compte",
+    enterOrCreate: 'Connectez-vous ou créez votre compte', signupInfo: 'Connectez-vous ou inscrivez-vous pour suivre vos réservations et profiter d’avantages exclusifs !',
+    email: 'E-mail', typeEmail: 'Saisissez votre e-mail', continueEmail: "Continuer avec l'e-mail", or: 'ou',
+    continueGoogle: 'Continuer avec Google', continueApple: 'Continuer avec Apple', hello: 'Bonjour !',
+    accountInfo: 'Accédez à votre compte ou inscrivez-vous', password: 'Mot de passe', typePassword: 'Saisissez votre mot de passe',
+    enter: 'Se connecter', forgotPassword: 'Mot de passe oublié ?', createAccount: 'Créer un compte',
+    nextDestination: 'Quelle est votre prochaine destination ?', searchDestinations: 'Rechercher des destinations', search: 'Rechercher',
+    planTrip: 'PLANIFIEZ VOTRE VOYAGE', nextPath: 'Votre prochain trajet commence ici.',
+    idealCar: 'Trouvez la voiture idéale pour profiter de chaque instant.', seeOffers: 'VOIR LES OFFRES',
+    rewards: 'Plus vous voyagez, plus vous gagnez.', rewardsInfo: 'Réservez avec Ghostcar et profitez d’avantages exclusifs.',
+    discoverBenefits: 'DÉCOUVRIR LES AVANTAGES', locationDenied: 'Autorisez la localisation pour utiliser votre position actuelle.',
+    locationFailed: 'Impossible d’obtenir votre position. Réessayez.', suggestions: 'Suggestions © contributeurs OpenStreetMap',
+  },
+  en: {
+    rentCars: 'CAR RENTAL', openAccount: 'Open account', haveAccount: 'I already have an account',
+    enterOrCreate: 'Sign in or create your account', signupInfo: 'Sign in or register to track your bookings and get exclusive benefits!',
+    email: 'Email', typeEmail: 'Enter your email', continueEmail: 'Continue with email', or: 'or',
+    continueGoogle: 'Continue with Google', continueApple: 'Continue with Apple', hello: 'Hello!',
+    accountInfo: 'Sign in or create your account', password: 'Password', typePassword: 'Enter your password',
+    enter: 'Sign in', forgotPassword: 'Forgot password?', createAccount: 'Create account',
+    nextDestination: 'What is your next destination?', searchDestinations: 'Search destinations', search: 'Search',
+    planTrip: 'PLAN YOUR TRIP', nextPath: 'Your next journey starts here.', idealCar: 'Find the perfect car for every moment.',
+    seeOffers: 'SEE OFFERS', rewards: 'The more you travel, the more you earn.', rewardsInfo: 'Book with Ghostcar and enjoy exclusive benefits.',
+    discoverBenefits: 'DISCOVER BENEFITS', locationDenied: 'Allow location access to use your current position.',
+    locationFailed: 'Unable to get your location. Try again.', suggestions: 'Suggestions © OpenStreetMap contributors',
+  },
+  es: {
+    rentCars: 'ALQUILER DE COCHES', openAccount: 'Abrir cuenta', haveAccount: 'Ya tengo una cuenta',
+    enterOrCreate: 'Entra o crea tu cuenta', signupInfo: 'Inicia sesión o regístrate para seguir tus reservas y obtener beneficios exclusivos.',
+    email: 'Correo', typeEmail: 'Ingresa tu correo', continueEmail: 'Continuar con correo', or: 'o',
+    continueGoogle: 'Continuar con Google', continueApple: 'Continuar con Apple', hello: '¡Hola!',
+    accountInfo: 'Accede a tu cuenta o regístrate', password: 'Contraseña', typePassword: 'Ingresa tu contraseña',
+    enter: 'Entrar', forgotPassword: 'Olvidé mi contraseña', createAccount: 'Crear cuenta',
+    nextDestination: '¿Cuál es tu próximo destino?', searchDestinations: 'Buscar destinos', search: 'Buscar',
+    planTrip: 'PLANEA TU VIAJE', nextPath: 'Tu próximo camino comienza aquí.', idealCar: 'Encuentra el coche ideal para cada momento.',
+    seeOffers: 'VER OFERTAS', rewards: 'Cuanto más viajas, más ganas.', rewardsInfo: 'Reserva con Ghostcar y disfruta beneficios exclusivos.',
+    discoverBenefits: 'CONOCER BENEFICIOS', locationDenied: 'Permite la ubicación para usar tu posición actual.',
+    locationFailed: 'No se pudo obtener tu ubicación. Inténtalo de nuevo.', suggestions: 'Sugerencias © colaboradores de OpenStreetMap',
+  },
+  zh: {
+    rentCars: '汽车租赁', openAccount: '开设账户', haveAccount: '我已有账户', enterOrCreate: '登录或创建账户',
+    signupInfo: '登录或注册以查看预订并享受专属优惠！', email: '电子邮箱', typeEmail: '输入电子邮箱', continueEmail: '使用邮箱继续',
+    or: '或', continueGoogle: '使用 Google 继续', continueApple: '使用 Apple 继续', hello: '您好！',
+    accountInfo: '登录或注册账户', password: '密码', typePassword: '输入密码', enter: '登录',
+    forgotPassword: '忘记密码？', createAccount: '创建账户', nextDestination: '您的下一个目的地是哪里？',
+    searchDestinations: '搜索目的地', search: '搜索', planTrip: '规划您的旅程', nextPath: '下一段旅程从这里开始。',
+    idealCar: '为每个美好时刻找到理想座驾。', seeOffers: '查看优惠', rewards: '旅行越多，收获越多。',
+    rewardsInfo: '通过 Ghostcar 预订并享受专属优惠。', discoverBenefits: '了解优惠',
+    locationDenied: '请允许定位以使用当前位置。', locationFailed: '无法获取您的位置，请重试。', suggestions: '建议 © OpenStreetMap 贡献者',
+  },
+  hi: {
+    rentCars: 'कार किराया', openAccount: 'खाता खोलें', haveAccount: 'मेरा खाता पहले से है', enterOrCreate: 'लॉग इन करें या खाता बनाएं',
+    signupInfo: 'अपनी बुकिंग देखने और विशेष लाभ पाने के लिए लॉग इन या पंजीकरण करें।', email: 'ईमेल', typeEmail: 'अपना ईमेल दर्ज करें',
+    continueEmail: 'ईमेल से जारी रखें', or: 'या', continueGoogle: 'Google से जारी रखें', continueApple: 'Apple से जारी रखें',
+    hello: 'नमस्ते!', accountInfo: 'अपने खाते में लॉग इन करें या पंजीकरण करें', password: 'पासवर्ड', typePassword: 'अपना पासवर्ड दर्ज करें',
+    enter: 'लॉग इन', forgotPassword: 'पासवर्ड भूल गए?', createAccount: 'खाता बनाएं', nextDestination: 'आपकी अगली मंज़िल क्या है?',
+    searchDestinations: 'मंज़िल खोजें', search: 'खोजें', planTrip: 'अपनी यात्रा की योजना बनाएं', nextPath: 'आपकी अगली यात्रा यहां से शुरू होती है।',
+    idealCar: 'हर पल के लिए सही कार खोजें।', seeOffers: 'ऑफर देखें', rewards: 'जितना यात्रा करें, उतना लाभ पाएं।',
+    rewardsInfo: 'Ghostcar से बुक करें और विशेष लाभ पाएं।', discoverBenefits: 'लाभ देखें',
+    locationDenied: 'वर्तमान स्थान के लिए लोकेशन की अनुमति दें।', locationFailed: 'स्थान प्राप्त नहीं हुआ। फिर प्रयास करें।',
+    suggestions: 'सुझाव © OpenStreetMap योगदानकर्ता',
+  },
+  ar: {
+    rentCars: 'تأجير السيارات', openAccount: 'فتح حساب', haveAccount: 'لدي حساب بالفعل', enterOrCreate: 'سجّل الدخول أو أنشئ حسابك',
+    signupInfo: 'سجّل الدخول أو أنشئ حسابًا لمتابعة حجوزاتك والاستفادة من المزايا الحصرية.', email: 'البريد الإلكتروني',
+    typeEmail: 'أدخل بريدك الإلكتروني', continueEmail: 'المتابعة بالبريد الإلكتروني', or: 'أو',
+    continueGoogle: 'المتابعة باستخدام Google', continueApple: 'المتابعة باستخدام Apple', hello: 'مرحبًا!',
+    accountInfo: 'سجّل الدخول أو أنشئ حسابًا', password: 'كلمة المرور', typePassword: 'أدخل كلمة المرور',
+    enter: 'تسجيل الدخول', forgotPassword: 'نسيت كلمة المرور؟', createAccount: 'إنشاء حساب',
+    nextDestination: 'ما هي وجهتك القادمة؟', searchDestinations: 'ابحث عن وجهة', search: 'بحث',
+    planTrip: 'خطط لرحلتك', nextPath: 'رحلتك القادمة تبدأ هنا.', idealCar: 'اعثر على السيارة المثالية لكل لحظة.',
+    seeOffers: 'عرض العروض', rewards: 'كلما سافرت أكثر، حصلت على مزايا أكثر.', rewardsInfo: 'احجز مع Ghostcar واستفد من المزايا الحصرية.',
+    discoverBenefits: 'اكتشف المزايا', locationDenied: 'اسمح بالوصول إلى الموقع لاستخدام موقعك الحالي.',
+    locationFailed: 'تعذر الحصول على موقعك. حاول مرة أخرى.', suggestions: 'اقتراحات © مساهمو OpenStreetMap',
+  },
+};
+
+const LanguageContext = createContext({
+  languageCode: 'pt' as LanguageCode,
+  setLanguageCode: (_code: LanguageCode) => {},
+  t: (key: string) => translations.pt[key] ?? key,
+});
+
+export function LanguageProvider({ children }: PropsWithChildren) {
+  const [languageCode, setLanguageCode] = useState<LanguageCode>('pt');
+  const value = useMemo(
+    () => ({ languageCode, setLanguageCode, t: (key: string) => translations[languageCode][key] ?? translations.pt[key] ?? key }),
+    [languageCode]
+  );
+  return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;
+}
+
+export function useLanguage() {
+  return useContext(LanguageContext);
+}

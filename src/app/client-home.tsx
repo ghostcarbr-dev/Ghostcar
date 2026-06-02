@@ -5,6 +5,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { languages, useLanguage } from '@/i18n';
 
 type Coordinates = {
   latitude: number;
@@ -32,27 +33,18 @@ type PhotonFeature = {
   };
 };
 
-const languages = [
-  { code: 'pt', flag: '🇧🇷', label: 'Português' },
-  { code: 'en', flag: '🇺🇸', label: 'English' },
-  { code: 'zh', flag: '🇨🇳', label: '中文' },
-  { code: 'hi', flag: '🇮🇳', label: 'हिन्दी' },
-  { code: 'es', flag: '🇪🇸', label: 'Español' },
-  { code: 'ar', flag: '🇸🇦', label: 'العربية' },
-] as const;
-
 export default function ClientHomeScreen() {
   const [destination, setDestination] = useState('');
   const [locationError, setLocationError] = useState('');
   const [isLocating, setIsLocating] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [isLanguageMenuOpen, setIsLanguageMenuOpen] = useState(false);
-  const [selectedLanguageCode, setSelectedLanguageCode] = useState('pt');
+  const { languageCode, setLanguageCode, t } = useLanguage();
   const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([]);
   const currentCoordinates = useRef<Coordinates | null>(null);
   const skipNextSuggestionFetch = useRef(false);
   const selectedLanguage =
-    languages.find((language) => language.code === selectedLanguageCode) ?? languages[0];
+    languages.find((language) => language.code === languageCode) ?? languages[0];
 
   useEffect(() => {
     const query = destination.trim();
@@ -116,7 +108,7 @@ export default function ClientHomeScreen() {
     try {
       const permission = await Location.requestForegroundPermissionsAsync();
       if (permission.status !== 'granted') {
-        setLocationError('Permita o acesso à localização para usar sua posição atual.');
+        setLocationError(t('locationDenied'));
         return;
       }
 
@@ -137,7 +129,7 @@ export default function ClientHomeScreen() {
         [address.street, address.name, address.city, address.region].filter(Boolean).join(', ')
       );
     } catch {
-      setLocationError('Não foi possível obter sua localização. Tente novamente.');
+      setLocationError(t('locationFailed'));
     } finally {
       setIsLocating(false);
     }
@@ -170,7 +162,7 @@ export default function ClientHomeScreen() {
             <View style={styles.topBar}>
               <View>
                 <Text style={styles.logo}>Ghostcar</Text>
-                <Text style={styles.logoTagline}>ALUGUEL DE CARROS</Text>
+                <Text style={styles.logoTagline}>{t('rentCars')}</Text>
               </View>
 
               <View style={styles.headerActions}>
@@ -191,7 +183,7 @@ export default function ClientHomeScreen() {
                         <Pressable
                           key={language.code}
                           onPress={() => {
-                            setSelectedLanguageCode(language.code);
+                            setLanguageCode(language.code);
                             setIsLanguageMenuOpen(false);
                           }}
                           style={({ pressed }) => [
@@ -212,12 +204,12 @@ export default function ClientHomeScreen() {
               </View>
             </View>
 
-            <Text style={styles.greeting}>Olá!</Text>
+            <Text style={styles.greeting}>{t('hello')}</Text>
           </SafeAreaView>
         </View>
 
         <View style={styles.searchCard}>
-          <Text style={styles.searchTitle}>Qual é o seu próximo destino?</Text>
+          <Text style={styles.searchTitle}>{t('nextDestination')}</Text>
           <View style={styles.searchInput}>
             <Pressable accessibilityLabel="Usar minha localização atual" onPress={useCurrentLocation}>
               {isLocating ? (
@@ -227,7 +219,7 @@ export default function ClientHomeScreen() {
               )}
             </Pressable>
             <TextInput
-              placeholder="Buscar destinos"
+              placeholder={t('searchDestinations')}
               placeholderTextColor="#B0B0B0"
               value={destination}
               onChangeText={setDestination}
@@ -248,12 +240,12 @@ export default function ClientHomeScreen() {
                   </Text>
                 </Pressable>
               ))}
-              <Text style={styles.attribution}>Suggestions © OpenStreetMap contributors</Text>
+              <Text style={styles.attribution}>{t('suggestions')}</Text>
             </View>
           )}
           {!!locationError && <Text style={styles.locationError}>{locationError}</Text>}
           <Pressable style={({ pressed }) => [styles.searchButton, pressed && styles.pressed]}>
-            <Text style={styles.searchButtonText}>Buscar</Text>
+            <Text style={styles.searchButtonText}>{t('search')}</Text>
           </Pressable>
         </View>
 
@@ -266,11 +258,11 @@ export default function ClientHomeScreen() {
             />
             <View style={styles.promoShade} />
             <View style={styles.promoContent}>
-              <Text style={styles.promoEyebrow}>PLANEJE SUA VIAGEM</Text>
-              <Text style={styles.promoTitle}>Seu próximo caminho começa aqui.</Text>
-              <Text style={styles.promoSubtitle}>Encontre o carro ideal para aproveitar cada momento.</Text>
+              <Text style={styles.promoEyebrow}>{t('planTrip')}</Text>
+              <Text style={styles.promoTitle}>{t('nextPath')}</Text>
+              <Text style={styles.promoSubtitle}>{t('idealCar')}</Text>
               <Pressable style={({ pressed }) => [styles.promoButton, pressed && styles.pressed]}>
-                <Text style={styles.promoButtonText}>VER OFERTAS</Text>
+                <Text style={styles.promoButtonText}>{t('seeOffers')}</Text>
               </Pressable>
             </View>
           </View>
@@ -279,12 +271,10 @@ export default function ClientHomeScreen() {
             <View style={styles.rewardsIcon}>
               <Ionicons color="#FFFFFF" name="gift-outline" size={22} />
             </View>
-            <Text style={styles.rewardsTitle}>Quanto mais você viaja, mais vantagens ganha.</Text>
-            <Text style={styles.rewardsSubtitle}>
-              Reserve com a Ghostcar e acompanhe benefícios exclusivos.
-            </Text>
+            <Text style={styles.rewardsTitle}>{t('rewards')}</Text>
+            <Text style={styles.rewardsSubtitle}>{t('rewardsInfo')}</Text>
             <Pressable style={({ pressed }) => [styles.rewardsButton, pressed && styles.pressed]}>
-              <Text style={styles.rewardsButtonText}>CONHECER BENEFÍCIOS</Text>
+              <Text style={styles.rewardsButtonText}>{t('discoverBenefits')}</Text>
             </Pressable>
           </View>
         </View>
@@ -348,10 +338,6 @@ const styles = StyleSheet.create({
   languageBadge: {
     alignItems: 'center',
     justifyContent: 'center',
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    backgroundColor: 'rgba(255, 255, 255, 0.16)',
   },
   languageFlag: {
     fontSize: 22,

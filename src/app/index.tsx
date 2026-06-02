@@ -14,9 +14,11 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useLanguage } from '@/i18n';
 
 export default function HomeScreen() {
   const router = useRouter();
+  const { t } = useLanguage();
   const [authMode, setAuthMode] = useState<'login' | 'signup' | null>(null);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -39,7 +41,7 @@ export default function HomeScreen() {
         <SafeAreaView edges={['top', 'bottom']} style={styles.safeArea}>
           <View style={styles.brandBlock}>
             <Text style={styles.brand}>Ghostcar</Text>
-            <Text style={styles.tagline}>ALUGUEL DE CARROS</Text>
+            <Text style={styles.tagline}>{t('rentCars')}</Text>
           </View>
 
           {!authMode && (
@@ -47,13 +49,13 @@ export default function HomeScreen() {
               <Pressable
                 onPress={() => setAuthMode('signup')}
                 style={({ pressed }) => [styles.openAccountButton, pressed && styles.pressed]}>
-                <Text style={styles.openAccountText}>Abrir conta</Text>
+                <Text style={styles.openAccountText}>{t('openAccount')}</Text>
               </Pressable>
 
               <Pressable
                 onPress={() => setAuthMode('login')}
                 style={({ pressed }) => [styles.existingAccountButton, pressed && styles.pressed]}>
-                <Text style={styles.existingAccountText}>Já tenho conta</Text>
+                <Text style={styles.existingAccountText}>{t('haveAccount')}</Text>
               </Pressable>
             </View>
           )}
@@ -72,29 +74,27 @@ export default function HomeScreen() {
                 </Pressable>
               </View>
 
-              <Text style={styles.signupTitle}>Entre ou crie sua conta</Text>
-              <Text style={styles.signupSubtitle}>
-                Faça login ou cadastre-se para acompanhar suas reservas e obter benefícios exclusivos!
-              </Text>
+              <Text style={styles.signupTitle}>{t('enterOrCreate')}</Text>
+              <Text style={styles.signupSubtitle}>{t('signupInfo')}</Text>
 
-              <Text style={styles.signupLabel}>E-mail</Text>
+              <Text style={styles.signupLabel}>{t('email')}</Text>
               <TextInput
                 autoCapitalize="none"
                 autoComplete="email"
                 keyboardType="email-address"
-                placeholder="Digite seu e-mail"
+                placeholder={t('typeEmail')}
                 placeholderTextColor="#7B7B7B"
                 style={styles.signupInput}
               />
 
               <Pressable
                 style={({ pressed }) => [styles.emailContinueButton, pressed && styles.pressed]}>
-                <Text style={styles.emailContinueText}>Continuar com e-mail</Text>
+                <Text style={styles.emailContinueText}>{t('continueEmail')}</Text>
               </Pressable>
 
               <View style={styles.dividerRow}>
                 <View style={styles.divider} />
-                <Text style={styles.dividerText}>ou</Text>
+                <Text style={styles.dividerText}>{t('or')}</Text>
                 <View style={styles.divider} />
               </View>
 
@@ -104,12 +104,12 @@ export default function HomeScreen() {
                   source={require('@/assets/images/google-g-logo.png')}
                   style={styles.googleIcon}
                 />
-                <Text style={styles.socialButtonText}>Continuar com Google</Text>
+                <Text style={styles.socialButtonText}>{t('continueGoogle')}</Text>
               </Pressable>
 
               <Pressable style={({ pressed }) => [styles.appleButton, pressed && styles.pressed]}>
                 <Ionicons color="#FFFFFF" name="logo-apple" size={26} />
-                <Text style={styles.appleButtonText}>Continuar com Apple</Text>
+                <Text style={styles.appleButtonText}>{t('continueApple')}</Text>
               </Pressable>
             </View>
           )}
@@ -123,8 +123,8 @@ export default function HomeScreen() {
                 <Text style={styles.cardBackIcon}>‹</Text>
               </Pressable>
 
-              <Text style={styles.title}>Olá!</Text>
-              <Text style={styles.subtitle}>Acesse sua conta ou cadastre-se</Text>
+              <Text style={styles.title}>{t('hello')}</Text>
+              <Text style={styles.subtitle}>{t('accountInfo')}</Text>
 
               <Pressable style={({ pressed }) => [styles.googleButton, pressed && styles.pressed]}>
                 <Image
@@ -132,36 +132,36 @@ export default function HomeScreen() {
                   source={require('@/assets/images/google-g-logo.png')}
                   style={styles.googleIcon}
                 />
-                <Text style={styles.socialButtonText}>Continuar com Google</Text>
+                <Text style={styles.socialButtonText}>{t('continueGoogle')}</Text>
               </Pressable>
 
               <Pressable style={({ pressed }) => [styles.appleButton, pressed && styles.pressed]}>
                 <Ionicons color="#FFFFFF" name="logo-apple" size={26} />
-                <Text style={styles.appleButtonText}>Continuar com Apple</Text>
+                <Text style={styles.appleButtonText}>{t('continueApple')}</Text>
               </Pressable>
 
               <View style={styles.dividerRow}>
                 <View style={styles.divider} />
-                <Text style={styles.dividerText}>ou</Text>
+                <Text style={styles.dividerText}>{t('or')}</Text>
                 <View style={styles.divider} />
               </View>
 
-              <Text style={styles.label}>E-mail</Text>
+              <Text style={styles.label}>{t('email')}</Text>
               <TextInput
                 autoCapitalize="none"
                 autoComplete="email"
                 keyboardType="email-address"
-                placeholder="Insira seu e-mail"
+                placeholder={t('typeEmail')}
                 placeholderTextColor="#9B9B9B"
                 style={styles.input}
               />
 
-              <Text style={styles.label}>Senha</Text>
+              <Text style={styles.label}>{t('password')}</Text>
               <View style={styles.passwordInput}>
                 <TextInput
                   autoCapitalize="none"
                   autoComplete="password"
-                  placeholder="Insira sua senha"
+                  placeholder={t('typePassword')}
                   placeholderTextColor="#9B9B9B"
                   secureTextEntry={!showPassword}
                   style={styles.passwordTextInput}
@@ -179,15 +179,15 @@ export default function HomeScreen() {
               <Pressable
                 onPress={() => router.push('/client-home')}
                 style={({ pressed }) => [styles.loginButton, pressed && styles.pressed]}>
-                <Text style={styles.loginButtonText}>Entrar</Text>
+                <Text style={styles.loginButtonText}>{t('enter')}</Text>
               </Pressable>
 
               <Pressable style={styles.forgotButton}>
-                <Text style={styles.forgotText}>Esqueci minha senha</Text>
+                <Text style={styles.forgotText}>{t('forgotPassword')}</Text>
               </Pressable>
 
               <Pressable style={({ pressed }) => [styles.createButton, pressed && styles.pressed]}>
-                <Text style={styles.createButtonText}>Criar conta</Text>
+                <Text style={styles.createButtonText}>{t('createAccount')}</Text>
               </Pressable>
             </View>
           )}
