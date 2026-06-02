@@ -9,10 +9,13 @@
 }
 
 html {
-  overflow-y: scroll;
+  min-height: 100%;
+  overflow-y: scroll !important;
 }
 
 body {
+  min-height: 100%;
   margin: 0;
   background: #ffffff;
+  overflow-y: scroll !important;
 }
