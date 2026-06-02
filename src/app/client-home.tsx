@@ -61,12 +61,19 @@ const currencies = [
   { code: 'AED', flag: '🇦🇪', label: 'UAE Dirham', symbol: 'AED' },
 ] as const;
 
+const demoCars = [
+  { id: 'city', name: 'Fiat Argo', category: 'Econômico', price: 'R$ 145', distance: '1,2 km', icon: 'car-outline' },
+  { id: 'suv', name: 'Jeep Renegade', category: 'SUV', price: 'R$ 238', distance: '3,7 km', icon: 'car-sport-outline' },
+  { id: 'sedan', name: 'Toyota Corolla', category: 'Sedan', price: 'R$ 275', distance: '5,1 km', icon: 'car-outline' },
+] as const;
+
 export default function ClientHomeScreen() {
   const [destination, setDestination] = useState('');
   const [locationError, setLocationError] = useState('');
   const [isLocating, setIsLocating] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isResultsOpen, setIsResultsOpen] = useState(false);
   const { languageCode, setLanguageCode, t } = useLanguage();
   const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([]);
   const currentCoordinates = useRef<Coordinates | null>(null);
@@ -179,10 +186,27 @@ export default function ClientHomeScreen() {
     setLanguageCode(nextLanguage.code);
   }
 
+  function searchCars() {
+    if (!destination.trim()) {
+      setLocationError(t('chooseDestination'));
+      return;
+    }
+
+    setLocationError('');
+    setSuggestions([]);
+    setIsResultsOpen(true);
+  }
+
   return (
     <View style={styles.screen}>
       <StatusBar style="light" />
-      {isMenuOpen ? (
+      {isResultsOpen ? (
+        <SearchResultsScreen
+          destination={destination}
+          onBack={() => setIsResultsOpen(false)}
+          t={t}
+        />
+      ) : isMenuOpen ? (
         <ClientMenu
           languageCode={languageCode}
           onBack={() => setIsMenuOpen(false)}
@@ -263,7 +287,7 @@ export default function ClientHomeScreen() {
             </View>
           )}
           {!!locationError && <Text style={styles.locationError}>{locationError}</Text>}
-          <Pressable style={({ pressed }) => [styles.searchButton, pressed && styles.pressed]}>
+          <Pressable onPress={searchCars} style={({ pressed }) => [styles.searchButton, pressed && styles.pressed]}>
             <Text style={styles.searchButtonText}>{t('search')}</Text>
           </Pressable>
         </View>
@@ -311,6 +335,92 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: '#F7F7F7',
+  },
+  resultsScreen: {
+    flex: 1,
+    backgroundColor: '#F7F7F7',
+  },
+  resultsContent: {
+    paddingHorizontal: 18,
+    paddingTop: 20,
+    paddingBottom: 28,
+  },
+  resultsLocationLabel: {
+    color: '#777777',
+    fontSize: 13,
+  },
+  resultsLocation: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 7,
+    gap: 7,
+  },
+  resultsLocationText: {
+    flex: 1,
+    color: '#242424',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  resultsDemoText: {
+    marginTop: 12,
+    marginBottom: 16,
+    color: '#8A8A8A',
+    fontSize: 11,
+    lineHeight: 15,
+  },
+  carCard: {
+    flexDirection: 'row',
+    overflow: 'hidden',
+    minHeight: 132,
+    marginBottom: 13,
+    borderRadius: 14,
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 7,
+    elevation: 3,
+  },
+  carImagePlaceholder: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 118,
+    backgroundColor: '#EAF8F3',
+  },
+  carCardContent: {
+    flex: 1,
+    padding: 14,
+  },
+  carName: {
+    color: '#202020',
+    fontSize: 16,
+    fontWeight: '800',
+  },
+  carCategory: {
+    marginTop: 3,
+    color: '#777777',
+    fontSize: 12,
+  },
+  carMetaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 12,
+  },
+  carDistance: {
+    color: '#777777',
+    fontSize: 12,
+  },
+  carPrice: {
+    marginTop: 8,
+    color: '#08735D',
+    fontSize: 16,
+    fontWeight: '900',
+  },
+  carPriceUnit: {
+    color: '#777777',
+    fontSize: 11,
+    fontWeight: '500',
   },
   content: {
     paddingBottom: 42,
@@ -755,6 +865,46 @@ const styles = StyleSheet.create({
     opacity: 0.78,
   },
 });
+
+function SearchResultsScreen({ destination, onBack, t }: { destination: string; onBack: () => void; t: (key: string) => string }) {
+  return (
+    <SafeAreaView edges={['top', 'bottom']} style={styles.resultsScreen}>
+      <View style={styles.menuHeader}>
+        <Pressable accessibilityLabel="Voltar" onPress={onBack}>
+          <Ionicons color="#242424" name="arrow-back" size={30} />
+        </Pressable>
+        <Text style={styles.settingsHeaderTitle}>{t('availableCars')}</Text>
+        <View style={styles.menuHeaderSpacer} />
+      </View>
+
+      <ScrollView contentContainerStyle={styles.resultsContent}>
+        <Text style={styles.resultsLocationLabel}>{t('near')}</Text>
+        <View style={styles.resultsLocation}>
+          <Ionicons color="#08735D" name="location-outline" size={19} />
+          <Text numberOfLines={2} style={styles.resultsLocationText}>{destination}</Text>
+        </View>
+        <Text style={styles.resultsDemoText}>{t('resultsDemo')}</Text>
+
+        {demoCars.map((car) => (
+          <View key={car.id} style={styles.carCard}>
+            <View style={styles.carImagePlaceholder}>
+              <Ionicons color="#08735D" name={car.icon} size={52} />
+            </View>
+            <View style={styles.carCardContent}>
+              <Text style={styles.carName}>{car.name}</Text>
+              <Text style={styles.carCategory}>{car.category}</Text>
+              <View style={styles.carMetaRow}>
+                <Ionicons color="#777777" name="location-outline" size={14} />
+                <Text style={styles.carDistance}>{car.distance}</Text>
+              </View>
+              <Text style={styles.carPrice}>{car.price} <Text style={styles.carPriceUnit}>{t('perDay')}</Text></Text>
+            </View>
+          </View>
+        ))}
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
 
 type ClientMenuProps = {
   languageCode: (typeof languages)[number]['code'];

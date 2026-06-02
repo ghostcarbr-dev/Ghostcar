@@ -36,6 +36,8 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     selectCurrency: 'Selecionar moeda',
     noBookings: 'Você ainda não tem reservas.', noBookingsInfo: 'Quando você reservar um carro, os detalhes aparecerão aqui.',
     publishCar: 'Publicar meu carro',
+    chooseDestination: 'Selecione uma localização antes de buscar.', availableCars: 'Carros disponíveis',
+    near: 'Perto de', perDay: '/ dia', resultsDemo: 'Anúncios de demonstração enquanto as publicações reais são conectadas.',
   },
   fr: {
     rentCars: 'LOCATION DE VOITURES', openAccount: 'Ouvrir un compte', haveAccount: "J'ai déjà un compte",
@@ -60,6 +62,8 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     selectCurrency: 'Sélectionner une devise',
     noBookings: "Vous n'avez pas encore de réservation.", noBookingsInfo: 'Lorsque vous réserverez une voiture, les détails apparaîtront ici.',
     publishCar: 'Publier ma voiture',
+    chooseDestination: 'Sélectionnez une localisation avant de rechercher.', availableCars: 'Voitures disponibles',
+    near: 'Près de', perDay: '/ jour', resultsDemo: 'Annonces de démonstration en attendant la connexion des publications réelles.',
   },
   en: {
     rentCars: 'CAR RENTAL', openAccount: 'Open account', haveAccount: 'I already have an account',
@@ -83,6 +87,8 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     selectCurrency: 'Select currency',
     noBookings: 'You do not have any bookings yet.', noBookingsInfo: 'Your booking details will appear here after you reserve a car.',
     publishCar: 'List my car',
+    chooseDestination: 'Select a location before searching.', availableCars: 'Available cars', near: 'Near',
+    perDay: '/ day', resultsDemo: 'Demo listings while real published cars are being connected.',
   },
   es: {
     rentCars: 'ALQUILER DE COCHES', openAccount: 'Abrir cuenta', haveAccount: 'Ya tengo una cuenta',
