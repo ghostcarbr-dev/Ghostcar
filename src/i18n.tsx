@@ -30,6 +30,7 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     bookings: 'Minhas Reservas', rentRewards: 'Rent Rewards', promotions: 'Promoções', settings: 'Configurações',
     helpCenter: 'Central de Ajuda', contactUs: 'Fale Conosco', privacyPolicy: 'Política de Privacidade',
     terms: 'Termos e Condições', about: 'Sobre a Ghostcar', followUs: 'Siga a Ghostcar',
+    language: 'Idioma', save: 'Salvar',
   },
   fr: {
     rentCars: 'LOCATION DE VOITURES', openAccount: 'Ouvrir un compte', haveAccount: "J'ai déjà un compte",
@@ -48,6 +49,7 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     bookings: 'Mes réservations', rentRewards: 'Récompenses', promotions: 'Promotions', settings: 'Paramètres',
     helpCenter: "Centre d'aide", contactUs: 'Contactez-nous', privacyPolicy: 'Politique de confidentialité',
     terms: 'Conditions générales', about: 'À propos de Ghostcar', followUs: 'Suivez Ghostcar',
+    language: 'Langue', save: 'Enregistrer',
   },
   en: {
     rentCars: 'CAR RENTAL', openAccount: 'Open account', haveAccount: 'I already have an account',
@@ -65,6 +67,7 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     bookings: 'My bookings', rentRewards: 'Rent Rewards', promotions: 'Promotions', settings: 'Settings',
     helpCenter: 'Help center', contactUs: 'Contact us', privacyPolicy: 'Privacy policy', terms: 'Terms and conditions',
     about: 'About Ghostcar', followUs: 'Follow Ghostcar',
+    language: 'Language', save: 'Save',
   },
   es: {
     rentCars: 'ALQUILER DE COCHES', openAccount: 'Abrir cuenta', haveAccount: 'Ya tengo una cuenta',

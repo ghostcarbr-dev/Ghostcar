@@ -173,8 +173,9 @@ export default function ClientHomeScreen() {
       {isMenuOpen ? (
         <ClientMenu
           flag={selectedLanguage.flag}
+          languageCode={languageCode}
           onBack={() => setIsMenuOpen(false)}
-          selectNextLanguage={selectNextLanguage}
+          setLanguageCode={setLanguageCode}
           t={t}
         />
       ) : (
@@ -575,6 +576,9 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '800',
   },
+  menuHeaderSpacer: {
+    width: 30,
+  },
   menuContent: {
     paddingBottom: 86,
   },
@@ -648,6 +652,44 @@ const styles = StyleSheet.create({
     gap: 28,
     marginTop: 22,
   },
+  languageSelectionContent: {
+    paddingTop: 12,
+    paddingBottom: 96,
+  },
+  languageSelectionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    minHeight: 66,
+    paddingHorizontal: 24,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E4E4E4',
+    gap: 14,
+  },
+  languageSelectionFlag: {
+    fontSize: 22,
+  },
+  languageSelectionText: {
+    flex: 1,
+    color: '#252525',
+    fontSize: 18,
+    fontWeight: '500',
+  },
+  saveLanguageButton: {
+    position: 'absolute',
+    right: 22,
+    bottom: 18,
+    left: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 58,
+    borderRadius: 20,
+    backgroundColor: '#FFB21C',
+  },
+  saveLanguageButtonText: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: '800',
+  },
   pressed: {
     opacity: 0.78,
   },
@@ -655,12 +697,31 @@ const styles = StyleSheet.create({
 
 type ClientMenuProps = {
   flag: string;
+  languageCode: (typeof languages)[number]['code'];
   onBack: () => void;
-  selectNextLanguage: () => void;
+  setLanguageCode: (code: (typeof languages)[number]['code']) => void;
   t: (key: string) => string;
 };
 
-function ClientMenu({ flag, onBack, selectNextLanguage, t }: ClientMenuProps) {
+function ClientMenu({ flag, languageCode, onBack, setLanguageCode, t }: ClientMenuProps) {
+  const [isLanguageScreenOpen, setIsLanguageScreenOpen] = useState(false);
+  const [pendingLanguageCode, setPendingLanguageCode] = useState(languageCode);
+
+  if (isLanguageScreenOpen) {
+    return (
+      <LanguageSelectionScreen
+        languageCode={pendingLanguageCode}
+        onBack={() => setIsLanguageScreenOpen(false)}
+        onSave={() => {
+          setLanguageCode(pendingLanguageCode);
+          setIsLanguageScreenOpen(false);
+        }}
+        selectLanguage={setPendingLanguageCode}
+        t={t}
+      />
+    );
+  }
+
   return (
     <SafeAreaView edges={['top']} style={styles.menuScreen}>
       <View style={styles.menuHeader}>
@@ -673,7 +734,7 @@ function ClientMenu({ flag, onBack, selectNextLanguage, t }: ClientMenuProps) {
 
       <ScrollView contentContainerStyle={styles.menuContent}>
         <Text style={styles.menuSectionTitle}>{t('preferences')}</Text>
-        <Pressable onPress={selectNextLanguage} style={styles.preferenceRow}>
+        <Pressable onPress={() => setIsLanguageScreenOpen(true)} style={styles.preferenceRow}>
           <View style={styles.menuItemLabel}>
             <Ionicons color="#5F5F5F" name="chatbox-outline" size={27} />
             <Text style={styles.menuItemText}>{t('languageCurrency')}</Text>
@@ -703,6 +764,58 @@ function ClientMenu({ flag, onBack, selectNextLanguage, t }: ClientMenuProps) {
           </View>
         </View>
       </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+type LanguageSelectionScreenProps = {
+  languageCode: (typeof languages)[number]['code'];
+  onBack: () => void;
+  onSave: () => void;
+  selectLanguage: (code: (typeof languages)[number]['code']) => void;
+  t: (key: string) => string;
+};
+
+function LanguageSelectionScreen({
+  languageCode,
+  onBack,
+  onSave,
+  selectLanguage,
+  t,
+}: LanguageSelectionScreenProps) {
+  return (
+    <SafeAreaView edges={['top', 'bottom']} style={styles.menuScreen}>
+      <View style={styles.menuHeader}>
+        <Pressable accessibilityLabel="Voltar" onPress={onBack}>
+          <Ionicons color="#242424" name="arrow-back" size={30} />
+        </Pressable>
+        <Text style={styles.menuHeaderTitle}>{t('language')}</Text>
+        <View style={styles.menuHeaderSpacer} />
+      </View>
+
+      <ScrollView contentContainerStyle={styles.languageSelectionContent}>
+        {languages.map((language) => (
+          <Pressable
+            key={language.code}
+            onPress={() => selectLanguage(language.code)}
+            style={({ pressed }) => [
+              styles.languageSelectionRow,
+              pressed && styles.menuRowPressed,
+            ]}>
+            <Text style={styles.languageSelectionFlag}>{language.flag}</Text>
+            <Text style={styles.languageSelectionText}>{language.label}</Text>
+            <Ionicons
+              color={language.code === languageCode ? '#08735D' : '#C7C7C7'}
+              name={language.code === languageCode ? 'radio-button-on' : 'radio-button-off'}
+              size={24}
+            />
+          </Pressable>
+        ))}
+      </ScrollView>
+
+      <Pressable onPress={onSave} style={({ pressed }) => [styles.saveLanguageButton, pressed && styles.pressed]}>
+        <Text style={styles.saveLanguageButtonText}>{t('save')}</Text>
+      </Pressable>
     </SafeAreaView>
   );
 }
