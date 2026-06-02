@@ -22,6 +22,15 @@ body {
   overflow-y: visible !important;
 }
 
+#root,
+#root > div,
+#root > div > div,
+#root [data-reactroot],
+#root [style*='overflow'],
+#root [class*='r-1rnoaur'] {
+  overflow-y: visible !important;
+}
+
 html::-webkit-scrollbar {
   width: 11px;
 }
