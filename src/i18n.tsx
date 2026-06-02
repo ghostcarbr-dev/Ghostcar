@@ -26,6 +26,10 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     rewards: 'Quanto mais você viaja, mais vantagens ganha.', rewardsInfo: 'Reserve com a Ghostcar e acompanhe benefícios exclusivos.',
     discoverBenefits: 'CONHECER BENEFÍCIOS', locationDenied: 'Permita o acesso à localização para usar sua posição atual.',
     locationFailed: 'Não foi possível obter sua localização. Tente novamente.', suggestions: 'Sugestões © OpenStreetMap contributors',
+    preferences: 'Preferências', languageCurrency: 'Idioma e Moeda', forYou: 'Para você', home: 'Página Inicial',
+    bookings: 'Minhas Reservas', rentRewards: 'Rent Rewards', promotions: 'Promoções', settings: 'Configurações',
+    helpCenter: 'Central de Ajuda', contactUs: 'Fale Conosco', privacyPolicy: 'Política de Privacidade',
+    terms: 'Termos e Condições', about: 'Sobre a Ghostcar', followUs: 'Siga a Ghostcar',
   },
   fr: {
     rentCars: 'LOCATION DE VOITURES', openAccount: 'Ouvrir un compte', haveAccount: "J'ai déjà un compte",
@@ -40,6 +44,10 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     rewards: 'Plus vous voyagez, plus vous gagnez.', rewardsInfo: 'Réservez avec Ghostcar et profitez d’avantages exclusifs.',
     discoverBenefits: 'DÉCOUVRIR LES AVANTAGES', locationDenied: 'Autorisez la localisation pour utiliser votre position actuelle.',
     locationFailed: 'Impossible d’obtenir votre position. Réessayez.', suggestions: 'Suggestions © contributeurs OpenStreetMap',
+    preferences: 'Préférences', languageCurrency: 'Langue et devise', forYou: 'Pour vous', home: "Page d'accueil",
+    bookings: 'Mes réservations', rentRewards: 'Récompenses', promotions: 'Promotions', settings: 'Paramètres',
+    helpCenter: "Centre d'aide", contactUs: 'Contactez-nous', privacyPolicy: 'Politique de confidentialité',
+    terms: 'Conditions générales', about: 'À propos de Ghostcar', followUs: 'Suivez Ghostcar',
   },
   en: {
     rentCars: 'CAR RENTAL', openAccount: 'Open account', haveAccount: 'I already have an account',
@@ -53,6 +61,10 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     seeOffers: 'SEE OFFERS', rewards: 'The more you travel, the more you earn.', rewardsInfo: 'Book with Ghostcar and enjoy exclusive benefits.',
     discoverBenefits: 'DISCOVER BENEFITS', locationDenied: 'Allow location access to use your current position.',
     locationFailed: 'Unable to get your location. Try again.', suggestions: 'Suggestions © OpenStreetMap contributors',
+    preferences: 'Preferences', languageCurrency: 'Language and currency', forYou: 'For you', home: 'Home',
+    bookings: 'My bookings', rentRewards: 'Rent Rewards', promotions: 'Promotions', settings: 'Settings',
+    helpCenter: 'Help center', contactUs: 'Contact us', privacyPolicy: 'Privacy policy', terms: 'Terms and conditions',
+    about: 'About Ghostcar', followUs: 'Follow Ghostcar',
   },
   es: {
     rentCars: 'ALQUILER DE COCHES', openAccount: 'Abrir cuenta', haveAccount: 'Ya tengo una cuenta',

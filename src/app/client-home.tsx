@@ -33,11 +33,28 @@ type PhotonFeature = {
   };
 };
 
+const personalMenuItems = [
+  { icon: 'home-outline', key: 'home' },
+  { icon: 'ticket-outline', key: 'bookings' },
+  { icon: 'trophy-outline', key: 'rentRewards' },
+  { icon: 'gift-outline', key: 'promotions' },
+  { icon: 'settings-outline', key: 'settings' },
+] as const;
+
+const supportMenuItems = [
+  { icon: 'help-circle-outline', key: 'helpCenter' },
+  { icon: 'headset-outline', key: 'contactUs' },
+  { icon: 'lock-closed-outline', key: 'privacyPolicy' },
+  { icon: 'document-text-outline', key: 'terms' },
+  { icon: 'information-circle-outline', key: 'about' },
+] as const;
+
 export default function ClientHomeScreen() {
   const [destination, setDestination] = useState('');
   const [locationError, setLocationError] = useState('');
   const [isLocating, setIsLocating] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { languageCode, setLanguageCode, t } = useLanguage();
   const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([]);
   const currentCoordinates = useRef<Coordinates | null>(null);
@@ -153,6 +170,14 @@ export default function ClientHomeScreen() {
   return (
     <View style={styles.screen}>
       <StatusBar style="light" />
+      {isMenuOpen ? (
+        <ClientMenu
+          flag={selectedLanguage.flag}
+          onBack={() => setIsMenuOpen(false)}
+          selectNextLanguage={selectNextLanguage}
+          t={t}
+        />
+      ) : (
       <ScrollView bounces={false} contentContainerStyle={styles.content}>
         <View style={styles.hero}>
           <Image
@@ -180,7 +205,7 @@ export default function ClientHomeScreen() {
                   style={styles.languageBadge}>
                   <Text style={styles.languageFlag}>{selectedLanguage.flag}</Text>
                 </Pressable>
-                <Pressable accessibilityLabel="Menu">
+                <Pressable accessibilityLabel="Menu" onPress={() => setIsMenuOpen(true)}>
                   <Ionicons color="#FFFFFF" name="menu" size={31} />
                 </Pressable>
               </View>
@@ -261,6 +286,7 @@ export default function ClientHomeScreen() {
           </View>
         </View>
       </ScrollView>
+      )}
 
       <Pressable accessibilityLabel="WhatsApp" style={({ pressed }) => [styles.whatsapp, pressed && styles.pressed]}>
         <Ionicons color="#FFFFFF" name="logo-whatsapp" size={36} />
@@ -531,10 +557,164 @@ const styles = StyleSheet.create({
     shadowRadius: 7,
     elevation: 5,
   },
+  menuScreen: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
+  menuHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    height: 66,
+    paddingHorizontal: 22,
+    borderBottomWidth: 1,
+    borderBottomColor: '#EAEAEA',
+  },
+  menuHeaderTitle: {
+    color: '#202020',
+    fontSize: 18,
+    fontWeight: '800',
+  },
+  menuContent: {
+    paddingBottom: 86,
+  },
+  menuSectionTitle: {
+    marginTop: 24,
+    marginBottom: 10,
+    paddingHorizontal: 24,
+    color: '#858585',
+    fontSize: 17,
+  },
+  preferenceRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    minHeight: 62,
+    paddingHorizontal: 24,
+  },
+  menuItemLabel: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  currencyBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: '#D6D6D6',
+    borderRadius: 10,
+    gap: 7,
+  },
+  currencyText: {
+    color: '#222222',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  currencyFlag: {
+    fontSize: 20,
+  },
+  menuRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    minHeight: 57,
+    paddingHorizontal: 34,
+    gap: 18,
+  },
+  menuRowPressed: {
+    backgroundColor: '#F3F3F3',
+  },
+  menuItemText: {
+    flex: 1,
+    color: '#171717',
+    fontSize: 18,
+    fontWeight: '500',
+  },
+  followSection: {
+    marginTop: 24,
+    paddingHorizontal: 38,
+    paddingTop: 24,
+    borderTopWidth: 1,
+    borderTopColor: '#E0E0E0',
+  },
+  followTitle: {
+    color: '#262626',
+    fontSize: 18,
+    fontWeight: '500',
+  },
+  socialIcons: {
+    flexDirection: 'row',
+    gap: 28,
+    marginTop: 22,
+  },
   pressed: {
     opacity: 0.78,
   },
 });
+
+type ClientMenuProps = {
+  flag: string;
+  onBack: () => void;
+  selectNextLanguage: () => void;
+  t: (key: string) => string;
+};
+
+function ClientMenu({ flag, onBack, selectNextLanguage, t }: ClientMenuProps) {
+  return (
+    <SafeAreaView edges={['top']} style={styles.menuScreen}>
+      <View style={styles.menuHeader}>
+        <Pressable accessibilityLabel="Voltar" onPress={onBack}>
+          <Ionicons color="#242424" name="arrow-back" size={30} />
+        </Pressable>
+        <Text style={styles.menuHeaderTitle}>Menu</Text>
+        <Ionicons color="#242424" name="menu" size={31} />
+      </View>
+
+      <ScrollView contentContainerStyle={styles.menuContent}>
+        <Text style={styles.menuSectionTitle}>{t('preferences')}</Text>
+        <Pressable onPress={selectNextLanguage} style={styles.preferenceRow}>
+          <View style={styles.menuItemLabel}>
+            <Ionicons color="#5F5F5F" name="chatbox-outline" size={27} />
+            <Text style={styles.menuItemText}>{t('languageCurrency')}</Text>
+          </View>
+          <View style={styles.currencyBadge}>
+            <Text style={styles.currencyText}>US$</Text>
+            <Text style={styles.currencyFlag}>{flag}</Text>
+          </View>
+        </Pressable>
+
+        <Text style={styles.menuSectionTitle}>{t('forYou')}</Text>
+        {personalMenuItems.map((item) => (
+          <MenuRow icon={item.icon} key={item.key} label={t(item.key)} />
+        ))}
+
+        <Text style={styles.menuSectionTitle}>Ghostcar</Text>
+        {supportMenuItems.map((item) => (
+          <MenuRow icon={item.icon} key={item.key} label={t(item.key)} />
+        ))}
+
+        <View style={styles.followSection}>
+          <Text style={styles.followTitle}>{t('followUs')}</Text>
+          <View style={styles.socialIcons}>
+            <Ionicons color="#777777" name="logo-facebook" size={26} />
+            <Ionicons color="#777777" name="logo-instagram" size={27} />
+            <Ionicons color="#777777" name="logo-linkedin" size={26} />
+          </View>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+function MenuRow({ icon, label }: { icon: keyof typeof Ionicons.glyphMap; label: string }) {
+  return (
+    <Pressable style={({ pressed }) => [styles.menuRow, pressed && styles.menuRowPressed]}>
+      <Ionicons color="#5F5F5F" name={icon} size={27} />
+      <Text style={styles.menuItemText}>{label}</Text>
+    </Pressable>
+  );
+}
 
 function formatPhotonSuggestion(properties: PhotonFeature['properties']) {
   return [
