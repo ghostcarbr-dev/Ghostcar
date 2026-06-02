@@ -31,6 +31,8 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     helpCenter: 'Central de Ajuda', contactUs: 'Fale Conosco', privacyPolicy: 'Política de Privacidade',
     terms: 'Termos e Condições', about: 'Sobre a Ghostcar', followUs: 'Siga a Ghostcar',
     language: 'Idioma', save: 'Salvar',
+    currency: 'Moeda', brazilianReal: 'Real Brasileiro (R$)', allowPush: 'Permitir notificações push',
+    allowLocation: 'Permitir localização',
   },
   fr: {
     rentCars: 'LOCATION DE VOITURES', openAccount: 'Ouvrir un compte', haveAccount: "J'ai déjà un compte",
@@ -50,6 +52,8 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     helpCenter: "Centre d'aide", contactUs: 'Contactez-nous', privacyPolicy: 'Politique de confidentialité',
     terms: 'Conditions générales', about: 'À propos de Ghostcar', followUs: 'Suivez Ghostcar',
     language: 'Langue', save: 'Enregistrer',
+    currency: 'Devise', brazilianReal: 'Réal brésilien (R$)', allowPush: 'Autoriser les notifications push',
+    allowLocation: 'Autoriser la localisation',
   },
   en: {
     rentCars: 'CAR RENTAL', openAccount: 'Open account', haveAccount: 'I already have an account',
@@ -68,6 +72,8 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     helpCenter: 'Help center', contactUs: 'Contact us', privacyPolicy: 'Privacy policy', terms: 'Terms and conditions',
     about: 'About Ghostcar', followUs: 'Follow Ghostcar',
     language: 'Language', save: 'Save',
+    currency: 'Currency', brazilianReal: 'Brazilian Real (R$)', allowPush: 'Allow push notifications',
+    allowLocation: 'Allow location access',
   },
   es: {
     rentCars: 'ALQUILER DE COCHES', openAccount: 'Abrir cuenta', haveAccount: 'Ya tengo una cuenta',

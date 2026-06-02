@@ -3,7 +3,7 @@ import { Image } from 'expo-image';
 import * as Location from 'expo-location';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { languages, useLanguage } from '@/i18n';
 
@@ -576,6 +576,11 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '800',
   },
+  settingsHeaderTitle: {
+    color: '#202020',
+    fontSize: 20,
+    fontWeight: '800',
+  },
   menuHeaderSpacer: {
     width: 30,
   },
@@ -652,6 +657,40 @@ const styles = StyleSheet.create({
     gap: 28,
     marginTop: 22,
   },
+  settingsContent: {
+    paddingHorizontal: 28,
+    paddingTop: 24,
+  },
+  settingsLinkRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    minHeight: 126,
+    borderBottomWidth: 1,
+    borderBottomColor: '#D8D8D8',
+  },
+  settingsLabel: {
+    color: '#646464',
+    fontSize: 17,
+  },
+  settingsValue: {
+    marginTop: 14,
+    color: '#242424',
+    fontSize: 17,
+    fontWeight: '800',
+  },
+  settingsToggleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    minHeight: 80,
+  },
+  settingsToggleText: {
+    flex: 1,
+    paddingRight: 16,
+    color: '#5C5C5C',
+    fontSize: 17,
+  },
   languageSelectionContent: {
     paddingTop: 12,
     paddingBottom: 96,
@@ -704,6 +743,7 @@ type ClientMenuProps = {
 };
 
 function ClientMenu({ flag, languageCode, onBack, setLanguageCode, t }: ClientMenuProps) {
+  const [isSettingsScreenOpen, setIsSettingsScreenOpen] = useState(false);
   const [isLanguageScreenOpen, setIsLanguageScreenOpen] = useState(false);
   const [pendingLanguageCode, setPendingLanguageCode] = useState(languageCode);
 
@@ -722,6 +762,17 @@ function ClientMenu({ flag, languageCode, onBack, setLanguageCode, t }: ClientMe
     );
   }
 
+  if (isSettingsScreenOpen) {
+    return (
+      <SettingsScreen
+        languageCode={languageCode}
+        onBack={() => setIsSettingsScreenOpen(false)}
+        onOpenLanguage={() => setIsLanguageScreenOpen(true)}
+        t={t}
+      />
+    );
+  }
+
   return (
     <SafeAreaView edges={['top']} style={styles.menuScreen}>
       <View style={styles.menuHeader}>
@@ -734,7 +785,7 @@ function ClientMenu({ flag, languageCode, onBack, setLanguageCode, t }: ClientMe
 
       <ScrollView contentContainerStyle={styles.menuContent}>
         <Text style={styles.menuSectionTitle}>{t('preferences')}</Text>
-        <Pressable onPress={() => setIsLanguageScreenOpen(true)} style={styles.preferenceRow}>
+        <Pressable onPress={() => setIsSettingsScreenOpen(true)} style={styles.preferenceRow}>
           <View style={styles.menuItemLabel}>
             <Ionicons color="#5F5F5F" name="chatbox-outline" size={27} />
             <Text style={styles.menuItemText}>{t('languageCurrency')}</Text>
@@ -764,6 +815,69 @@ function ClientMenu({ flag, languageCode, onBack, setLanguageCode, t }: ClientMe
           </View>
         </View>
       </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+type SettingsScreenProps = {
+  languageCode: (typeof languages)[number]['code'];
+  onBack: () => void;
+  onOpenLanguage: () => void;
+  t: (key: string) => string;
+};
+
+function SettingsScreen({ languageCode, onBack, onOpenLanguage, t }: SettingsScreenProps) {
+  const [allowPush, setAllowPush] = useState(false);
+  const [allowLocation, setAllowLocation] = useState(false);
+  const language = languages.find((item) => item.code === languageCode) ?? languages[0];
+
+  return (
+    <SafeAreaView edges={['top', 'bottom']} style={styles.menuScreen}>
+      <View style={styles.menuHeader}>
+        <Pressable accessibilityLabel="Voltar" onPress={onBack}>
+          <Ionicons color="#242424" name="arrow-back" size={30} />
+        </Pressable>
+        <Text style={styles.settingsHeaderTitle}>{t('settings')}</Text>
+        <Ionicons color="#242424" name="menu" size={31} />
+      </View>
+
+      <View style={styles.settingsContent}>
+        <Pressable onPress={onOpenLanguage} style={styles.settingsLinkRow}>
+          <View>
+            <Text style={styles.settingsLabel}>{t('language')}</Text>
+            <Text style={styles.settingsValue}>{language.label}</Text>
+          </View>
+          <Ionicons color="#242424" name="chevron-forward" size={28} />
+        </Pressable>
+
+        <Pressable style={styles.settingsLinkRow}>
+          <View>
+            <Text style={styles.settingsLabel}>{t('currency')}</Text>
+            <Text style={styles.settingsValue}>{t('brazilianReal')}</Text>
+          </View>
+          <Ionicons color="#242424" name="chevron-forward" size={28} />
+        </Pressable>
+
+        <View style={styles.settingsToggleRow}>
+          <Text style={styles.settingsToggleText}>{t('allowPush')}</Text>
+          <Switch
+            onValueChange={setAllowPush}
+            thumbColor="#FFFFFF"
+            trackColor={{ false: '#CECECE', true: '#08735D' }}
+            value={allowPush}
+          />
+        </View>
+
+        <View style={styles.settingsToggleRow}>
+          <Text style={styles.settingsToggleText}>{t('allowLocation')}</Text>
+          <Switch
+            onValueChange={setAllowLocation}
+            thumbColor="#FFFFFF"
+            trackColor={{ false: '#CECECE', true: '#08735D' }}
+            value={allowLocation}
+          />
+        </View>
+      </View>
     </SafeAreaView>
   );
 }
