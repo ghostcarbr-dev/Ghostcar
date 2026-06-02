@@ -38,7 +38,6 @@ export default function ClientHomeScreen() {
   const [locationError, setLocationError] = useState('');
   const [isLocating, setIsLocating] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
-  const [isLanguageMenuOpen, setIsLanguageMenuOpen] = useState(false);
   const { languageCode, setLanguageCode, t } = useLanguage();
   const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([]);
   const currentCoordinates = useRef<Coordinates | null>(null);
@@ -145,6 +144,12 @@ export default function ClientHomeScreen() {
     setSuggestions([]);
   }
 
+  function selectNextLanguage() {
+    const currentIndex = languages.findIndex((language) => language.code === languageCode);
+    const nextLanguage = languages[(currentIndex + 1) % languages.length];
+    setLanguageCode(nextLanguage.code);
+  }
+
   return (
     <View style={styles.screen}>
       <StatusBar style="light" />
@@ -169,35 +174,12 @@ export default function ClientHomeScreen() {
                 <Pressable accessibilityLabel="Notificações">
                   <Ionicons color="#FFFFFF" name="notifications-outline" size={24} />
                 </Pressable>
-                <View>
-                  <Pressable
-                    accessibilityLabel="Selecionar idioma"
-                    onPress={() => setIsLanguageMenuOpen((isOpen) => !isOpen)}
-                    style={styles.languageBadge}>
-                    <Text style={styles.languageFlag}>{selectedLanguage.flag}</Text>
-                  </Pressable>
-
-                  {isLanguageMenuOpen && (
-                    <View style={styles.languageMenu}>
-                      {languages.map((language) => (
-                        <Pressable
-                          key={language.code}
-                          onPress={() => {
-                            setLanguageCode(language.code);
-                            setIsLanguageMenuOpen(false);
-                          }}
-                          style={({ pressed }) => [
-                            styles.languageOption,
-                            language.code === selectedLanguage.code && styles.languageOptionSelected,
-                            pressed && styles.languageOptionPressed,
-                          ]}>
-                          <Text style={styles.languageOptionFlag}>{language.flag}</Text>
-                          <Text style={styles.languageOptionText}>{language.label}</Text>
-                        </Pressable>
-                      ))}
-                    </View>
-                  )}
-                </View>
+                <Pressable
+                  accessibilityLabel="Selecionar próximo idioma"
+                  onPress={selectNextLanguage}
+                  style={styles.languageBadge}>
+                  <Text style={styles.languageFlag}>{selectedLanguage.flag}</Text>
+                </Pressable>
                 <Pressable accessibilityLabel="Menu">
                   <Ionicons color="#FFFFFF" name="menu" size={31} />
                 </Pressable>
@@ -341,43 +323,6 @@ const styles = StyleSheet.create({
   },
   languageFlag: {
     fontSize: 22,
-  },
-  languageMenu: {
-    position: 'absolute',
-    top: 42,
-    right: 0,
-    zIndex: 20,
-    width: 172,
-    overflow: 'hidden',
-    borderRadius: 12,
-    backgroundColor: '#FFFFFF',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 9,
-    elevation: 8,
-  },
-  languageOption: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    minHeight: 43,
-    paddingHorizontal: 12,
-    gap: 10,
-  },
-  languageOptionSelected: {
-    backgroundColor: '#EDF8F4',
-  },
-  languageOptionPressed: {
-    backgroundColor: '#E4F2ED',
-  },
-  languageOptionFlag: {
-    fontSize: 20,
-  },
-  languageOptionText: {
-    flex: 1,
-    color: '#333333',
-    fontSize: 14,
-    fontWeight: '600',
   },
   greeting: {
     marginTop: 76,
