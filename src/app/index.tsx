@@ -1,5 +1,6 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Image } from 'expo-image';
+import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
 import {
@@ -15,6 +16,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function HomeScreen() {
+  const router = useRouter();
   const [authMode, setAuthMode] = useState<'login' | 'signup' | null>(null);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -174,7 +176,9 @@ export default function HomeScreen() {
                 </Pressable>
               </View>
 
-              <Pressable style={({ pressed }) => [styles.loginButton, pressed && styles.pressed]}>
+              <Pressable
+                onPress={() => router.push('/client-home')}
+                style={({ pressed }) => [styles.loginButton, pressed && styles.pressed]}>
                 <Text style={styles.loginButtonText}>Entrar</Text>
               </Pressable>
 
