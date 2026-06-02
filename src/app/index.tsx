@@ -1098,7 +1098,7 @@ const styles = StyleSheet.create({
   webFooter: {
     paddingTop: 42,
     paddingBottom: 18,
-    backgroundColor: '#102D27',
+    backgroundColor: '#00102D',
   },
   webFooterGrid: {
     flexDirection: 'row',
@@ -1127,7 +1127,7 @@ const styles = StyleSheet.create({
   webCopyright: {
     paddingTop: 16,
     borderTopWidth: 1,
-    borderTopColor: '#2B4942',
+    borderTopColor: '#1A2948',
     color: '#9DB5AF',
     fontSize: 11,
     textAlign: 'center',
