@@ -1,10 +1,49 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Image } from 'expo-image';
+import * as Location from 'expo-location';
 import { StatusBar } from 'expo-status-bar';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useState } from 'react';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function ClientHomeScreen() {
+  const [destination, setDestination] = useState('');
+  const [locationError, setLocationError] = useState('');
+  const [isLocating, setIsLocating] = useState(false);
+
+  async function useCurrentLocation() {
+    setIsLocating(true);
+    setLocationError('');
+
+    try {
+      const permission = await Location.requestForegroundPermissionsAsync();
+      if (permission.status !== 'granted') {
+        setLocationError('Permita o acesso à localização para usar sua posição atual.');
+        return;
+      }
+
+      const currentLocation = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced,
+      });
+      const [address] = await Location.reverseGeocodeAsync(currentLocation.coords);
+
+      if (!address) {
+        setDestination(
+          `${currentLocation.coords.latitude.toFixed(5)}, ${currentLocation.coords.longitude.toFixed(5)}`
+        );
+        return;
+      }
+
+      setDestination(
+        [address.street, address.name, address.city, address.region].filter(Boolean).join(', ')
+      );
+    } catch {
+      setLocationError('Não foi possível obter sua localização. Tente novamente.');
+    } finally {
+      setIsLocating(false);
+    }
+  }
+
   return (
     <View style={styles.screen}>
       <StatusBar style="light" />
@@ -45,13 +84,22 @@ export default function ClientHomeScreen() {
         <View style={styles.searchCard}>
           <Text style={styles.searchTitle}>Qual é o seu próximo destino?</Text>
           <View style={styles.searchInput}>
-            <Ionicons color="#777777" name="location-outline" size={24} />
+            <Pressable accessibilityLabel="Usar minha localização atual" onPress={useCurrentLocation}>
+              {isLocating ? (
+                <ActivityIndicator color="#08735D" size="small" />
+              ) : (
+                <Ionicons color="#08735D" name="locate" size={24} />
+              )}
+            </Pressable>
             <TextInput
               placeholder="Buscar destinos"
               placeholderTextColor="#B0B0B0"
+              value={destination}
+              onChangeText={setDestination}
               style={styles.searchTextInput}
             />
           </View>
+          {!!locationError && <Text style={styles.locationError}>{locationError}</Text>}
           <Pressable style={({ pressed }) => [styles.searchButton, pressed && styles.pressed]}>
             <Text style={styles.searchButtonText}>Buscar</Text>
           </Pressable>
@@ -198,6 +246,12 @@ const styles = StyleSheet.create({
     height: '100%',
     color: '#222222',
     fontSize: 17,
+  },
+  locationError: {
+    marginTop: 9,
+    color: '#B44242',
+    fontSize: 12,
+    lineHeight: 16,
   },
   searchButton: {
     alignItems: 'center',
