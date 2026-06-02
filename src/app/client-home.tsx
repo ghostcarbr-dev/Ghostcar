@@ -329,7 +329,7 @@ const styles = StyleSheet.create({
   },
   logo: {
     color: '#FFFFFF',
-    fontSize: 29,
+    fontSize: 25,
     fontWeight: '900',
     letterSpacing: -1.6,
   },
@@ -354,7 +354,7 @@ const styles = StyleSheet.create({
   greeting: {
     marginTop: 76,
     color: '#FFFFFF',
-    fontSize: 32,
+    fontSize: 27,
     fontWeight: '900',
   },
   searchCard: {
@@ -372,7 +372,7 @@ const styles = StyleSheet.create({
   },
   searchTitle: {
     color: '#242424',
-    fontSize: 20,
+    fontSize: 17,
     fontWeight: '800',
   },
   searchInput: {
@@ -390,7 +390,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: '100%',
     color: '#222222',
-    fontSize: 17,
+    fontSize: 15,
   },
   locationError: {
     marginTop: 9,
@@ -422,7 +422,7 @@ const styles = StyleSheet.create({
   suggestionText: {
     flex: 1,
     color: '#383838',
-    fontSize: 14,
+    fontSize: 13,
     lineHeight: 18,
   },
   attribution: {
@@ -442,7 +442,7 @@ const styles = StyleSheet.create({
   },
   searchButtonText: {
     color: '#FFFFFF',
-    fontSize: 20,
+    fontSize: 17,
     fontWeight: '800',
   },
   promotions: {
@@ -477,14 +477,14 @@ const styles = StyleSheet.create({
   promoTitle: {
     marginTop: 7,
     color: '#FFFFFF',
-    fontSize: 22,
+    fontSize: 19,
     fontWeight: '900',
     lineHeight: 25,
   },
   promoSubtitle: {
     marginTop: 7,
     color: '#FFFFFF',
-    fontSize: 13,
+    fontSize: 12,
     lineHeight: 17,
   },
   promoButton: {
@@ -516,7 +516,7 @@ const styles = StyleSheet.create({
     width: '82%',
     marginTop: 12,
     color: '#18372E',
-    fontSize: 23,
+    fontSize: 20,
     fontWeight: '900',
     lineHeight: 25,
   },
@@ -524,7 +524,7 @@ const styles = StyleSheet.create({
     width: '82%',
     marginTop: 7,
     color: '#313131',
-    fontSize: 13,
+    fontSize: 12,
     lineHeight: 17,
   },
   rewardsButton: {
@@ -573,12 +573,12 @@ const styles = StyleSheet.create({
   },
   menuHeaderTitle: {
     color: '#202020',
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '800',
   },
   settingsHeaderTitle: {
     color: '#202020',
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '800',
   },
   menuHeaderSpacer: {
@@ -592,7 +592,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     paddingHorizontal: 24,
     color: '#858585',
-    fontSize: 17,
+    fontSize: 15,
   },
   preferenceRow: {
     flexDirection: 'row',
@@ -618,7 +618,7 @@ const styles = StyleSheet.create({
   },
   currencyText: {
     color: '#222222',
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '700',
   },
   currencyFlag: {
@@ -637,7 +637,7 @@ const styles = StyleSheet.create({
   menuItemText: {
     flex: 1,
     color: '#171717',
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '500',
   },
   followSection: {
@@ -649,7 +649,7 @@ const styles = StyleSheet.create({
   },
   followTitle: {
     color: '#262626',
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '500',
   },
   socialIcons: {
@@ -671,12 +671,12 @@ const styles = StyleSheet.create({
   },
   settingsLabel: {
     color: '#646464',
-    fontSize: 17,
+    fontSize: 15,
   },
   settingsValue: {
     marginTop: 14,
     color: '#242424',
-    fontSize: 17,
+    fontSize: 15,
     fontWeight: '800',
   },
   settingsToggleRow: {
@@ -684,12 +684,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     minHeight: 80,
+    paddingRight: 2,
   },
   settingsToggleText: {
-    flex: 1,
+    width: '76%',
     paddingRight: 16,
     color: '#5C5C5C',
-    fontSize: 17,
+    fontSize: 15,
   },
   languageSelectionContent: {
     paddingTop: 12,
@@ -710,7 +711,7 @@ const styles = StyleSheet.create({
   languageSelectionText: {
     flex: 1,
     color: '#252525',
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '500',
   },
   saveLanguageButton: {
@@ -726,7 +727,7 @@ const styles = StyleSheet.create({
   },
   saveLanguageButtonText: {
     color: '#FFFFFF',
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '800',
   },
   pressed: {

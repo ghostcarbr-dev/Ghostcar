@@ -214,7 +214,7 @@ const styles = StyleSheet.create({
   },
   brand: {
     color: '#FFFFFF',
-    fontSize: 40,
+    fontSize: 34,
     fontWeight: '800',
     letterSpacing: -2,
     lineHeight: 44,
@@ -240,7 +240,7 @@ const styles = StyleSheet.create({
   },
   openAccountText: {
     color: '#171717',
-    fontSize: 17,
+    fontSize: 15,
     fontWeight: '500',
   },
   existingAccountButton: {
@@ -254,7 +254,7 @@ const styles = StyleSheet.create({
   },
   existingAccountText: {
     color: '#FFFFFF',
-    fontSize: 17,
+    fontSize: 15,
     fontWeight: '500',
   },
   signupCard: {
@@ -293,7 +293,7 @@ const styles = StyleSheet.create({
   },
   signupTitle: {
     color: '#111111',
-    fontSize: 29,
+    fontSize: 25,
     fontWeight: '800',
     letterSpacing: -0.8,
   },
@@ -301,13 +301,13 @@ const styles = StyleSheet.create({
     marginTop: 18,
     marginBottom: 30,
     color: '#666666',
-    fontSize: 17,
+    fontSize: 15,
     lineHeight: 24,
   },
   signupLabel: {
     marginBottom: 9,
     color: '#555555',
-    fontSize: 17,
+    fontSize: 15,
   },
   signupInput: {
     height: 64,
@@ -316,7 +316,7 @@ const styles = StyleSheet.create({
     borderColor: '#C8CECC',
     borderRadius: 11,
     color: '#202020',
-    fontSize: 18,
+    fontSize: 16,
   },
   emailContinueButton: {
     alignItems: 'center',
@@ -328,7 +328,7 @@ const styles = StyleSheet.create({
   },
   emailContinueText: {
     color: '#FFFFFF',
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '700',
   },
   card: {
@@ -366,14 +366,14 @@ const styles = StyleSheet.create({
   },
   title: {
     color: '#111111',
-    fontSize: 34,
+    fontSize: 30,
     fontWeight: '800',
     letterSpacing: -1,
   },
   subtitle: {
     marginTop: 2,
     color: '#656565',
-    fontSize: 18,
+    fontSize: 16,
   },
   googleButton: {
     flexDirection: 'row',
@@ -400,7 +400,7 @@ const styles = StyleSheet.create({
   },
   socialButtonText: {
     color: '#252525',
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '600',
   },
   appleButton: {
@@ -415,7 +415,7 @@ const styles = StyleSheet.create({
   },
   appleButtonText: {
     color: '#FFFFFF',
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '600',
   },
   dividerRow: {
@@ -431,12 +431,12 @@ const styles = StyleSheet.create({
   },
   dividerText: {
     color: '#989898',
-    fontSize: 18,
+    fontSize: 16,
   },
   label: {
     marginBottom: 8,
     color: '#3B3B3B',
-    fontSize: 17,
+    fontSize: 15,
   },
   input: {
     height: 62,
@@ -446,7 +446,7 @@ const styles = StyleSheet.create({
     borderColor: '#C8C8C8',
     borderRadius: 11,
     color: '#202020',
-    fontSize: 18,
+    fontSize: 16,
   },
   passwordInput: {
     flexDirection: 'row',
@@ -462,7 +462,7 @@ const styles = StyleSheet.create({
     height: '100%',
     paddingHorizontal: 18,
     color: '#202020',
-    fontSize: 18,
+    fontSize: 16,
   },
   eyeButton: {
     alignItems: 'center',
@@ -484,7 +484,7 @@ const styles = StyleSheet.create({
   },
   loginButtonText: {
     color: '#FFFFFF',
-    fontSize: 20,
+    fontSize: 17,
     fontWeight: '800',
   },
   forgotButton: {
@@ -493,7 +493,7 @@ const styles = StyleSheet.create({
   },
   forgotText: {
     color: '#08735D',
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '600',
   },
   createButton: {
@@ -506,7 +506,7 @@ const styles = StyleSheet.create({
   },
   createButtonText: {
     color: '#08735D',
-    fontSize: 20,
+    fontSize: 17,
     fontWeight: '800',
   },
   pressed: {
