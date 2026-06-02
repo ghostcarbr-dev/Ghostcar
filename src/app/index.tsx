@@ -26,18 +26,20 @@ export default function HomeScreen() {
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       style={styles.screen}>
-      <StatusBar style="light" />
-      <Image
-        contentFit="cover"
-        contentPosition={{ left: '43%', top: '50%' }}
-        source={require('@/assets/images/ghostcar-hero-v2.png')}
-        style={StyleSheet.absoluteFill}
-      />
+      <StatusBar style={Platform.OS === 'web' ? 'dark' : 'light'} />
+      {Platform.OS !== 'web' && (
+        <Image
+          contentFit="cover"
+          contentPosition={{ left: '43%', top: '50%' }}
+          source={require('@/assets/images/ghostcar-hero-v2.png')}
+          style={StyleSheet.absoluteFill}
+        />
+      )}
       <ScrollView
         bounces={false}
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}>
+        showsVerticalScrollIndicator={Platform.OS === 'web'}>
         <SafeAreaView edges={['top', 'bottom']} style={styles.safeArea}>
           <View style={styles.brandBlock}>
             <Text style={styles.brand}>Ghostcar</Text>
@@ -201,6 +203,11 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: '#00102D',
+    ...Platform.select({
+      web: {
+        backgroundColor: '#FFFFFF',
+      },
+    }),
   },
   scrollContent: {
     flexGrow: 1,
@@ -211,6 +218,11 @@ const styles = StyleSheet.create({
   brandBlock: {
     alignItems: 'center',
     marginTop: 22,
+    ...Platform.select({
+      web: {
+        marginTop: 28,
+      },
+    }),
   },
   brand: {
     color: '#FFFFFF',
@@ -218,18 +230,39 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     letterSpacing: -2,
     lineHeight: 44,
+    ...Platform.select({
+      web: {
+        color: '#08735D',
+        fontSize: 28,
+        lineHeight: 35,
+      },
+    }),
   },
   tagline: {
     color: '#FFFFFF',
     fontSize: 9,
     fontWeight: '700',
     letterSpacing: 3.2,
+    ...Platform.select({
+      web: {
+        color: '#656565',
+        fontSize: 7,
+      },
+    }),
   },
   welcomeActions: {
     marginTop: 'auto',
     paddingHorizontal: 16,
     paddingBottom: 18,
     gap: 14,
+    ...Platform.select({
+      web: {
+        width: '100%',
+        maxWidth: 440,
+        alignSelf: 'center',
+        paddingBottom: 30,
+      },
+    }),
   },
   openAccountButton: {
     alignItems: 'center',
@@ -237,6 +270,12 @@ const styles = StyleSheet.create({
     height: 58,
     borderRadius: 18,
     backgroundColor: '#FFCC2D',
+    ...Platform.select({
+      web: {
+        height: 48,
+        borderRadius: 12,
+      },
+    }),
   },
   openAccountText: {
     color: '#171717',
@@ -251,11 +290,24 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 255, 255, 0.84)',
     borderRadius: 18,
     backgroundColor: 'rgba(0, 0, 0, 0.16)',
+    ...Platform.select({
+      web: {
+        height: 48,
+        borderColor: '#08735D',
+        borderRadius: 12,
+        backgroundColor: '#FFFFFF',
+      },
+    }),
   },
   existingAccountText: {
     color: '#FFFFFF',
     fontSize: 15,
     fontWeight: '500',
+    ...Platform.select({
+      web: {
+        color: '#08735D',
+      },
+    }),
   },
   signupCard: {
     width: '94%',
@@ -268,12 +320,29 @@ const styles = StyleSheet.create({
     paddingBottom: 34,
     borderRadius: 22,
     backgroundColor: '#FFFFFF',
+    ...Platform.select({
+      web: {
+        maxWidth: 440,
+        marginTop: 16,
+        paddingHorizontal: 22,
+        paddingTop: 18,
+        paddingBottom: 24,
+        borderWidth: 1,
+        borderColor: '#E5E5E5',
+        borderRadius: 16,
+      },
+    }),
   },
   signupHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: 28,
+    ...Platform.select({
+      web: {
+        marginBottom: 18,
+      },
+    }),
   },
   profileIcon: {
     alignItems: 'center',
@@ -282,6 +351,13 @@ const styles = StyleSheet.create({
     height: 62,
     borderRadius: 31,
     backgroundColor: '#ECFFF5',
+    ...Platform.select({
+      web: {
+        width: 48,
+        height: 48,
+        borderRadius: 24,
+      },
+    }),
   },
   closeButton: {
     alignItems: 'center',
@@ -290,12 +366,24 @@ const styles = StyleSheet.create({
     height: 48,
     borderRadius: 24,
     backgroundColor: '#E7E7E7',
+    ...Platform.select({
+      web: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+      },
+    }),
   },
   signupTitle: {
     color: '#111111',
     fontSize: 25,
     fontWeight: '800',
     letterSpacing: -0.8,
+    ...Platform.select({
+      web: {
+        fontSize: 21,
+      },
+    }),
   },
   signupSubtitle: {
     marginTop: 18,
@@ -303,6 +391,14 @@ const styles = StyleSheet.create({
     color: '#666666',
     fontSize: 15,
     lineHeight: 24,
+    ...Platform.select({
+      web: {
+        marginTop: 10,
+        marginBottom: 18,
+        fontSize: 13,
+        lineHeight: 19,
+      },
+    }),
   },
   signupLabel: {
     marginBottom: 9,
@@ -317,6 +413,12 @@ const styles = StyleSheet.create({
     borderRadius: 11,
     color: '#202020',
     fontSize: 16,
+    ...Platform.select({
+      web: {
+        height: 52,
+        fontSize: 14,
+      },
+    }),
   },
   emailContinueButton: {
     alignItems: 'center',
@@ -325,6 +427,12 @@ const styles = StyleSheet.create({
     marginTop: 26,
     borderRadius: 10,
     backgroundColor: '#C8E7DA',
+    ...Platform.select({
+      web: {
+        height: 50,
+        marginTop: 18,
+      },
+    }),
   },
   emailContinueText: {
     color: '#FFFFFF',
@@ -347,6 +455,20 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 12,
     elevation: 5,
+    ...Platform.select({
+      web: {
+        maxWidth: 440,
+        marginTop: 16,
+        marginBottom: 22,
+        paddingHorizontal: 22,
+        paddingTop: 16,
+        paddingBottom: 24,
+        borderWidth: 1,
+        borderColor: '#E5E5E5',
+        borderRadius: 16,
+        shadowOpacity: 0.05,
+      },
+    }),
   },
   cardBackButton: {
     alignItems: 'center',
@@ -363,17 +485,32 @@ const styles = StyleSheet.create({
     fontSize: 43,
     fontWeight: '200',
     lineHeight: 43,
+    ...Platform.select({
+      web: {
+        fontSize: 36,
+      },
+    }),
   },
   title: {
     color: '#111111',
     fontSize: 30,
     fontWeight: '800',
     letterSpacing: -1,
+    ...Platform.select({
+      web: {
+        fontSize: 24,
+      },
+    }),
   },
   subtitle: {
     marginTop: 2,
     color: '#656565',
     fontSize: 16,
+    ...Platform.select({
+      web: {
+        fontSize: 14,
+      },
+    }),
   },
   googleButton: {
     flexDirection: 'row',
@@ -390,6 +527,12 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
+    ...Platform.select({
+      web: {
+        height: 52,
+        marginTop: 24,
+      },
+    }),
   },
   signupSocialButton: {
     marginTop: 0,
@@ -412,6 +555,12 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     backgroundColor: '#111111',
     gap: 14,
+    ...Platform.select({
+      web: {
+        height: 52,
+        marginTop: 10,
+      },
+    }),
   },
   appleButtonText: {
     color: '#FFFFFF',
@@ -423,6 +572,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 18,
     marginVertical: 34,
+    ...Platform.select({
+      web: {
+        marginVertical: 22,
+      },
+    }),
   },
   divider: {
     flex: 1,
@@ -432,6 +586,11 @@ const styles = StyleSheet.create({
   dividerText: {
     color: '#989898',
     fontSize: 16,
+    ...Platform.select({
+      web: {
+        fontSize: 14,
+      },
+    }),
   },
   label: {
     marginBottom: 8,
@@ -447,6 +606,13 @@ const styles = StyleSheet.create({
     borderRadius: 11,
     color: '#202020',
     fontSize: 16,
+    ...Platform.select({
+      web: {
+        height: 52,
+        marginBottom: 18,
+        fontSize: 14,
+      },
+    }),
   },
   passwordInput: {
     flexDirection: 'row',
@@ -456,6 +622,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#C8C8C8',
     borderRadius: 11,
+    ...Platform.select({
+      web: {
+        height: 52,
+        marginBottom: 20,
+      },
+    }),
   },
   passwordTextInput: {
     flex: 1,
@@ -481,6 +653,11 @@ const styles = StyleSheet.create({
     height: 62,
     borderRadius: 7,
     backgroundColor: '#08735D',
+    ...Platform.select({
+      web: {
+        height: 52,
+      },
+    }),
   },
   loginButtonText: {
     color: '#FFFFFF',
@@ -490,6 +667,11 @@ const styles = StyleSheet.create({
   forgotButton: {
     alignSelf: 'flex-start',
     marginVertical: 24,
+    ...Platform.select({
+      web: {
+        marginVertical: 16,
+      },
+    }),
   },
   forgotText: {
     color: '#08735D',
@@ -503,6 +685,11 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: '#08735D',
     borderRadius: 7,
+    ...Platform.select({
+      web: {
+        height: 52,
+      },
+    }),
   },
   createButtonText: {
     color: '#08735D',
