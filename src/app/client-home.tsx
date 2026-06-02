@@ -696,7 +696,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    minHeight: 80,
+    height: 68,
     paddingRight: 2,
   },
   settingsToggleText: {
@@ -704,6 +704,13 @@ const styles = StyleSheet.create({
     paddingRight: 16,
     color: '#5C5C5C',
     fontSize: 15,
+    lineHeight: 18,
+  },
+  settingsSwitch: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 58,
+    height: 42,
   },
   languageSelectionContent: {
     paddingTop: 12,
@@ -897,22 +904,26 @@ function SettingsScreen({ languageCode, onBack, onOpenCurrency, onOpenLanguage, 
 
         <View style={styles.settingsToggleRow}>
           <Text style={styles.settingsToggleText}>{t('allowPush')}</Text>
-          <Switch
-            onValueChange={setAllowPush}
-            thumbColor="#FFFFFF"
-            trackColor={{ false: '#CECECE', true: '#08735D' }}
-            value={allowPush}
-          />
+          <View style={styles.settingsSwitch}>
+            <Switch
+              onValueChange={setAllowPush}
+              thumbColor="#FFFFFF"
+              trackColor={{ false: '#CECECE', true: '#08735D' }}
+              value={allowPush}
+            />
+          </View>
         </View>
 
         <View style={styles.settingsToggleRow}>
           <Text style={styles.settingsToggleText}>{t('allowLocation')}</Text>
-          <Switch
-            onValueChange={setAllowLocation}
-            thumbColor="#FFFFFF"
-            trackColor={{ false: '#CECECE', true: '#08735D' }}
-            value={allowLocation}
-          />
+          <View style={styles.settingsSwitch}>
+            <Switch
+              onValueChange={setAllowLocation}
+              thumbColor="#FFFFFF"
+              trackColor={{ false: '#CECECE', true: '#08735D' }}
+              value={allowLocation}
+            />
+          </View>
         </View>
       </View>
     </SafeAreaView>
