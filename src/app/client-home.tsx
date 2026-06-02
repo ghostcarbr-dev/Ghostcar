@@ -18,6 +18,18 @@ type PlaceSuggestion = {
   label: string;
 };
 
+type CarListing = {
+  category: string;
+  city: string | null;
+  currency: string;
+  dailyPrice: number;
+  distanceKm: number | null;
+  id: number;
+  imageUrl: string | null;
+  ownerName: string;
+  title: string;
+};
+
 type PhotonFeature = {
   geometry: {
     coordinates: [number, number];
@@ -61,11 +73,7 @@ const currencies = [
   { code: 'AED', flag: '🇦🇪', label: 'UAE Dirham', symbol: 'AED' },
 ] as const;
 
-const demoCars = [
-  { id: 'city', name: 'Fiat Argo', category: 'Econômico', price: 'R$ 145', distance: '1,2 km', icon: 'car-outline' },
-  { id: 'suv', name: 'Jeep Renegade', category: 'SUV', price: 'R$ 238', distance: '3,7 km', icon: 'car-sport-outline' },
-  { id: 'sedan', name: 'Toyota Corolla', category: 'Sedan', price: 'R$ 275', distance: '5,1 km', icon: 'car-outline' },
-] as const;
+const apiUrl = 'https://ghostcar-api.onrender.com';
 
 export default function ClientHomeScreen() {
   const [destination, setDestination] = useState('');
@@ -187,7 +195,7 @@ export default function ClientHomeScreen() {
   }
 
   function searchCars() {
-    if (!destination.trim()) {
+    if (!destination.trim() || !currentCoordinates.current) {
       setLocationError(t('chooseDestination'));
       return;
     }
@@ -202,6 +210,7 @@ export default function ClientHomeScreen() {
       <StatusBar style="light" />
       {isResultsOpen ? (
         <SearchResultsScreen
+          coordinates={currentCoordinates.current!}
           destination={destination}
           onBack={() => setIsResultsOpen(false)}
           t={t}
@@ -367,6 +376,17 @@ const styles = StyleSheet.create({
     color: '#8A8A8A',
     fontSize: 11,
     lineHeight: 15,
+  },
+  resultsStatus: {
+    paddingVertical: 34,
+    color: '#777777',
+    fontSize: 13,
+    lineHeight: 19,
+    textAlign: 'center',
+  },
+  carImage: {
+    width: 118,
+    minHeight: 132,
   },
   carCard: {
     flexDirection: 'row',
@@ -864,9 +884,79 @@ const styles = StyleSheet.create({
   pressed: {
     opacity: 0.78,
   },
+  publishContent: {
+    padding: 20,
+    gap: 14,
+  },
+  publishLabel: {
+    marginBottom: 6,
+    color: '#575757',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  publishInput: {
+    minHeight: 52,
+    paddingHorizontal: 14,
+    borderWidth: 1,
+    borderColor: '#D0D0D0',
+    borderRadius: 10,
+    color: '#242424',
+    fontSize: 14,
+    backgroundColor: '#FFFFFF',
+  },
+  publishLocation: {
+    color: '#08735D',
+    fontSize: 12,
+    lineHeight: 17,
+  },
+  publishFeedback: {
+    color: '#08735D',
+    fontSize: 12,
+    lineHeight: 17,
+  },
 });
 
-function SearchResultsScreen({ destination, onBack, t }: { destination: string; onBack: () => void; t: (key: string) => string }) {
+function SearchResultsScreen({ coordinates, destination, onBack, t }: { coordinates: Coordinates; destination: string; onBack: () => void; t: (key: string) => string }) {
+  const [cars, setCars] = useState<CarListing[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadCars() {
+      try {
+        const params = new URLSearchParams({
+          lat: String(coordinates.latitude),
+          lon: String(coordinates.longitude),
+          radiusKm: '50',
+        });
+        const response = await fetch(`${apiUrl}/cars?${params.toString()}`);
+        if (!response.ok) {
+          throw new Error('Car search failed');
+        }
+
+        const data = (await response.json()) as { cars: CarListing[] };
+        if (isMounted) {
+          setCars(data.cars);
+        }
+      } catch {
+        if (isMounted) {
+          setLoadFailed(true);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    loadCars();
+    return () => {
+      isMounted = false;
+    };
+  }, [coordinates.latitude, coordinates.longitude]);
+
   return (
     <SafeAreaView edges={['top', 'bottom']} style={styles.resultsScreen}>
       <View style={styles.menuHeader}>
@@ -883,21 +973,29 @@ function SearchResultsScreen({ destination, onBack, t }: { destination: string; 
           <Ionicons color="#08735D" name="location-outline" size={19} />
           <Text numberOfLines={2} style={styles.resultsLocationText}>{destination}</Text>
         </View>
-        <Text style={styles.resultsDemoText}>{t('resultsDemo')}</Text>
-
-        {demoCars.map((car) => (
+        {isLoading ? (
+          <ActivityIndicator color="#08735D" size="large" style={styles.resultsStatus} />
+        ) : loadFailed ? (
+          <Text style={styles.resultsStatus}>{t('carsLoadFailed')}</Text>
+        ) : cars.length === 0 ? (
+          <Text style={styles.resultsStatus}>{t('noCarsNearby')}</Text>
+        ) : cars.map((car) => (
           <View key={car.id} style={styles.carCard}>
-            <View style={styles.carImagePlaceholder}>
-              <Ionicons color="#08735D" name={car.icon} size={52} />
-            </View>
+            {car.imageUrl ? (
+              <Image contentFit="cover" source={{ uri: car.imageUrl }} style={styles.carImage} />
+            ) : (
+              <View style={styles.carImagePlaceholder}>
+                <Ionicons color="#08735D" name="car-outline" size={52} />
+              </View>
+            )}
             <View style={styles.carCardContent}>
-              <Text style={styles.carName}>{car.name}</Text>
+              <Text style={styles.carName}>{car.title}</Text>
               <Text style={styles.carCategory}>{car.category}</Text>
               <View style={styles.carMetaRow}>
                 <Ionicons color="#777777" name="location-outline" size={14} />
-                <Text style={styles.carDistance}>{car.distance}</Text>
+                <Text style={styles.carDistance}>{formatDistance(car.distanceKm)}</Text>
               </View>
-              <Text style={styles.carPrice}>{car.price} <Text style={styles.carPriceUnit}>{t('perDay')}</Text></Text>
+              <Text style={styles.carPrice}>{formatPrice(car.dailyPrice, car.currency)} <Text style={styles.carPriceUnit}>{t('perDay')}</Text></Text>
             </View>
           </View>
         ))}
@@ -917,10 +1015,15 @@ function ClientMenu({ languageCode, onBack, setLanguageCode, t }: ClientMenuProp
   const [isSettingsScreenOpen, setIsSettingsScreenOpen] = useState(false);
   const [isLanguageScreenOpen, setIsLanguageScreenOpen] = useState(false);
   const [isCurrencyScreenOpen, setIsCurrencyScreenOpen] = useState(false);
+  const [isPublishScreenOpen, setIsPublishScreenOpen] = useState(false);
   const [pendingLanguageCode, setPendingLanguageCode] = useState(languageCode);
   const [selectedCurrencyCode, setSelectedCurrencyCode] = useState<(typeof currencies)[number]['code']>('BRL');
   const selectedCurrency =
     currencies.find((currency) => currency.code === selectedCurrencyCode) ?? currencies[0];
+
+  if (isPublishScreenOpen) {
+    return <PublishCarScreen onBack={() => setIsPublishScreenOpen(false)} t={t} />;
+  }
 
   if (isLanguageScreenOpen) {
     return (
@@ -989,7 +1092,12 @@ function ClientMenu({ languageCode, onBack, setLanguageCode, t }: ClientMenuProp
 
         <Text style={styles.menuSectionTitle}>{t('forYou')}</Text>
         {personalMenuItems.map((item) => (
-          <MenuRow icon={item.icon} key={item.key} label={t(item.key)} />
+          <MenuRow
+            icon={item.icon}
+            key={item.key}
+            label={t(item.key)}
+            onPress={item.key === 'publishCar' ? () => setIsPublishScreenOpen(true) : undefined}
+          />
         ))}
 
         <Text style={styles.menuSectionTitle}>Ghostcar</Text>
@@ -1007,6 +1115,113 @@ function ClientMenu({ languageCode, onBack, setLanguageCode, t }: ClientMenuProp
         </View>
       </ScrollView>
     </SafeAreaView>
+  );
+}
+
+function PublishCarScreen({ onBack, t }: { onBack: () => void; t: (key: string) => string }) {
+  const [ownerName, setOwnerName] = useState('');
+  const [title, setTitle] = useState('');
+  const [category, setCategory] = useState('');
+  const [dailyPrice, setDailyPrice] = useState('');
+  const [coordinates, setCoordinates] = useState<Coordinates | null>(null);
+  const [city, setCity] = useState('');
+  const [feedback, setFeedback] = useState('');
+  const [isLocating, setIsLocating] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  async function locateCar() {
+    setIsLocating(true);
+    setFeedback('');
+
+    try {
+      const permission = await Location.requestForegroundPermissionsAsync();
+      if (permission.status !== 'granted') {
+        setFeedback(t('locationDenied'));
+        return;
+      }
+      const position = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+      setCoordinates(position.coords);
+      const [address] = await Location.reverseGeocodeAsync(position.coords);
+      setCity([address?.city, address?.region].filter(Boolean).join(', '));
+    } catch {
+      setFeedback(t('locationFailed'));
+    } finally {
+      setIsLocating(false);
+    }
+  }
+
+  async function publishCar() {
+    if (!ownerName.trim() || !title.trim() || !category.trim() || !dailyPrice.trim() || !coordinates) {
+      setFeedback(t('completeCarForm'));
+      return;
+    }
+
+    setIsSubmitting(true);
+    setFeedback('');
+    try {
+      const response = await fetch(`${apiUrl}/cars`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ownerName,
+          title,
+          category,
+          dailyPrice,
+          currency: 'BRL',
+          latitude: coordinates.latitude,
+          longitude: coordinates.longitude,
+          city,
+        }),
+      });
+      if (!response.ok) {
+        throw new Error('Car publication failed');
+      }
+
+      setFeedback(t('carPublished'));
+      setOwnerName('');
+      setTitle('');
+      setCategory('');
+      setDailyPrice('');
+    } catch {
+      setFeedback(t('carPublishFailed'));
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  return (
+    <SafeAreaView edges={['top', 'bottom']} style={styles.menuScreen}>
+      <View style={styles.menuHeader}>
+        <Pressable accessibilityLabel="Voltar" onPress={onBack}>
+          <Ionicons color="#242424" name="arrow-back" size={30} />
+        </Pressable>
+        <Text style={styles.settingsHeaderTitle}>{t('publishCar')}</Text>
+        <View style={styles.menuHeaderSpacer} />
+      </View>
+      <ScrollView contentContainerStyle={styles.publishContent}>
+        <Field label={t('ownerName')} onChangeText={setOwnerName} value={ownerName} />
+        <Field label={t('carModel')} onChangeText={setTitle} value={title} />
+        <Field label={t('carCategory')} onChangeText={setCategory} value={category} />
+        <Field keyboardType="decimal-pad" label={t('dailyPrice')} onChangeText={setDailyPrice} value={dailyPrice} />
+        <Pressable onPress={locateCar} style={({ pressed }) => [styles.searchButton, pressed && styles.pressed]}>
+          {isLocating ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.searchButtonText}>{t('useCurrentLocation')}</Text>}
+        </Pressable>
+        {!!coordinates && <Text style={styles.publishLocation}>{city || `${coordinates.latitude.toFixed(5)}, ${coordinates.longitude.toFixed(5)}`}</Text>}
+        {!!feedback && <Text style={styles.publishFeedback}>{feedback}</Text>}
+        <Pressable disabled={isSubmitting} onPress={publishCar} style={({ pressed }) => [styles.searchButton, pressed && styles.pressed]}>
+          {isSubmitting ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.searchButtonText}>{t('publish')}</Text>}
+        </Pressable>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+function Field({ keyboardType, label, onChangeText, value }: { keyboardType?: 'decimal-pad'; label: string; onChangeText: (value: string) => void; value: string }) {
+  return (
+    <View>
+      <Text style={styles.publishLabel}>{label}</Text>
+      <TextInput keyboardType={keyboardType} onChangeText={onChangeText} style={styles.publishInput} value={value} />
+    </View>
   );
 }
 
@@ -1197,4 +1412,12 @@ function formatPhotonSuggestion(properties: PhotonFeature['properties']) {
   ]
     .filter((part, index, parts) => part && parts.indexOf(part) === index)
     .join(', ');
+}
+
+function formatDistance(distanceKm: number | null) {
+  return distanceKm == null ? '' : `${distanceKm.toFixed(1).replace('.', ',')} km`;
+}
+
+function formatPrice(price: number, currency: string) {
+  return new Intl.NumberFormat('pt-BR', { currency, style: 'currency' }).format(price);
 }
