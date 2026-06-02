@@ -4,6 +4,8 @@ services:
     runtime: static
     buildCommand: npm ci && npm run build:web
     staticPublishPath: ./dist
+    domains:
+      - ghostcar.com.br
 
   - type: web
     name: ghostcar-api
