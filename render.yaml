@@ -1,5 +1,11 @@
 services:
   - type: web
+    name: ghostcar-web
+    runtime: static
+    buildCommand: npm ci && npm run build:web
+    staticPublishPath: ./dist
+
+  - type: web
     name: ghostcar-api
     runtime: node
     rootDir: server
