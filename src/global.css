@@ -11,7 +11,8 @@
 html {
   min-height: 100%;
   overflow-y: scroll !important;
-  scrollbar-width: none;
+  scrollbar-color: #596168 transparent;
+  scrollbar-width: thin;
 }
 
 body {
@@ -22,7 +23,20 @@ body {
 }
 
 html::-webkit-scrollbar {
-  display: none;
-  width: 0;
-  height: 0;
+  width: 11px;
+}
+
+html::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+html::-webkit-scrollbar-thumb {
+  min-height: 72px;
+  border: 0;
+  border-radius: 8px;
+  background: #596168;
+}
+
+html::-webkit-scrollbar-thumb:hover {
+  background: #3f474d;
 }
