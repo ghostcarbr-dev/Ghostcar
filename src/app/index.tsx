@@ -218,7 +218,7 @@ function WebHomeScreen() {
           <Text style={styles.webNavLink}>Publicar meu carro</Text>
           <Text style={styles.webNavLink}>Ajuda</Text>
           <Pressable onPress={() => router.push('/client-home')} style={styles.webLoginButton}>
-            <Ionicons color="#08735D" name="person-outline" size={18} />
+            <Ionicons color="#00102D" name="person-outline" size={18} />
             <Text style={styles.webLoginText}>Entrar</Text>
           </Pressable>
         </View>
@@ -234,7 +234,7 @@ function WebHomeScreen() {
             <Text style={styles.webSearchLabel}>Onde você deseja retirar o carro?</Text>
             <View style={styles.webSearchRow}>
               <View style={styles.webDestinationInput}>
-                <Ionicons color="#08735D" name="location-outline" size={22} />
+                <Ionicons color="#00102D" name="location-outline" size={22} />
                 <TextInput
                   onChangeText={setDestination}
                   placeholder="Digite uma cidade, aeroporto ou endereço"
@@ -320,7 +320,7 @@ function WebBenefit({ icon, text, title }: { icon: keyof typeof Ionicons.glyphMa
   return (
     <View style={styles.webBenefit}>
       <View style={styles.webIconCircle}>
-        <Ionicons color="#08735D" name={icon} size={25} />
+        <Ionicons color="#00102D" name={icon} size={25} />
       </View>
       <View style={styles.webBenefitCopy}>
         <Text style={styles.webBenefitTitle}>{title}</Text>
@@ -333,7 +333,7 @@ function WebBenefit({ icon, text, title }: { icon: keyof typeof Ionicons.glyphMa
 function WebFeature({ icon, text, title }: { icon: keyof typeof Ionicons.glyphMap; text: string; title: string }) {
   return (
     <View style={styles.webFeature}>
-      <Ionicons color="#08735D" name={icon} size={31} />
+      <Ionicons color="#00102D" name={icon} size={31} />
       <Text style={styles.webFeatureTitle}>{title}</Text>
       <Text style={styles.webFeatureText}>{text}</Text>
     </View>
@@ -373,7 +373,7 @@ const styles = StyleSheet.create({
     lineHeight: 44,
     ...Platform.select({
       web: {
-        color: '#08735D',
+        color: '#00102D',
         fontSize: 28,
         lineHeight: 35,
       },
@@ -434,7 +434,7 @@ const styles = StyleSheet.create({
     ...Platform.select({
       web: {
         height: 48,
-        borderColor: '#08735D',
+        borderColor: '#00102D',
         borderRadius: 12,
         backgroundColor: '#FFFFFF',
       },
@@ -446,7 +446,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     ...Platform.select({
       web: {
-        color: '#08735D',
+        color: '#00102D',
       },
     }),
   },
@@ -793,7 +793,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     height: 62,
     borderRadius: 7,
-    backgroundColor: '#08735D',
+    backgroundColor: '#00102D',
     ...Platform.select({
       web: {
         height: 52,
@@ -815,7 +815,7 @@ const styles = StyleSheet.create({
     }),
   },
   forgotText: {
-    color: '#08735D',
+    color: '#00102D',
     fontSize: 16,
     fontWeight: '600',
   },
@@ -824,7 +824,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     height: 62,
     borderWidth: 1.5,
-    borderColor: '#08735D',
+    borderColor: '#00102D',
     borderRadius: 7,
     ...Platform.select({
       web: {
@@ -833,7 +833,7 @@ const styles = StyleSheet.create({
     }),
   },
   createButtonText: {
-    color: '#08735D',
+    color: '#00102D',
     fontSize: 17,
     fontWeight: '800',
   },
@@ -855,7 +855,7 @@ const styles = StyleSheet.create({
     paddingVertical: 18,
   },
   webLogo: {
-    color: '#08735D',
+    color: '#00102D',
     fontSize: 30,
     fontWeight: '900',
     letterSpacing: -2,
@@ -887,12 +887,12 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   webLoginText: {
-    color: '#08735D',
+    color: '#00102D',
     fontSize: 14,
     fontWeight: '700',
   },
   webHero: {
-    backgroundColor: '#08735D',
+    backgroundColor: '#00102D',
     paddingVertical: 58,
   },
   webSection: {
@@ -1010,7 +1010,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F4FAF8',
   },
   webEyebrow: {
-    color: '#08735D',
+    color: '#00102D',
     fontSize: 11,
     fontWeight: '900',
     letterSpacing: 1.4,
@@ -1073,11 +1073,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     paddingVertical: 13,
     borderWidth: 1.5,
-    borderColor: '#08735D',
+    borderColor: '#00102D',
     borderRadius: 8,
   },
   webOutlineButtonText: {
-    color: '#08735D',
+    color: '#00102D',
     fontSize: 14,
     fontWeight: '800',
   },
@@ -1087,7 +1087,7 @@ const styles = StyleSheet.create({
     width: '38%',
     minHeight: 240,
     borderRadius: 18,
-    backgroundColor: '#08735D',
+    backgroundColor: '#00102D',
   },
   webPublishVisualText: {
     marginTop: 16,
