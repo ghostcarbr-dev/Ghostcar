@@ -17,6 +17,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLanguage } from '@/i18n';
 
 export default function HomeScreen() {
+  if (Platform.OS === 'web') {
+    return <WebHomeScreen />;
+  }
+
   const router = useRouter();
   const { t } = useLanguage();
   const [authMode, setAuthMode] = useState<'login' | 'signup' | null>(null);
@@ -26,20 +30,18 @@ export default function HomeScreen() {
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       style={styles.screen}>
-      <StatusBar style={Platform.OS === 'web' ? 'dark' : 'light'} />
-      {Platform.OS !== 'web' && (
-        <Image
-          contentFit="cover"
-          contentPosition={{ left: '43%', top: '50%' }}
-          source={require('@/assets/images/ghostcar-hero-v2.png')}
-          style={StyleSheet.absoluteFill}
-        />
-      )}
+      <StatusBar style="light" />
+      <Image
+        contentFit="cover"
+        contentPosition={{ left: '43%', top: '50%' }}
+        source={require('@/assets/images/ghostcar-hero-v2.png')}
+        style={StyleSheet.absoluteFill}
+      />
       <ScrollView
         bounces={false}
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={Platform.OS === 'web'}>
+        showsVerticalScrollIndicator={false}>
         <SafeAreaView edges={['top', 'bottom']} style={styles.safeArea}>
           <View style={styles.brandBlock}>
             <Text style={styles.brand}>Ghostcar</Text>
@@ -196,6 +198,147 @@ export default function HomeScreen() {
         </SafeAreaView>
       </ScrollView>
     </KeyboardAvoidingView>
+  );
+}
+
+function WebHomeScreen() {
+  const router = useRouter();
+  const [destination, setDestination] = useState('');
+
+  return (
+    <ScrollView
+      contentContainerStyle={styles.webPage}
+      showsVerticalScrollIndicator>
+      <StatusBar style="dark" />
+      <View style={styles.webHeader}>
+        <View>
+          <Text style={styles.webLogo}>Ghostcar</Text>
+          <Text style={styles.webLogoTagline}>ALUGUEL DE CARROS</Text>
+        </View>
+        <View style={styles.webNav}>
+          <Text style={styles.webNavLink}>Aluguel de carros</Text>
+          <Text style={styles.webNavLink}>Publicar meu carro</Text>
+          <Text style={styles.webNavLink}>Ajuda</Text>
+          <Pressable onPress={() => router.push('/client-home')} style={styles.webLoginButton}>
+            <Ionicons color="#08735D" name="person-outline" size={18} />
+            <Text style={styles.webLoginText}>Entrar</Text>
+          </Pressable>
+        </View>
+      </View>
+
+      <View style={styles.webHero}>
+        <View style={styles.webSection}>
+          <Text style={styles.webHeroTitle}>Aluguel de carros simples, rápido e seguro.</Text>
+          <Text style={styles.webHeroSubtitle}>
+            Encontre carros publicados perto de você e aproveite cada trajeto com liberdade.
+          </Text>
+          <View style={styles.webSearchCard}>
+            <Text style={styles.webSearchLabel}>Onde você deseja retirar o carro?</Text>
+            <View style={styles.webSearchRow}>
+              <View style={styles.webDestinationInput}>
+                <Ionicons color="#08735D" name="location-outline" size={22} />
+                <TextInput
+                  onChangeText={setDestination}
+                  placeholder="Digite uma cidade, aeroporto ou endereço"
+                  placeholderTextColor="#8C9693"
+                  style={styles.webDestinationText}
+                  value={destination}
+                />
+              </View>
+              <Pressable onPress={() => router.push('/client-home')} style={styles.webSearchButton}>
+                <Ionicons color="#FFFFFF" name="search" size={19} />
+                <Text style={styles.webSearchButtonText}>Pesquisar</Text>
+              </Pressable>
+            </View>
+            <Text style={styles.webSearchHint}>Consulte veículos disponíveis em até 50 km da localização escolhida.</Text>
+          </View>
+        </View>
+      </View>
+
+      <View style={[styles.webSection, styles.webBenefits]}>
+        <WebBenefit icon="pricetag-outline" title="Preços transparentes" text="Compare anúncios próximos e escolha a opção ideal para sua viagem." />
+        <WebBenefit icon="location-outline" title="Carros perto de você" text="Pesquise por endereço e encontre veículos disponíveis na região." />
+        <WebBenefit icon="shield-checkmark-outline" title="Experiência simples" text="Uma plataforma direta para publicar, pesquisar e reservar seu carro." />
+      </View>
+
+      <View style={styles.webSoftSection}>
+        <View style={styles.webSection}>
+          <Text style={styles.webEyebrow}>DESCUBRA A GHOSTCAR</Text>
+          <Text style={styles.webSectionTitle}>Seu próximo carro está mais perto do que você imagina</Text>
+          <Text style={styles.webSectionSubtitle}>
+            Escolha uma localização, encontre anúncios publicados por proprietários e prepare sua próxima viagem.
+          </Text>
+          <View style={styles.webFeatureGrid}>
+            <WebFeature icon="search-outline" title="Pesquise sua região" text="Use sua localização ou digite o destino desejado." />
+            <WebFeature icon="car-sport-outline" title="Compare veículos" text="Veja categoria, preço diário e distância de cada anúncio." />
+            <WebFeature icon="key-outline" title="Viaje com liberdade" text="Encontre a opção certa para cada momento." />
+          </View>
+        </View>
+      </View>
+
+      <View style={[styles.webSection, styles.webPublishSection]}>
+        <View style={styles.webPublishCopy}>
+          <Text style={styles.webEyebrow}>PARA PROPRIETÁRIOS</Text>
+          <Text style={styles.webSectionTitle}>Seu carro parado pode gerar novas oportunidades</Text>
+          <Text style={styles.webSectionSubtitle}>
+            Publique seu veículo na Ghostcar e permita que clientes próximos encontrem seu anúncio.
+          </Text>
+          <Pressable onPress={() => router.push('/client-home')} style={styles.webOutlineButton}>
+            <Text style={styles.webOutlineButtonText}>Publicar meu carro</Text>
+          </Pressable>
+        </View>
+        <View style={styles.webPublishVisual}>
+          <Ionicons color="#FFFFFF" name="car-sport" size={94} />
+          <Text style={styles.webPublishVisualText}>Publique. Conecte. Viaje.</Text>
+        </View>
+      </View>
+
+      <View style={styles.webFooter}>
+        <View style={[styles.webSection, styles.webFooterGrid]}>
+          <View>
+            <Text style={styles.webFooterLogo}>Ghostcar</Text>
+            <Text style={styles.webFooterText}>Aluguel de carros de um jeito mais próximo.</Text>
+          </View>
+          <View>
+            <Text style={styles.webFooterTitle}>Ghostcar</Text>
+            <Text style={styles.webFooterText}>Página inicial</Text>
+            <Text style={styles.webFooterText}>Publicar meu carro</Text>
+            <Text style={styles.webFooterText}>Promoções</Text>
+          </View>
+          <View>
+            <Text style={styles.webFooterTitle}>Suporte</Text>
+            <Text style={styles.webFooterText}>Central de ajuda</Text>
+            <Text style={styles.webFooterText}>Política de privacidade</Text>
+            <Text style={styles.webFooterText}>Termos e condições</Text>
+          </View>
+        </View>
+        <Text style={styles.webCopyright}>© 2026 Ghostcar. Todos os direitos reservados.</Text>
+      </View>
+    </ScrollView>
+  );
+}
+
+function WebBenefit({ icon, text, title }: { icon: keyof typeof Ionicons.glyphMap; text: string; title: string }) {
+  return (
+    <View style={styles.webBenefit}>
+      <View style={styles.webIconCircle}>
+        <Ionicons color="#08735D" name={icon} size={25} />
+      </View>
+      <View style={styles.webBenefitCopy}>
+        <Text style={styles.webBenefitTitle}>{title}</Text>
+        <Text style={styles.webBenefitText}>{text}</Text>
+      </View>
+    </View>
+  );
+}
+
+function WebFeature({ icon, text, title }: { icon: keyof typeof Ionicons.glyphMap; text: string; title: string }) {
+  return (
+    <View style={styles.webFeature}>
+      <Ionicons color="#08735D" name={icon} size={31} />
+      <Text style={styles.webFeatureTitle}>{title}</Text>
+      <Text style={styles.webFeatureText}>{text}</Text>
+    </View>
   );
 }
 
@@ -698,5 +841,296 @@ const styles = StyleSheet.create({
   },
   pressed: {
     opacity: 0.76,
+  },
+  webPage: {
+    backgroundColor: '#FFFFFF',
+  },
+  webHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+    maxWidth: 1180,
+    alignSelf: 'center',
+    paddingHorizontal: 26,
+    paddingVertical: 18,
+  },
+  webLogo: {
+    color: '#08735D',
+    fontSize: 30,
+    fontWeight: '900',
+    letterSpacing: -2,
+  },
+  webLogoTagline: {
+    color: '#6C7875',
+    fontSize: 7,
+    fontWeight: '800',
+    letterSpacing: 2.2,
+  },
+  webNav: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 24,
+  },
+  webNavLink: {
+    color: '#33413E',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  webLoginButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    borderWidth: 1,
+    borderColor: '#C7D9D4',
+    borderRadius: 8,
+  },
+  webLoginText: {
+    color: '#08735D',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  webHero: {
+    backgroundColor: '#08735D',
+    paddingVertical: 58,
+  },
+  webSection: {
+    width: '100%',
+    maxWidth: 1180,
+    alignSelf: 'center',
+    paddingHorizontal: 26,
+  },
+  webHeroTitle: {
+    maxWidth: 710,
+    color: '#FFFFFF',
+    fontSize: 39,
+    fontWeight: '900',
+    letterSpacing: -1.4,
+    lineHeight: 48,
+  },
+  webHeroSubtitle: {
+    maxWidth: 660,
+    marginTop: 10,
+    color: '#D7F1EA',
+    fontSize: 17,
+    lineHeight: 25,
+  },
+  webSearchCard: {
+    marginTop: 34,
+    padding: 20,
+    borderRadius: 12,
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.16,
+    shadowRadius: 14,
+  },
+  webSearchLabel: {
+    marginBottom: 10,
+    color: '#283532',
+    fontSize: 15,
+    fontWeight: '800',
+  },
+  webSearchRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  webDestinationInput: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 9,
+    height: 54,
+    paddingHorizontal: 14,
+    borderWidth: 1,
+    borderColor: '#C8D5D1',
+    borderRadius: 8,
+  },
+  webDestinationText: {
+    flex: 1,
+    height: '100%',
+    color: '#263532',
+    fontSize: 14,
+  },
+  webSearchButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    width: 166,
+    borderRadius: 8,
+    backgroundColor: '#FFB21C',
+  },
+  webSearchButtonText: {
+    color: '#1C2926',
+    fontSize: 15,
+    fontWeight: '900',
+  },
+  webSearchHint: {
+    marginTop: 10,
+    color: '#75817F',
+    fontSize: 12,
+  },
+  webBenefits: {
+    flexDirection: 'row',
+    gap: 18,
+    paddingVertical: 42,
+  },
+  webBenefit: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 13,
+  },
+  webIconCircle: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: '#E8F7F2',
+  },
+  webBenefitCopy: {
+    flex: 1,
+  },
+  webBenefitTitle: {
+    color: '#23312E',
+    fontSize: 15,
+    fontWeight: '800',
+  },
+  webBenefitText: {
+    marginTop: 4,
+    color: '#6E7C79',
+    fontSize: 12,
+    lineHeight: 17,
+  },
+  webSoftSection: {
+    paddingVertical: 68,
+    backgroundColor: '#F4FAF8',
+  },
+  webEyebrow: {
+    color: '#08735D',
+    fontSize: 11,
+    fontWeight: '900',
+    letterSpacing: 1.4,
+  },
+  webSectionTitle: {
+    maxWidth: 680,
+    marginTop: 9,
+    color: '#24312E',
+    fontSize: 30,
+    fontWeight: '900',
+    letterSpacing: -0.8,
+    lineHeight: 38,
+  },
+  webSectionSubtitle: {
+    maxWidth: 680,
+    marginTop: 10,
+    color: '#687572',
+    fontSize: 15,
+    lineHeight: 23,
+  },
+  webFeatureGrid: {
+    flexDirection: 'row',
+    gap: 18,
+    marginTop: 32,
+  },
+  webFeature: {
+    flex: 1,
+    minHeight: 168,
+    padding: 22,
+    borderWidth: 1,
+    borderColor: '#DEEBE7',
+    borderRadius: 12,
+    backgroundColor: '#FFFFFF',
+  },
+  webFeatureTitle: {
+    marginTop: 16,
+    color: '#25332F',
+    fontSize: 16,
+    fontWeight: '800',
+  },
+  webFeatureText: {
+    marginTop: 7,
+    color: '#71807C',
+    fontSize: 13,
+    lineHeight: 19,
+  },
+  webPublishSection: {
+    flexDirection: 'row',
+    alignItems: 'stretch',
+    gap: 28,
+    paddingVertical: 68,
+  },
+  webPublishCopy: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  webOutlineButton: {
+    alignSelf: 'flex-start',
+    marginTop: 22,
+    paddingHorizontal: 18,
+    paddingVertical: 13,
+    borderWidth: 1.5,
+    borderColor: '#08735D',
+    borderRadius: 8,
+  },
+  webOutlineButtonText: {
+    color: '#08735D',
+    fontSize: 14,
+    fontWeight: '800',
+  },
+  webPublishVisual: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '38%',
+    minHeight: 240,
+    borderRadius: 18,
+    backgroundColor: '#08735D',
+  },
+  webPublishVisualText: {
+    marginTop: 16,
+    color: '#FFFFFF',
+    fontSize: 17,
+    fontWeight: '800',
+  },
+  webFooter: {
+    paddingTop: 42,
+    paddingBottom: 18,
+    backgroundColor: '#102D27',
+  },
+  webFooterGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 50,
+    paddingBottom: 30,
+  },
+  webFooterLogo: {
+    color: '#FFFFFF',
+    fontSize: 25,
+    fontWeight: '900',
+    letterSpacing: -1.4,
+  },
+  webFooterTitle: {
+    marginBottom: 10,
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '800',
+  },
+  webFooterText: {
+    maxWidth: 300,
+    marginTop: 7,
+    color: '#B9D0CA',
+    fontSize: 12,
+  },
+  webCopyright: {
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#2B4942',
+    color: '#9DB5AF',
+    fontSize: 11,
+    textAlign: 'center',
   },
 });
