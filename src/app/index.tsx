@@ -2,7 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -209,6 +209,7 @@ function WebHomeScreen() {
     <ScrollView
       contentContainerStyle={styles.webPage}
       showsVerticalScrollIndicator>
+      <WebScrollThumb />
       <StatusBar style="dark" />
       <View style={styles.webHeader}>
         <View>
@@ -316,6 +317,33 @@ function WebHomeScreen() {
       </View>
     </ScrollView>
   );
+}
+
+function WebScrollThumb() {
+  const [thumb, setThumb] = useState({ height: 160, top: 18 });
+
+  useEffect(() => {
+    function updateThumb() {
+      const documentElement = document.documentElement;
+      const scrollableHeight = documentElement.scrollHeight - window.innerHeight;
+      const trackHeight = window.innerHeight - 36;
+      const height = Math.max(90, window.innerHeight * (window.innerHeight / documentElement.scrollHeight));
+      const top = 18 + (scrollableHeight > 0 ? (window.scrollY / scrollableHeight) * (trackHeight - height) : 0);
+
+      setThumb({ height, top });
+    }
+
+    updateThumb();
+    window.addEventListener('scroll', updateThumb, { passive: true });
+    window.addEventListener('resize', updateThumb);
+
+    return () => {
+      window.removeEventListener('scroll', updateThumb);
+      window.removeEventListener('resize', updateThumb);
+    };
+  }, []);
+
+  return <View pointerEvents="none" style={[styles.webScrollThumb, thumb]} />;
 }
 
 function WebBenefit({ icon, text, title }: { icon: keyof typeof Ionicons.glyphMap; text: string; title: string }) {
@@ -844,6 +872,14 @@ const styles = StyleSheet.create({
   },
   webPage: {
     backgroundColor: '#FFFFFF',
+  },
+  webScrollThumb: {
+    position: 'fixed' as never,
+    right: 5,
+    zIndex: 10000,
+    width: 9,
+    borderRadius: 8,
+    backgroundColor: '#596168',
   },
   webHeader: {
     flexDirection: 'row',
