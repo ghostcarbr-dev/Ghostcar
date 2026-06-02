@@ -49,6 +49,17 @@ const supportMenuItems = [
   { icon: 'information-circle-outline', key: 'about' },
 ] as const;
 
+const currencies = [
+  { code: 'BRL', flag: '🇧🇷', label: 'Real Brasileiro', symbol: 'R$' },
+  { code: 'USD', flag: '🇺🇸', label: 'US Dollar', symbol: 'US$' },
+  { code: 'EUR', flag: '🇪🇺', label: 'Euro', symbol: '€' },
+  { code: 'GBP', flag: '🇬🇧', label: 'British Pound', symbol: '£' },
+  { code: 'CNY', flag: '🇨🇳', label: 'Chinese Yuan', symbol: '¥' },
+  { code: 'JPY', flag: '🇯🇵', label: 'Japanese Yen', symbol: '¥' },
+  { code: 'INR', flag: '🇮🇳', label: 'Indian Rupee', symbol: '₹' },
+  { code: 'AED', flag: '🇦🇪', label: 'UAE Dirham', symbol: 'AED' },
+] as const;
+
 export default function ClientHomeScreen() {
   const [destination, setDestination] = useState('');
   const [locationError, setLocationError] = useState('');
@@ -172,7 +183,6 @@ export default function ClientHomeScreen() {
       <StatusBar style="light" />
       {isMenuOpen ? (
         <ClientMenu
-          flag={selectedLanguage.flag}
           languageCode={languageCode}
           onBack={() => setIsMenuOpen(false)}
           setLanguageCode={setLanguageCode}
@@ -602,15 +612,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   menuItemLabel: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 16,
   },
   currencyBadge: {
+    flexShrink: 0,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    marginLeft: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 7,
     borderWidth: 1,
     borderColor: '#D6D6D6',
     borderRadius: 10,
@@ -736,17 +749,20 @@ const styles = StyleSheet.create({
 });
 
 type ClientMenuProps = {
-  flag: string;
   languageCode: (typeof languages)[number]['code'];
   onBack: () => void;
   setLanguageCode: (code: (typeof languages)[number]['code']) => void;
   t: (key: string) => string;
 };
 
-function ClientMenu({ flag, languageCode, onBack, setLanguageCode, t }: ClientMenuProps) {
+function ClientMenu({ languageCode, onBack, setLanguageCode, t }: ClientMenuProps) {
   const [isSettingsScreenOpen, setIsSettingsScreenOpen] = useState(false);
   const [isLanguageScreenOpen, setIsLanguageScreenOpen] = useState(false);
+  const [isCurrencyScreenOpen, setIsCurrencyScreenOpen] = useState(false);
   const [pendingLanguageCode, setPendingLanguageCode] = useState(languageCode);
+  const [selectedCurrencyCode, setSelectedCurrencyCode] = useState<(typeof currencies)[number]['code']>('BRL');
+  const selectedCurrency =
+    currencies.find((currency) => currency.code === selectedCurrencyCode) ?? currencies[0];
 
   if (isLanguageScreenOpen) {
     return (
@@ -763,12 +779,28 @@ function ClientMenu({ flag, languageCode, onBack, setLanguageCode, t }: ClientMe
     );
   }
 
+  if (isCurrencyScreenOpen) {
+    return (
+      <CurrencySelectionScreen
+        currencyCode={selectedCurrencyCode}
+        onBack={() => setIsCurrencyScreenOpen(false)}
+        selectCurrency={(code) => {
+          setSelectedCurrencyCode(code);
+          setIsCurrencyScreenOpen(false);
+        }}
+        t={t}
+      />
+    );
+  }
+
   if (isSettingsScreenOpen) {
     return (
       <SettingsScreen
         languageCode={languageCode}
         onBack={() => setIsSettingsScreenOpen(false)}
+        onOpenCurrency={() => setIsCurrencyScreenOpen(true)}
         onOpenLanguage={() => setIsLanguageScreenOpen(true)}
+        selectedCurrency={selectedCurrency}
         t={t}
       />
     );
@@ -792,8 +824,8 @@ function ClientMenu({ flag, languageCode, onBack, setLanguageCode, t }: ClientMe
             <Text style={styles.menuItemText}>{t('languageCurrency')}</Text>
           </View>
           <View style={styles.currencyBadge}>
-            <Text style={styles.currencyText}>US$</Text>
-            <Text style={styles.currencyFlag}>{flag}</Text>
+              <Text style={styles.currencyText}>{selectedCurrency.symbol}</Text>
+              <Text style={styles.currencyFlag}>{selectedCurrency.flag}</Text>
           </View>
         </Pressable>
 
@@ -823,11 +855,13 @@ function ClientMenu({ flag, languageCode, onBack, setLanguageCode, t }: ClientMe
 type SettingsScreenProps = {
   languageCode: (typeof languages)[number]['code'];
   onBack: () => void;
+  onOpenCurrency: () => void;
   onOpenLanguage: () => void;
+  selectedCurrency: (typeof currencies)[number];
   t: (key: string) => string;
 };
 
-function SettingsScreen({ languageCode, onBack, onOpenLanguage, t }: SettingsScreenProps) {
+function SettingsScreen({ languageCode, onBack, onOpenCurrency, onOpenLanguage, selectedCurrency, t }: SettingsScreenProps) {
   const [allowPush, setAllowPush] = useState(false);
   const [allowLocation, setAllowLocation] = useState(false);
   const language = languages.find((item) => item.code === languageCode) ?? languages[0];
@@ -851,10 +885,12 @@ function SettingsScreen({ languageCode, onBack, onOpenLanguage, t }: SettingsScr
           <Ionicons color="#242424" name="chevron-forward" size={28} />
         </Pressable>
 
-        <Pressable style={styles.settingsLinkRow}>
+        <Pressable onPress={onOpenCurrency} style={styles.settingsLinkRow}>
           <View>
             <Text style={styles.settingsLabel}>{t('currency')}</Text>
-            <Text style={styles.settingsValue}>{t('brazilianReal')}</Text>
+            <Text style={styles.settingsValue}>
+              {selectedCurrency.label} ({selectedCurrency.symbol})
+            </Text>
           </View>
           <Ionicons color="#242424" name="chevron-forward" size={28} />
         </Pressable>
@@ -879,6 +915,49 @@ function SettingsScreen({ languageCode, onBack, onOpenLanguage, t }: SettingsScr
           />
         </View>
       </View>
+    </SafeAreaView>
+  );
+}
+
+type CurrencySelectionScreenProps = {
+  currencyCode: (typeof currencies)[number]['code'];
+  onBack: () => void;
+  selectCurrency: (code: (typeof currencies)[number]['code']) => void;
+  t: (key: string) => string;
+};
+
+function CurrencySelectionScreen({ currencyCode, onBack, selectCurrency, t }: CurrencySelectionScreenProps) {
+  return (
+    <SafeAreaView edges={['top', 'bottom']} style={styles.menuScreen}>
+      <View style={styles.menuHeader}>
+        <Pressable accessibilityLabel="Voltar" onPress={onBack}>
+          <Ionicons color="#242424" name="arrow-back" size={30} />
+        </Pressable>
+        <Text style={styles.menuHeaderTitle}>{t('selectCurrency')}</Text>
+        <View style={styles.menuHeaderSpacer} />
+      </View>
+
+      <ScrollView contentContainerStyle={styles.languageSelectionContent}>
+        {currencies.map((currency) => (
+          <Pressable
+            key={currency.code}
+            onPress={() => selectCurrency(currency.code)}
+            style={({ pressed }) => [
+              styles.languageSelectionRow,
+              pressed && styles.menuRowPressed,
+            ]}>
+            <Text style={styles.languageSelectionFlag}>{currency.flag}</Text>
+            <Text style={styles.languageSelectionText}>
+              {currency.label} ({currency.symbol})
+            </Text>
+            <Ionicons
+              color={currency.code === currencyCode ? '#08735D' : '#C7C7C7'}
+              name={currency.code === currencyCode ? 'radio-button-on' : 'radio-button-off'}
+              size={24}
+            />
+          </Pressable>
+        ))}
+      </ScrollView>
     </SafeAreaView>
   );
 }

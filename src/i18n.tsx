@@ -33,6 +33,7 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     language: 'Idioma', save: 'Salvar',
     currency: 'Moeda', brazilianReal: 'Real Brasileiro (R$)', allowPush: 'Permitir notificações push',
     allowLocation: 'Permitir localização',
+    selectCurrency: 'Selecionar moeda',
   },
   fr: {
     rentCars: 'LOCATION DE VOITURES', openAccount: 'Ouvrir un compte', haveAccount: "J'ai déjà un compte",
@@ -54,6 +55,7 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     language: 'Langue', save: 'Enregistrer',
     currency: 'Devise', brazilianReal: 'Réal brésilien (R$)', allowPush: 'Autoriser les notifications push',
     allowLocation: 'Autoriser la localisation',
+    selectCurrency: 'Sélectionner une devise',
   },
   en: {
     rentCars: 'CAR RENTAL', openAccount: 'Open account', haveAccount: 'I already have an account',
@@ -74,6 +76,7 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     language: 'Language', save: 'Save',
     currency: 'Currency', brazilianReal: 'Brazilian Real (R$)', allowPush: 'Allow push notifications',
     allowLocation: 'Allow location access',
+    selectCurrency: 'Select currency',
   },
   es: {
     rentCars: 'ALQUILER DE COCHES', openAccount: 'Abrir cuenta', haveAccount: 'Ya tengo una cuenta',
