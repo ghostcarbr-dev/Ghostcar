@@ -5,6 +5,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { GhostcarLogo } from '@/components/GhostcarLogo';
 import { languages, useLanguage } from '@/i18n';
 
 type Coordinates = {
@@ -236,8 +237,7 @@ export default function ClientHomeScreen() {
           <SafeAreaView edges={['top']} style={styles.heroSafeArea}>
             <View style={styles.topBar}>
               <View>
-                <Text style={styles.logo}>Ghostcar</Text>
-                <Text style={styles.logoTagline}>{t('rentCars')}</Text>
+                <GhostcarLogo color="#FFFFFF" size="small" taglineColor="#FFCC2D" />
               </View>
 
               <View style={styles.headerActions}>

@@ -14,6 +14,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { GhostcarLogo } from '@/components/GhostcarLogo';
 import { useLanguage } from '@/i18n';
 
 export default function HomeScreen() {
@@ -44,8 +45,7 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}>
         <SafeAreaView edges={['top', 'bottom']} style={styles.safeArea}>
           <View style={styles.brandBlock}>
-            <Text style={styles.brand}>Ghostcar</Text>
-            <Text style={styles.tagline}>{t('rentCars')}</Text>
+            <GhostcarLogo align="center" color="#FFFFFF" size="large" />
           </View>
 
           {!authMode && (
@@ -209,10 +209,7 @@ function WebHomeScreen() {
     <View style={styles.webPage}>
       <StatusBar style="dark" />
       <View style={styles.webHeader}>
-        <View>
-          <Text style={styles.webLogo}>Ghostcar</Text>
-          <Text style={styles.webLogoTagline}>ALUGUEL DE CARROS</Text>
-        </View>
+        <GhostcarLogo color="#00102D" size="medium" />
         <View style={styles.webNav}>
           <Text style={styles.webNavLink}>Aluguel de carros</Text>
           <Text style={styles.webNavLink}>Publicar meu carro</Text>
@@ -294,7 +291,7 @@ function WebHomeScreen() {
       <View style={styles.webFooter}>
         <View style={[styles.webSection, styles.webFooterGrid]}>
           <View>
-            <Text style={styles.webFooterLogo}>Ghostcar</Text>
+            <GhostcarLogo color="#FFFFFF" size="small" taglineColor="#B9D0CA" />
             <Text style={styles.webFooterText}>Aluguel de carros de um jeito mais próximo.</Text>
           </View>
           <View>
