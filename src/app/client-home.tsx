@@ -2,14 +2,99 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { Image } from 'expo-image';
 import * as Location from 'expo-location';
 import { StatusBar } from 'expo-status-bar';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+
+type Coordinates = {
+  latitude: number;
+  longitude: number;
+};
+
+type PlaceSuggestion = {
+  coordinates: Coordinates;
+  id: string;
+  label: string;
+};
+
+type PhotonFeature = {
+  geometry: {
+    coordinates: [number, number];
+  };
+  properties: {
+    city?: string;
+    country?: string;
+    district?: string;
+    name?: string;
+    postcode?: string;
+    state?: string;
+    street?: string;
+  };
+};
 
 export default function ClientHomeScreen() {
   const [destination, setDestination] = useState('');
   const [locationError, setLocationError] = useState('');
   const [isLocating, setIsLocating] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([]);
+  const currentCoordinates = useRef<Coordinates | null>(null);
+  const skipNextSuggestionFetch = useRef(false);
+
+  useEffect(() => {
+    const query = destination.trim();
+
+    if (skipNextSuggestionFetch.current) {
+      skipNextSuggestionFetch.current = false;
+      return;
+    }
+
+    if (query.length < 3) {
+      setSuggestions([]);
+      setIsSearching(false);
+      return;
+    }
+
+    const timeoutId = setTimeout(async () => {
+      setIsSearching(true);
+
+      try {
+        const coordinates = currentCoordinates.current;
+        const params = new URLSearchParams({
+          limit: '5',
+          q: query,
+        });
+
+        if (coordinates) {
+          params.set('lat', String(coordinates.latitude));
+          params.set('lon', String(coordinates.longitude));
+        }
+
+        const response = await fetch(`https://photon.komoot.io/api/?${params.toString()}`);
+        if (!response.ok) {
+          throw new Error('Suggestion request failed');
+        }
+
+        const data = (await response.json()) as { features: PhotonFeature[] };
+        setSuggestions(
+          data.features.map((feature, index) => {
+            const [longitude, latitude] = feature.geometry.coordinates;
+            return {
+              coordinates: { latitude, longitude },
+              id: `${longitude}-${latitude}-${index}`,
+              label: formatPhotonSuggestion(feature.properties),
+            };
+          })
+        );
+      } catch {
+        setSuggestions([]);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [destination]);
 
   async function useCurrentLocation() {
     setIsLocating(true);
@@ -25,16 +110,17 @@ export default function ClientHomeScreen() {
       const currentLocation = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.Balanced,
       });
+      currentCoordinates.current = currentLocation.coords;
       const [address] = await Location.reverseGeocodeAsync(currentLocation.coords);
 
       if (!address) {
-        setDestination(
+        selectDestination(
           `${currentLocation.coords.latitude.toFixed(5)}, ${currentLocation.coords.longitude.toFixed(5)}`
         );
         return;
       }
 
-      setDestination(
+      selectDestination(
         [address.street, address.name, address.city, address.region].filter(Boolean).join(', ')
       );
     } catch {
@@ -42,6 +128,16 @@ export default function ClientHomeScreen() {
     } finally {
       setIsLocating(false);
     }
+  }
+
+  function selectDestination(label: string, coordinates?: Coordinates) {
+    if (coordinates) {
+      currentCoordinates.current = coordinates;
+    }
+
+    skipNextSuggestionFetch.current = true;
+    setDestination(label);
+    setSuggestions([]);
   }
 
   return (
@@ -98,7 +194,24 @@ export default function ClientHomeScreen() {
               onChangeText={setDestination}
               style={styles.searchTextInput}
             />
+            {isSearching && <ActivityIndicator color="#08735D" size="small" />}
           </View>
+          {!!suggestions.length && (
+            <View style={styles.suggestions}>
+              {suggestions.map((suggestion) => (
+                <Pressable
+                  key={suggestion.id}
+                  onPress={() => selectDestination(suggestion.label, suggestion.coordinates)}
+                  style={({ pressed }) => [styles.suggestionRow, pressed && styles.suggestionPressed]}>
+                  <Ionicons color="#08735D" name="location-outline" size={19} />
+                  <Text numberOfLines={2} style={styles.suggestionText}>
+                    {suggestion.label}
+                  </Text>
+                </Pressable>
+              ))}
+              <Text style={styles.attribution}>Suggestions © OpenStreetMap contributors</Text>
+            </View>
+          )}
           {!!locationError && <Text style={styles.locationError}>{locationError}</Text>}
           <Pressable style={({ pressed }) => [styles.searchButton, pressed && styles.pressed]}>
             <Text style={styles.searchButtonText}>Buscar</Text>
@@ -253,6 +366,40 @@ const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 16,
   },
+  suggestions: {
+    overflow: 'hidden',
+    marginTop: 8,
+    borderWidth: 1,
+    borderColor: '#E3E3E3',
+    borderRadius: 10,
+    backgroundColor: '#FFFFFF',
+  },
+  suggestionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    minHeight: 52,
+    paddingHorizontal: 13,
+    paddingVertical: 9,
+    borderBottomWidth: 1,
+    borderBottomColor: '#EEEEEE',
+    gap: 10,
+  },
+  suggestionPressed: {
+    backgroundColor: '#F0FAF6',
+  },
+  suggestionText: {
+    flex: 1,
+    color: '#383838',
+    fontSize: 14,
+    lineHeight: 18,
+  },
+  attribution: {
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    color: '#8B8B8B',
+    fontSize: 10,
+    textAlign: 'right',
+  },
   searchButton: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -383,3 +530,17 @@ const styles = StyleSheet.create({
     opacity: 0.78,
   },
 });
+
+function formatPhotonSuggestion(properties: PhotonFeature['properties']) {
+  return [
+    properties.name,
+    properties.street,
+    properties.district,
+    properties.city,
+    properties.state,
+    properties.postcode,
+    properties.country,
+  ]
+    .filter((part, index, parts) => part && parts.indexOf(part) === index)
+    .join(', ');
+}
