@@ -1433,6 +1433,7 @@ const styles = StyleSheet.create({
     paddingVertical: 18,
   },
   webHeaderMobile: {
+    flexDirection: 'column',
     alignItems: 'flex-start',
     gap: 12,
     paddingHorizontal: 18,
