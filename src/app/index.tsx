@@ -2,7 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -34,6 +34,12 @@ type CarListing = {
   imageUrl: string | null;
   ownerName: string;
   title: string;
+};
+
+type PlaceSuggestion = {
+  coordinates: Coordinates;
+  id: string;
+  label: string;
 };
 
 type PhotonFeature = {
@@ -244,8 +250,67 @@ function WebHomeScreen() {
   const [cars, setCars] = useState<CarListing[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
   const [isLoadingCars, setIsLoadingCars] = useState(false);
+  const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const [searchError, setSearchError] = useState('');
+  const [selectedCoordinates, setSelectedCoordinates] = useState<Coordinates | null>(null);
+  const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([]);
+  const skipNextSuggestionFetch = useRef(false);
   const isMobileWeb = width < 720;
+
+  useEffect(() => {
+    const query = destination.trim();
+
+    if (skipNextSuggestionFetch.current) {
+      skipNextSuggestionFetch.current = false;
+      return;
+    }
+
+    setSelectedCoordinates(null);
+
+    if (query.length < 3) {
+      setSuggestions([]);
+      setIsLoadingSuggestions(false);
+      return;
+    }
+
+    const timeoutId = setTimeout(async () => {
+      setIsLoadingSuggestions(true);
+
+      try {
+        const params = new URLSearchParams({ limit: '6', q: query });
+        const response = await fetch(`https://photon.komoot.io/api/?${params.toString()}`);
+        if (!response.ok) {
+          throw new Error('Suggestion request failed');
+        }
+
+        const data = (await response.json()) as { features: PhotonFeature[] };
+        setSuggestions(
+          data.features.map((feature, index) => {
+            const [longitude, latitude] = feature.geometry.coordinates;
+            return {
+              coordinates: { latitude, longitude },
+              id: `${longitude}-${latitude}-${index}`,
+              label: formatPhotonSuggestion(feature.properties),
+            };
+          }).filter((suggestion) => suggestion.label)
+        );
+      } catch {
+        setSuggestions([]);
+      } finally {
+        setIsLoadingSuggestions(false);
+      }
+    }, 350);
+
+    return () => clearTimeout(timeoutId);
+  }, [destination]);
+
+  function selectWebSuggestion(suggestion: PlaceSuggestion) {
+    skipNextSuggestionFetch.current = true;
+    setDestination(suggestion.label);
+    setSelectedCoordinates(suggestion.coordinates);
+    setSuggestions([]);
+    setSearchError('');
+  }
 
   async function searchWebCars() {
     const query = destination.trim();
@@ -259,24 +324,31 @@ function WebHomeScreen() {
     setSearchError('');
 
     try {
-      const photonParams = new URLSearchParams({ limit: '1', q: query });
-      const photonResponse = await fetch(`https://photon.komoot.io/api/?${photonParams.toString()}`);
-      if (!photonResponse.ok) {
-        throw new Error('Location search failed');
+      let coordinates = selectedCoordinates;
+
+      if (!coordinates) {
+        const photonParams = new URLSearchParams({ limit: '1', q: query });
+        const photonResponse = await fetch(`https://photon.komoot.io/api/?${photonParams.toString()}`);
+        if (!photonResponse.ok) {
+          throw new Error('Location search failed');
+        }
+
+        const photonData = (await photonResponse.json()) as { features: PhotonFeature[] };
+        const [firstPlace] = photonData.features;
+        if (!firstPlace) {
+          setCars([]);
+          setSearchError('Nenhuma localização encontrada para essa busca.');
+          return;
+        }
+
+        const [longitude, latitude] = firstPlace.geometry.coordinates;
+        coordinates = { latitude, longitude };
+        setSelectedCoordinates(coordinates);
       }
 
-      const photonData = (await photonResponse.json()) as { features: PhotonFeature[] };
-      const [firstPlace] = photonData.features;
-      if (!firstPlace) {
-        setCars([]);
-        setSearchError('Nenhuma localização encontrada para essa busca.');
-        return;
-      }
-
-      const [longitude, latitude] = firstPlace.geometry.coordinates;
       const carParams = new URLSearchParams({
-        lat: String(latitude),
-        lon: String(longitude),
+        lat: String(coordinates.latitude),
+        lon: String(coordinates.longitude),
         radiusKm: '50',
       });
       const carsResponse = await fetch(`${apiUrl}/cars?${carParams.toString()}`);
@@ -286,6 +358,7 @@ function WebHomeScreen() {
 
       const data = (await carsResponse.json()) as { cars: CarListing[] };
       setCars(data.cars);
+      setSuggestions([]);
     } catch {
       setCars([]);
       setSearchError('Não foi possível buscar os carros agora. Tente novamente.');
@@ -330,6 +403,7 @@ function WebHomeScreen() {
                   style={styles.webDestinationText}
                   value={destination}
                 />
+                {isLoadingSuggestions && <ActivityIndicator color="#00102D" size="small" />}
               </View>
               <Pressable
                 onPress={searchWebCars}
@@ -344,6 +418,21 @@ function WebHomeScreen() {
                 )}
               </Pressable>
             </View>
+            {suggestions.length > 0 && (
+              <View style={styles.webSuggestions}>
+                {suggestions.map((suggestion) => (
+                  <Pressable
+                    key={suggestion.id}
+                    onPress={() => selectWebSuggestion(suggestion)}
+                    style={({ pressed }) => [styles.webSuggestionItem, pressed && styles.pressed]}>
+                    <Ionicons color="#00102D" name="location-outline" size={17} />
+                    <Text numberOfLines={2} style={styles.webSuggestionText}>
+                      {suggestion.label}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+            )}
             <Text style={styles.webSearchHint}>Consulte veículos disponíveis em até 50 km da localização escolhida.</Text>
             {!!searchError && <Text style={styles.webSearchError}>{searchError}</Text>}
           </View>
@@ -1145,6 +1234,29 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '900',
   },
+  webSuggestions: {
+    marginTop: 10,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#D8E3DF',
+    borderRadius: 10,
+    backgroundColor: '#FFFFFF',
+  },
+  webSuggestionItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 9,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#EDF2F0',
+  },
+  webSuggestionText: {
+    flex: 1,
+    color: '#24312E',
+    fontSize: 13,
+    lineHeight: 18,
+  },
   webSearchHint: {
     marginTop: 10,
     color: '#75817F',
@@ -1420,4 +1532,18 @@ function formatDistance(distanceKm: number | null) {
 
 function formatPrice(price: number, currency: string) {
   return new Intl.NumberFormat('pt-BR', { currency, style: 'currency' }).format(price);
+}
+
+function formatPhotonSuggestion(properties: PhotonFeature['properties']) {
+  return [
+    properties.name,
+    properties.street,
+    properties.district,
+    properties.city,
+    properties.state,
+    properties.postcode,
+    properties.country,
+  ]
+    .filter((part, index, parts) => part && parts.indexOf(part) === index)
+    .join(', ');
 }
