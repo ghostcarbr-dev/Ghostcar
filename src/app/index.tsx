@@ -245,7 +245,6 @@ export default function HomeScreen() {
 }
 
 function WebHomeScreen() {
-  const router = useRouter();
   const { width } = useWindowDimensions();
   const [destination, setDestination] = useState('');
   const [cars, setCars] = useState<CarListing[]>([]);
@@ -254,6 +253,7 @@ function WebHomeScreen() {
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const [isPublishingCar, setIsPublishingCar] = useState(false);
   const [isPublishFormOpen, setIsPublishFormOpen] = useState(false);
+  const [isWebLoginOpen, setIsWebLoginOpen] = useState(false);
   const [publishFeedback, setPublishFeedback] = useState('');
   const [publishForm, setPublishForm] = useState({
     category: '',
@@ -465,12 +465,76 @@ function WebHomeScreen() {
             <Text style={styles.webNavLink}>Publicar meu carro</Text>
           </Pressable>
           {!isMobileWeb && <Text style={styles.webNavLink}>Ajuda</Text>}
-          <Pressable onPress={() => router.push('/client-home')} style={styles.webLoginButton}>
+          <Pressable onPress={() => setIsWebLoginOpen((isOpen) => !isOpen)} style={styles.webLoginButton}>
             <Ionicons color="#00102D" name="person-outline" size={18} />
             <Text style={styles.webLoginText}>Entrar</Text>
           </Pressable>
         </View>
       </View>
+      {isWebLoginOpen && (
+        <View style={[styles.webLoginPanelWrap, isMobileWeb && styles.webLoginPanelWrapMobile]}>
+          <View style={[styles.webLoginPanel, isMobileWeb && styles.webLoginPanelMobile]}>
+            <View style={styles.webLoginArrow} />
+            <View style={[styles.webSignupColumn, isMobileWeb && styles.webLoginColumnMobile]}>
+              <Text style={styles.webLoginPanelTitle}>Criar nova conta</Text>
+              <Pressable style={styles.webSignupButton}>
+                <Text style={styles.webSignupButtonText}>Cadastre-se</Text>
+              </Pressable>
+              <View style={styles.webLoginBenefitRow}>
+                <Ionicons color="#00102D" name="checkmark" size={22} />
+                <Text style={styles.webLoginBenefitText}>Rápido e fácil reservar</Text>
+              </View>
+              <View style={styles.webLoginBenefitRow}>
+                <Ionicons color="#00102D" name="checkmark" size={22} />
+                <Text style={styles.webLoginBenefitText}>Descontos de até 30%</Text>
+              </View>
+              <View style={styles.webLoginBenefitRow}>
+                <Ionicons color="#00102D" name="checkmark" size={22} />
+                <Text style={styles.webLoginBenefitText}>Acesso a ofertas exclusivas</Text>
+              </View>
+              <View style={styles.webLoginBenefitRow}>
+                <Ionicons color="#00102D" name="checkmark" size={22} />
+                <Text style={styles.webLoginBenefitText}>Ganhe cashback</Text>
+              </View>
+            </View>
+
+            <View style={[styles.webLoginColumn, isMobileWeb && styles.webLoginColumnMobile]}>
+              <Text style={styles.webLoginPanelTitle}>Login</Text>
+              <Text style={styles.webLoginLabel}>E-mail</Text>
+              <TextInput
+                autoCapitalize="none"
+                keyboardType="email-address"
+                style={styles.webLoginInput}
+              />
+              <Text style={styles.webLoginLabel}>Senha</Text>
+              <TextInput secureTextEntry style={styles.webLoginInput} />
+              <Pressable>
+                <Text style={styles.webForgotText}>Esqueci minha senha</Text>
+              </Pressable>
+              <Pressable style={styles.webLoginSubmitButton}>
+                <Text style={styles.webLoginSubmitText}>Entrar</Text>
+              </Pressable>
+              <View style={styles.webLoginDividerRow}>
+                <View style={styles.webLoginDivider} />
+                <Text style={styles.webLoginDividerText}>ou</Text>
+                <View style={styles.webLoginDivider} />
+              </View>
+              <View style={styles.webSocialRow}>
+                <Pressable style={styles.webSocialButton}>
+                  <Image
+                    contentFit="contain"
+                    source={require('@/assets/images/google-g-logo.png')}
+                    style={styles.webSocialIcon}
+                  />
+                </Pressable>
+                <Pressable style={styles.webSocialButton}>
+                  <Ionicons color="#00102D" name="logo-apple" size={27} />
+                </Pressable>
+              </View>
+            </View>
+          </View>
+        </View>
+      )}
 
       <View style={[styles.webHero, isMobileWeb && styles.webHeroMobile]}>
         <View style={[styles.webSection, isMobileWeb && styles.webSectionMobile]}>
@@ -1289,6 +1353,166 @@ const styles = StyleSheet.create({
     color: '#00102D',
     fontSize: 14,
     fontWeight: '700',
+  },
+  webLoginPanelWrap: {
+    position: 'absolute',
+    top: 66,
+    right: 26,
+    zIndex: 20,
+    width: '100%',
+    maxWidth: 850,
+  },
+  webLoginPanelWrapMobile: {
+    position: 'relative',
+    top: 0,
+    right: 0,
+    width: '100%',
+    paddingHorizontal: 18,
+    paddingBottom: 12,
+  },
+  webLoginPanel: {
+    position: 'relative',
+    flexDirection: 'row',
+    overflow: 'visible',
+    borderWidth: 1,
+    borderColor: '#E3E6EA',
+    borderRadius: 10,
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 14 },
+    shadowOpacity: 0.18,
+    shadowRadius: 28,
+  },
+  webLoginPanelMobile: {
+    flexDirection: 'column',
+  },
+  webLoginArrow: {
+    position: 'absolute',
+    top: -10,
+    right: 52,
+    width: 20,
+    height: 20,
+    borderLeftWidth: 1,
+    borderTopWidth: 1,
+    borderColor: '#E3E6EA',
+    backgroundColor: '#FFFFFF',
+    transform: [{ rotate: '45deg' }],
+  },
+  webSignupColumn: {
+    flex: 1,
+    padding: 24,
+    borderRightWidth: 1,
+    borderRightColor: '#E7EAEE',
+  },
+  webLoginColumn: {
+    flex: 1,
+    padding: 24,
+  },
+  webLoginColumnMobile: {
+    borderRightWidth: 0,
+    padding: 18,
+  },
+  webLoginPanelTitle: {
+    color: '#41495A',
+    fontSize: 20,
+    fontWeight: '500',
+  },
+  webSignupButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 50,
+    marginTop: 28,
+    marginBottom: 28,
+    borderWidth: 1,
+    borderColor: '#D7DCE2',
+    borderRadius: 4,
+    backgroundColor: '#FFFFFF',
+  },
+  webSignupButtonText: {
+    color: '#41495A',
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  webLoginBenefitRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginTop: 18,
+  },
+  webLoginBenefitText: {
+    color: '#4B5260',
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  webLoginLabel: {
+    marginTop: 28,
+    marginBottom: 9,
+    color: '#59606D',
+    fontSize: 17,
+    fontWeight: '500',
+  },
+  webLoginInput: {
+    height: 50,
+    paddingHorizontal: 14,
+    borderWidth: 1,
+    borderColor: '#D7DCE2',
+    borderRadius: 4,
+    color: '#263532',
+    fontSize: 15,
+  },
+  webForgotText: {
+    marginTop: 18,
+    color: '#2B6CB0',
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  webLoginSubmitButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 50,
+    marginTop: 22,
+    borderRadius: 4,
+    backgroundColor: '#159A57',
+  },
+  webLoginSubmitText: {
+    color: '#FFFFFF',
+    fontSize: 17,
+    fontWeight: '800',
+  },
+  webLoginDividerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    marginVertical: 24,
+  },
+  webLoginDivider: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#E3E6EA',
+  },
+  webLoginDividerText: {
+    color: '#59606D',
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  webSocialRow: {
+    flexDirection: 'row',
+    gap: 28,
+    justifyContent: 'center',
+  },
+  webSocialButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 112,
+    height: 52,
+    borderWidth: 1,
+    borderColor: '#E1E5EA',
+    borderRadius: 5,
+    backgroundColor: '#FFFFFF',
+  },
+  webSocialIcon: {
+    width: 28,
+    height: 28,
   },
   webHero: {
     backgroundColor: '#00102D',
