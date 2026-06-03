@@ -253,6 +253,7 @@ function WebHomeScreen() {
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const [isPublishingCar, setIsPublishingCar] = useState(false);
   const [isPublishFormOpen, setIsPublishFormOpen] = useState(false);
+  const [isWebSignupPageOpen, setIsWebSignupPageOpen] = useState(false);
   const [isWebLoginOpen, setIsWebLoginOpen] = useState(false);
   const [publishFeedback, setPublishFeedback] = useState('');
   const [publishForm, setPublishForm] = useState({
@@ -267,6 +268,10 @@ function WebHomeScreen() {
   const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([]);
   const skipNextSuggestionFetch = useRef(false);
   const isMobileWeb = width < 720;
+
+  if (isWebSignupPageOpen) {
+    return <WebSignupPage onBack={() => setIsWebSignupPageOpen(false)} />;
+  }
 
   useEffect(() => {
     const query = destination.trim();
@@ -477,7 +482,12 @@ function WebHomeScreen() {
             <View style={styles.webLoginArrow} />
             <View style={[styles.webSignupColumn, isMobileWeb && styles.webLoginColumnMobile]}>
               <Text style={styles.webLoginPanelTitle}>Criar nova conta</Text>
-              <Pressable style={styles.webSignupButton}>
+              <Pressable
+                onPress={() => {
+                  setIsWebLoginOpen(false);
+                  setIsWebSignupPageOpen(true);
+                }}
+                style={styles.webSignupButton}>
                 <Text style={styles.webSignupButtonText}>Cadastre-se</Text>
               </Pressable>
               <View style={styles.webLoginBenefitRow}>
@@ -769,6 +779,92 @@ function WebFeature({ icon, text, title }: { icon: keyof typeof Ionicons.glyphMa
   );
 }
 
+function WebSignupPage({ onBack }: { onBack: () => void }) {
+  const { width } = useWindowDimensions();
+  const isMobileWeb = width < 820;
+
+  return (
+    <View style={styles.webSignupPage}>
+      <StatusBar style="dark" />
+      <View style={[styles.webSignupHeader, isMobileWeb && styles.webSignupHeaderMobile]}>
+        <Pressable onPress={onBack}>
+          <GhostcarLogo color="#00102D" size={isMobileWeb ? 'small' : 'medium'} />
+        </Pressable>
+        <View style={[styles.webSignupHeaderNav, isMobileWeb && styles.webSignupHeaderNavMobile]}>
+          <Text style={styles.webSignupHeaderItem}>🇧🇷</Text>
+          <Text style={styles.webSignupHeaderItem}>R$</Text>
+          <Text style={styles.webSignupHeaderItem}>Ajuda</Text>
+          <Pressable onPress={onBack}>
+            <Text style={styles.webSignupHeaderItem}>Entrar</Text>
+          </Pressable>
+        </View>
+      </View>
+
+      <View style={[styles.webSignupContent, isMobileWeb && styles.webSignupContentMobile]}>
+        <View style={[styles.webSignupSocialCard, isMobileWeb && styles.webSignupSocialCardMobile]}>
+          <Text style={styles.webSignupSocialTitle}>
+            Acelere seu cadastro usando sua conta das redes sociais
+          </Text>
+          <Pressable style={styles.webSignupGoogleButton}>
+            <Image
+              contentFit="contain"
+              source={require('@/assets/images/google-g-logo.png')}
+              style={styles.webSignupGoogleIcon}
+            />
+            <Text style={styles.webSignupGoogleText}>Fazer Login com o Google</Text>
+          </Pressable>
+          <Pressable style={styles.webSignupAppleButton}>
+            <Ionicons color="#FFFFFF" name="logo-apple" size={21} />
+            <Text style={styles.webSignupAppleText}>Apple</Text>
+          </Pressable>
+          <View style={styles.webSignupPrivacyRow}>
+            <Ionicons color="#4B5260" name="lock-closed" size={14} />
+            <Text style={styles.webSignupPrivacyText}>
+              Seus dados serão mantidos em sigilo e nada será publicado em sua timeline
+            </Text>
+          </View>
+        </View>
+
+        <View style={styles.webSignupMain}>
+          <Text style={styles.webSignupTitle}>Crie sua conta</Text>
+          <Text style={styles.webSignupSectionTitle}>Dados pessoais</Text>
+          <View style={[styles.webSignupGrid, isMobileWeb && styles.webSignupGridMobile]}>
+            <WebSignupInput label="Nome do locatário:" placeholder="Nome do locatário" required />
+            <WebSignupInput label="Sobrenome:" placeholder="Sobrenome" required />
+            <WebSignupInput label="País de Residência:" placeholder="Brasil" required />
+            <WebSignupInput label="CPF:" required />
+            <WebSignupInput label="Data de Nascimento:" placeholder="DD/MM/AAAA" required />
+            <WebSignupInput label="Celular:" placeholder="Ex.: (11) 96123-4567" required />
+          </View>
+
+          <Text style={styles.webSignupSectionTitle}>Dados de acesso à Ghostcar</Text>
+          <View style={[styles.webSignupGrid, isMobileWeb && styles.webSignupGridMobile]}>
+            <WebSignupInput label="E-mail:" keyboardType="email-address" required />
+            <WebSignupInput label="Confirme seu E-mail:" keyboardType="email-address" required />
+            <WebSignupInput label="Crie uma Senha de Acesso:" secureTextEntry required />
+            <WebSignupInput label="Confirme sua Senha de Acesso:" secureTextEntry required />
+          </View>
+
+          <View style={styles.webSignupCheckboxRow}>
+            <View style={styles.webSignupCheckbox} />
+            <Text style={styles.webSignupSmallText}>Aceito receber todas as ofertas e promoções da Ghostcar</Text>
+          </View>
+
+          <Text style={styles.webSignupTerms}>
+            Ao seguir utilizando nossas soluções você está ciente de que seus dados pessoais serão tratados conforme a{' '}
+            <Text style={styles.webSignupLink}>Política de Privacidade</Text> da Ghostcar. Ao criar uma conta você concorda com os{' '}
+            <Text style={styles.webSignupLink}>Termos de Uso</Text> da Ghostcar.
+          </Text>
+
+          <Pressable style={styles.webSignupCreateButton}>
+            <Text style={styles.webSignupCreateButtonText}>Criar Conta</Text>
+          </Pressable>
+        </View>
+      </View>
+    </View>
+  );
+}
+
 function WebPublishInput({
   keyboardType,
   onChangeText,
@@ -789,6 +885,36 @@ function WebPublishInput({
       style={styles.webPublishInput}
       value={value}
     />
+  );
+}
+
+function WebSignupInput({
+  keyboardType,
+  label,
+  placeholder,
+  required,
+  secureTextEntry,
+}: {
+  keyboardType?: TextInputProps['keyboardType'];
+  label: string;
+  placeholder?: string;
+  required?: boolean;
+  secureTextEntry?: boolean;
+}) {
+  return (
+    <View style={styles.webSignupField}>
+      <Text style={styles.webSignupLabel}>
+        {required && <Text style={styles.webSignupRequired}>* </Text>}
+        {label}
+      </Text>
+      <TextInput
+        keyboardType={keyboardType}
+        placeholder={placeholder}
+        placeholderTextColor="#8C9693"
+        secureTextEntry={secureTextEntry}
+        style={styles.webSignupInput}
+      />
+    </View>
   );
 }
 
@@ -1513,6 +1639,213 @@ const styles = StyleSheet.create({
   webSocialIcon: {
     width: 28,
     height: 28,
+  },
+  webSignupPage: {
+    minHeight: '100%',
+    backgroundColor: '#FFFFFF',
+  },
+  webSignupHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+    paddingHorizontal: 54,
+    paddingVertical: 28,
+    borderBottomWidth: 1,
+    borderBottomColor: '#EEF1F4',
+  },
+  webSignupHeaderMobile: {
+    alignItems: 'flex-start',
+    gap: 14,
+    paddingHorizontal: 18,
+    paddingVertical: 18,
+  },
+  webSignupHeaderNav: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 34,
+  },
+  webSignupHeaderNavMobile: {
+    width: '100%',
+    flexWrap: 'wrap',
+    gap: 18,
+  },
+  webSignupHeaderItem: {
+    color: '#41495A',
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  webSignupContent: {
+    flexDirection: 'row',
+    gap: 42,
+    width: '100%',
+    maxWidth: 1120,
+    alignSelf: 'center',
+    paddingHorizontal: 42,
+    paddingTop: 34,
+    paddingBottom: 70,
+  },
+  webSignupContentMobile: {
+    flexDirection: 'column',
+    gap: 22,
+    paddingHorizontal: 18,
+    paddingTop: 22,
+    paddingBottom: 42,
+  },
+  webSignupSocialCard: {
+    width: 340,
+    alignSelf: 'flex-start',
+    padding: 18,
+    borderWidth: 1,
+    borderColor: '#E0E5EA',
+    borderRadius: 4,
+    backgroundColor: '#FFFFFF',
+  },
+  webSignupSocialCardMobile: {
+    width: '100%',
+  },
+  webSignupSocialTitle: {
+    color: '#4B5260',
+    fontSize: 16,
+    lineHeight: 23,
+    fontWeight: '600',
+  },
+  webSignupGoogleButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 11,
+    height: 44,
+    marginTop: 18,
+    borderWidth: 1,
+    borderColor: '#DCE1E7',
+    borderRadius: 4,
+    backgroundColor: '#FFFFFF',
+  },
+  webSignupGoogleIcon: {
+    width: 22,
+    height: 22,
+  },
+  webSignupGoogleText: {
+    color: '#41495A',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  webSignupAppleButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 9,
+    height: 44,
+    marginTop: 10,
+    borderRadius: 3,
+    backgroundColor: '#171B22',
+  },
+  webSignupAppleText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '800',
+  },
+  webSignupPrivacyRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 18,
+  },
+  webSignupPrivacyText: {
+    flex: 1,
+    color: '#4B5260',
+    fontSize: 13,
+    lineHeight: 19,
+  },
+  webSignupMain: {
+    flex: 1,
+  },
+  webSignupTitle: {
+    color: '#343B49',
+    fontSize: 28,
+    fontWeight: '900',
+  },
+  webSignupSectionTitle: {
+    marginTop: 20,
+    marginBottom: 12,
+    color: '#343B49',
+    fontSize: 18,
+    fontWeight: '900',
+  },
+  webSignupGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    columnGap: 28,
+    rowGap: 18,
+  },
+  webSignupGridMobile: {
+    flexDirection: 'column',
+    rowGap: 14,
+  },
+  webSignupField: {
+    flexBasis: '46%',
+    flexGrow: 1,
+    minWidth: 260,
+  },
+  webSignupLabel: {
+    marginBottom: 8,
+    color: '#59606D',
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  webSignupRequired: {
+    color: '#A94442',
+  },
+  webSignupInput: {
+    height: 42,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: '#C8CED6',
+    borderRadius: 2,
+    color: '#263532',
+    fontSize: 13,
+  },
+  webSignupCheckboxRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginTop: 22,
+  },
+  webSignupCheckbox: {
+    width: 14,
+    height: 14,
+    borderWidth: 1,
+    borderColor: '#9FA7B2',
+    borderRadius: 2,
+  },
+  webSignupSmallText: {
+    flex: 1,
+    color: '#4B5260',
+    fontSize: 13,
+  },
+  webSignupTerms: {
+    marginTop: 18,
+    color: '#4B5260',
+    fontSize: 13,
+    lineHeight: 20,
+  },
+  webSignupLink: {
+    color: '#2B6CB0',
+    fontWeight: '700',
+  },
+  webSignupCreateButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 52,
+    maxWidth: 460,
+    marginTop: 24,
+    borderRadius: 3,
+    backgroundColor: '#159A57',
+  },
+  webSignupCreateButtonText: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: '900',
   },
   webHero: {
     backgroundColor: '#00102D',
