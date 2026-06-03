@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
 import {
+  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -17,6 +18,40 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { GhostcarLogo } from '@/components/GhostcarLogo';
 import { useLanguage } from '@/i18n';
+
+type Coordinates = {
+  latitude: number;
+  longitude: number;
+};
+
+type CarListing = {
+  category: string;
+  city: string | null;
+  currency: string;
+  dailyPrice: number;
+  distanceKm: number | null;
+  id: number;
+  imageUrl: string | null;
+  ownerName: string;
+  title: string;
+};
+
+type PhotonFeature = {
+  geometry: {
+    coordinates: [number, number];
+  };
+  properties: {
+    city?: string;
+    country?: string;
+    district?: string;
+    name?: string;
+    postcode?: string;
+    state?: string;
+    street?: string;
+  };
+};
+
+const apiUrl = 'https://ghostcar-api.onrender.com';
 
 export default function HomeScreen() {
   if (Platform.OS === 'web') {
@@ -206,7 +241,58 @@ function WebHomeScreen() {
   const router = useRouter();
   const { width } = useWindowDimensions();
   const [destination, setDestination] = useState('');
+  const [cars, setCars] = useState<CarListing[]>([]);
+  const [hasSearched, setHasSearched] = useState(false);
+  const [isLoadingCars, setIsLoadingCars] = useState(false);
+  const [searchError, setSearchError] = useState('');
   const isMobileWeb = width < 720;
+
+  async function searchWebCars() {
+    const query = destination.trim();
+    if (!query) {
+      setSearchError('Digite uma cidade, aeroporto ou endereço.');
+      return;
+    }
+
+    setHasSearched(true);
+    setIsLoadingCars(true);
+    setSearchError('');
+
+    try {
+      const photonParams = new URLSearchParams({ limit: '1', q: query });
+      const photonResponse = await fetch(`https://photon.komoot.io/api/?${photonParams.toString()}`);
+      if (!photonResponse.ok) {
+        throw new Error('Location search failed');
+      }
+
+      const photonData = (await photonResponse.json()) as { features: PhotonFeature[] };
+      const [firstPlace] = photonData.features;
+      if (!firstPlace) {
+        setCars([]);
+        setSearchError('Nenhuma localização encontrada para essa busca.');
+        return;
+      }
+
+      const [longitude, latitude] = firstPlace.geometry.coordinates;
+      const carParams = new URLSearchParams({
+        lat: String(latitude),
+        lon: String(longitude),
+        radiusKm: '50',
+      });
+      const carsResponse = await fetch(`${apiUrl}/cars?${carParams.toString()}`);
+      if (!carsResponse.ok) {
+        throw new Error('Car search failed');
+      }
+
+      const data = (await carsResponse.json()) as { cars: CarListing[] };
+      setCars(data.cars);
+    } catch {
+      setCars([]);
+      setSearchError('Não foi possível buscar os carros agora. Tente novamente.');
+    } finally {
+      setIsLoadingCars(false);
+    }
+  }
 
   return (
     <View style={styles.webPage}>
@@ -246,16 +332,63 @@ function WebHomeScreen() {
                 />
               </View>
               <Pressable
-                onPress={() => router.push('/client-home')}
+                onPress={searchWebCars}
                 style={[styles.webSearchButton, isMobileWeb && styles.webSearchButtonMobile]}>
-                <Ionicons color="#FFFFFF" name="search" size={19} />
-                <Text style={styles.webSearchButtonText}>Pesquisar</Text>
+                {isLoadingCars ? (
+                  <ActivityIndicator color="#FFFFFF" />
+                ) : (
+                  <>
+                    <Ionicons color="#FFFFFF" name="search" size={19} />
+                    <Text style={styles.webSearchButtonText}>Pesquisar</Text>
+                  </>
+                )}
               </Pressable>
             </View>
             <Text style={styles.webSearchHint}>Consulte veículos disponíveis em até 50 km da localização escolhida.</Text>
+            {!!searchError && <Text style={styles.webSearchError}>{searchError}</Text>}
           </View>
         </View>
       </View>
+
+      {hasSearched && (
+        <View style={[styles.webSection, styles.webResultsSection, isMobileWeb && styles.webSectionMobile]}>
+          <Text style={styles.webEyebrow}>CARROS DISPONÍVEIS</Text>
+          <Text style={[styles.webSectionTitle, isMobileWeb && styles.webSectionTitleMobile]}>
+            Resultados perto de {destination.trim()}
+          </Text>
+          {isLoadingCars ? (
+            <ActivityIndicator color="#00102D" size="large" style={styles.webResultsStatus} />
+          ) : cars.length === 0 ? (
+            <Text style={styles.webResultsStatusText}>
+              Nenhum carro publicado foi encontrado nessa localização.
+            </Text>
+          ) : (
+            <View style={[styles.webCarsGrid, isMobileWeb && styles.webCarsGridMobile]}>
+              {cars.map((car) => (
+                <View key={car.id} style={styles.webCarCard}>
+                  {car.imageUrl ? (
+                    <Image contentFit="cover" source={{ uri: car.imageUrl }} style={styles.webCarImage} />
+                  ) : (
+                    <View style={styles.webCarImagePlaceholder}>
+                      <Ionicons color="#00102D" name="car-sport-outline" size={52} />
+                    </View>
+                  )}
+                  <View style={styles.webCarContent}>
+                    <Text style={styles.webCarTitle}>{car.title}</Text>
+                    <Text style={styles.webCarMeta}>{car.category}</Text>
+                    <Text style={styles.webCarMeta}>
+                      {car.city ? `${car.city} • ` : ''}{formatDistance(car.distanceKm)}
+                    </Text>
+                    <Text style={styles.webCarPrice}>
+                      {formatPrice(car.dailyPrice, car.currency)} <Text style={styles.webCarPriceUnit}>/ dia</Text>
+                    </Text>
+                  </View>
+                </View>
+              ))}
+            </View>
+          )}
+        </View>
+      )}
 
       <View style={[styles.webSection, styles.webBenefits, isMobileWeb && styles.webBenefitsMobile]}>
         <WebBenefit icon="pricetag-outline" title="Preços transparentes" text="Compare anúncios próximos e escolha a opção ideal para sua viagem." />
@@ -1017,6 +1150,79 @@ const styles = StyleSheet.create({
     color: '#75817F',
     fontSize: 12,
   },
+  webSearchError: {
+    marginTop: 10,
+    color: '#B42318',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  webResultsSection: {
+    paddingTop: 42,
+    paddingBottom: 12,
+  },
+  webResultsStatus: {
+    marginTop: 28,
+  },
+  webResultsStatusText: {
+    marginTop: 16,
+    color: '#64716E',
+    fontSize: 15,
+    lineHeight: 22,
+  },
+  webCarsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 18,
+    marginTop: 28,
+  },
+  webCarsGridMobile: {
+    flexDirection: 'column',
+  },
+  webCarCard: {
+    flexBasis: '31%',
+    flexGrow: 1,
+    minWidth: 260,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#DFE8E5',
+    borderRadius: 14,
+    backgroundColor: '#FFFFFF',
+  },
+  webCarImage: {
+    width: '100%',
+    height: 170,
+  },
+  webCarImagePlaceholder: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+    height: 170,
+    backgroundColor: '#EEF6F3',
+  },
+  webCarContent: {
+    padding: 16,
+  },
+  webCarTitle: {
+    color: '#1E2B28',
+    fontSize: 17,
+    fontWeight: '900',
+  },
+  webCarMeta: {
+    marginTop: 5,
+    color: '#6B7875',
+    fontSize: 13,
+  },
+  webCarPrice: {
+    marginTop: 13,
+    color: '#00102D',
+    fontSize: 18,
+    fontWeight: '900',
+  },
+  webCarPriceUnit: {
+    color: '#6B7875',
+    fontSize: 12,
+    fontWeight: '700',
+  },
   webBenefits: {
     flexDirection: 'row',
     gap: 18,
@@ -1207,3 +1413,11 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
+
+function formatDistance(distanceKm: number | null) {
+  return distanceKm == null ? '' : `${distanceKm.toFixed(1).replace('.', ',')} km`;
+}
+
+function formatPrice(price: number, currency: string) {
+  return new Intl.NumberFormat('pt-BR', { currency, style: 'currency' }).format(price);
+}
