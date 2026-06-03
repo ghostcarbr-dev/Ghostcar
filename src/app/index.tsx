@@ -12,6 +12,7 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  TextInputProps,
   useWindowDimensions,
   View,
 } from 'react-native';
@@ -251,6 +252,16 @@ function WebHomeScreen() {
   const [hasSearched, setHasSearched] = useState(false);
   const [isLoadingCars, setIsLoadingCars] = useState(false);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
+  const [isPublishingCar, setIsPublishingCar] = useState(false);
+  const [isPublishFormOpen, setIsPublishFormOpen] = useState(false);
+  const [publishFeedback, setPublishFeedback] = useState('');
+  const [publishForm, setPublishForm] = useState({
+    category: '',
+    city: '',
+    dailyPrice: '',
+    ownerName: '',
+    title: '',
+  });
   const [searchError, setSearchError] = useState('');
   const [selectedCoordinates, setSelectedCoordinates] = useState<Coordinates | null>(null);
   const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([]);
@@ -310,6 +321,82 @@ function WebHomeScreen() {
     setSelectedCoordinates(suggestion.coordinates);
     setSuggestions([]);
     setSearchError('');
+  }
+
+  function updatePublishForm(field: keyof typeof publishForm, value: string) {
+    setPublishForm((currentForm) => ({ ...currentForm, [field]: value }));
+    setPublishFeedback('');
+  }
+
+  function openPublishForm() {
+    setIsPublishFormOpen(true);
+    setPublishFeedback('');
+
+    if (Platform.OS === 'web') {
+      requestAnimationFrame(() => {
+        document
+          .getElementById('web-publish-section')
+          ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
+  }
+
+  async function publishWebCar() {
+    const ownerName = publishForm.ownerName.trim();
+    const title = publishForm.title.trim();
+    const category = publishForm.category.trim();
+    const city = publishForm.city.trim();
+    const dailyPrice = Number(publishForm.dailyPrice.replace(',', '.'));
+
+    if (!ownerName || !title || !category || !city || !Number.isFinite(dailyPrice) || dailyPrice <= 0) {
+      setPublishFeedback('Preencha todos os campos com um preço válido.');
+      return;
+    }
+
+    setIsPublishingCar(true);
+    setPublishFeedback('');
+
+    try {
+      const photonParams = new URLSearchParams({ limit: '1', q: city });
+      const photonResponse = await fetch(`https://photon.komoot.io/api/?${photonParams.toString()}`);
+      if (!photonResponse.ok) {
+        throw new Error('Location search failed');
+      }
+
+      const photonData = (await photonResponse.json()) as { features: PhotonFeature[] };
+      const [firstPlace] = photonData.features;
+      if (!firstPlace) {
+        setPublishFeedback('Não encontramos essa localização. Digite uma cidade ou endereço válido.');
+        return;
+      }
+
+      const [longitude, latitude] = firstPlace.geometry.coordinates;
+      const response = await fetch(`${apiUrl}/cars`, {
+        body: JSON.stringify({
+          category,
+          city,
+          currency: 'BRL',
+          dailyPrice,
+          latitude,
+          longitude,
+          ownerName,
+          title,
+        }),
+        headers: { 'Content-Type': 'application/json' },
+        method: 'POST',
+      });
+
+      if (!response.ok) {
+        throw new Error('Car publish failed');
+      }
+
+      setPublishForm({ category: '', city: '', dailyPrice: '', ownerName: '', title: '' });
+      setPublishFeedback('Carro publicado com sucesso.');
+    } catch {
+      setPublishFeedback('Não foi possível publicar o carro agora. Tente novamente.');
+    } finally {
+      setIsPublishingCar(false);
+    }
   }
 
   async function searchWebCars() {
@@ -374,7 +461,9 @@ function WebHomeScreen() {
         <GhostcarLogo color="#00102D" size={isMobileWeb ? 'small' : 'medium'} />
         <View style={[styles.webNav, isMobileWeb && styles.webNavMobile]}>
           <Text style={styles.webNavLink}>Aluguel de carros</Text>
-          <Text style={styles.webNavLink}>Publicar meu carro</Text>
+          <Pressable onPress={openPublishForm}>
+            <Text style={styles.webNavLink}>Publicar meu carro</Text>
+          </Pressable>
           {!isMobileWeb && <Text style={styles.webNavLink}>Ajuda</Text>}
           <Pressable onPress={() => router.push('/client-home')} style={styles.webLoginButton}>
             <Ionicons color="#00102D" name="person-outline" size={18} />
@@ -502,7 +591,9 @@ function WebHomeScreen() {
         </View>
       </View>
 
-      <View style={[styles.webSection, styles.webPublishSection, isMobileWeb && styles.webPublishSectionMobile]}>
+      <View
+        nativeID="web-publish-section"
+        style={[styles.webSection, styles.webPublishSection, isMobileWeb && styles.webPublishSectionMobile]}>
         <View style={styles.webPublishCopy}>
           <Text style={styles.webEyebrow}>PARA PROPRIETÁRIOS</Text>
           <Text style={[styles.webSectionTitle, isMobileWeb && styles.webSectionTitleMobile]}>
@@ -511,9 +602,53 @@ function WebHomeScreen() {
           <Text style={styles.webSectionSubtitle}>
             Publique seu veículo na Ghostcar e permita que clientes próximos encontrem seu anúncio.
           </Text>
-          <Pressable onPress={() => router.push('/client-home')} style={styles.webOutlineButton}>
+          <Pressable onPress={openPublishForm} style={styles.webOutlineButton}>
             <Text style={styles.webOutlineButtonText}>Publicar meu carro</Text>
           </Pressable>
+          {isPublishFormOpen && (
+            <View style={styles.webPublishForm}>
+              <Text style={styles.webPublishFormTitle}>Publique seu carro</Text>
+              <View style={[styles.webPublishFormGrid, isMobileWeb && styles.webPublishFormGridMobile]}>
+                <WebPublishInput
+                  onChangeText={(value) => updatePublishForm('ownerName', value)}
+                  placeholder="Seu nome"
+                  value={publishForm.ownerName}
+                />
+                <WebPublishInput
+                  onChangeText={(value) => updatePublishForm('title', value)}
+                  placeholder="Modelo do carro"
+                  value={publishForm.title}
+                />
+                <WebPublishInput
+                  onChangeText={(value) => updatePublishForm('category', value)}
+                  placeholder="Categoria"
+                  value={publishForm.category}
+                />
+                <WebPublishInput
+                  keyboardType="decimal-pad"
+                  onChangeText={(value) => updatePublishForm('dailyPrice', value)}
+                  placeholder="Preço por dia"
+                  value={publishForm.dailyPrice}
+                />
+                <WebPublishInput
+                  onChangeText={(value) => updatePublishForm('city', value)}
+                  placeholder="Cidade ou endereço do carro"
+                  value={publishForm.city}
+                />
+              </View>
+              {!!publishFeedback && <Text style={styles.webPublishFeedback}>{publishFeedback}</Text>}
+              <Pressable
+                disabled={isPublishingCar}
+                onPress={publishWebCar}
+                style={[styles.webSearchButton, styles.webPublishSubmitButton]}>
+                {isPublishingCar ? (
+                  <ActivityIndicator color="#FFFFFF" />
+                ) : (
+                  <Text style={styles.webSearchButtonText}>Publicar anúncio</Text>
+                )}
+              </Pressable>
+            </View>
+          )}
         </View>
         <View style={[styles.webPublishVisual, isMobileWeb && styles.webPublishVisualMobile]}>
           <Ionicons color="#FFFFFF" name="car-sport" size={94} />
@@ -567,6 +702,29 @@ function WebFeature({ icon, text, title }: { icon: keyof typeof Ionicons.glyphMa
       <Text style={styles.webFeatureTitle}>{title}</Text>
       <Text style={styles.webFeatureText}>{text}</Text>
     </View>
+  );
+}
+
+function WebPublishInput({
+  keyboardType,
+  onChangeText,
+  placeholder,
+  value,
+}: {
+  keyboardType?: TextInputProps['keyboardType'];
+  onChangeText: (value: string) => void;
+  placeholder: string;
+  value: string;
+}) {
+  return (
+    <TextInput
+      keyboardType={keyboardType}
+      onChangeText={onChangeText}
+      placeholder={placeholder}
+      placeholderTextColor="#8C9693"
+      style={styles.webPublishInput}
+      value={value}
+    />
   );
 }
 
@@ -1463,6 +1621,51 @@ const styles = StyleSheet.create({
     color: '#00102D',
     fontSize: 14,
     fontWeight: '800',
+  },
+  webPublishForm: {
+    marginTop: 24,
+    padding: 18,
+    borderWidth: 1,
+    borderColor: '#DDE8E4',
+    borderRadius: 14,
+    backgroundColor: '#FFFFFF',
+  },
+  webPublishFormTitle: {
+    marginBottom: 14,
+    color: '#24312E',
+    fontSize: 16,
+    fontWeight: '900',
+  },
+  webPublishFormGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  webPublishFormGridMobile: {
+    flexDirection: 'column',
+  },
+  webPublishInput: {
+    flexBasis: '48%',
+    flexGrow: 1,
+    minWidth: 210,
+    height: 48,
+    paddingHorizontal: 13,
+    borderWidth: 1,
+    borderColor: '#C8D5D1',
+    borderRadius: 8,
+    color: '#263532',
+    fontSize: 13,
+  },
+  webPublishFeedback: {
+    marginTop: 12,
+    color: '#00102D',
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  webPublishSubmitButton: {
+    width: '100%',
+    height: 50,
+    marginTop: 14,
   },
   webPublishVisual: {
     alignItems: 'center',
