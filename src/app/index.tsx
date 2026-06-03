@@ -470,7 +470,9 @@ function WebHomeScreen() {
             <Text style={styles.webNavLink}>Publicar meu carro</Text>
           </Pressable>
           {!isMobileWeb && <Text style={styles.webNavLink}>Ajuda</Text>}
-          <Pressable onPress={() => setIsWebLoginOpen((isOpen) => !isOpen)} style={styles.webLoginButton}>
+          <Pressable
+            onPress={() => setIsWebLoginOpen((isOpen) => !isOpen)}
+            style={[styles.webLoginButton, isMobileWeb && styles.webLoginButtonMobile]}>
             <Ionicons color="#00102D" name="person-outline" size={18} />
             <Text style={styles.webLoginText}>Entrar</Text>
           </Pressable>
@@ -529,15 +531,15 @@ function WebHomeScreen() {
                 <Text style={styles.webLoginDividerText}>ou</Text>
                 <View style={styles.webLoginDivider} />
               </View>
-              <View style={styles.webSocialRow}>
-                <Pressable style={styles.webSocialButton}>
+              <View style={[styles.webSocialRow, isMobileWeb && styles.webSocialRowMobile]}>
+                <Pressable style={[styles.webSocialButton, isMobileWeb && styles.webSocialButtonMobile]}>
                   <Image
                     contentFit="contain"
                     source={require('@/assets/images/google-g-logo.png')}
                     style={styles.webSocialIcon}
                   />
                 </Pressable>
-                <Pressable style={styles.webSocialButton}>
+                <Pressable style={[styles.webSocialButton, isMobileWeb && styles.webSocialButtonMobile]}>
                   <Ionicons color="#00102D" name="logo-apple" size={27} />
                 </Pressable>
               </View>
@@ -856,7 +858,7 @@ function WebSignupPage({ onBack }: { onBack: () => void }) {
             <Text style={styles.webSignupLink}>Termos de Uso</Text> da Ghostcar.
           </Text>
 
-          <Pressable style={styles.webSignupCreateButton}>
+          <Pressable style={[styles.webSignupCreateButton, isMobileWeb && styles.webSignupCreateButtonMobile]}>
             <Text style={styles.webSignupCreateButtonText}>Criar Conta</Text>
           </Pressable>
         </View>
@@ -1459,7 +1461,7 @@ const styles = StyleSheet.create({
   webNavMobile: {
     width: '100%',
     flexWrap: 'wrap',
-    gap: 10,
+    gap: 8,
   },
   webNavLink: {
     color: '#33413E',
@@ -1469,12 +1471,17 @@ const styles = StyleSheet.create({
   webLoginButton: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: 7,
     paddingHorizontal: 14,
     paddingVertical: 9,
     borderWidth: 1,
     borderColor: '#C7D9D4',
     borderRadius: 8,
+  },
+  webLoginButtonMobile: {
+    minWidth: 104,
+    paddingHorizontal: 12,
   },
   webLoginText: {
     color: '#00102D',
@@ -1494,7 +1501,8 @@ const styles = StyleSheet.create({
     top: 0,
     right: 0,
     width: '100%',
-    paddingHorizontal: 18,
+    maxWidth: '100%',
+    paddingHorizontal: 12,
     paddingBottom: 12,
   },
   webLoginPanel: {
@@ -1512,6 +1520,8 @@ const styles = StyleSheet.create({
   },
   webLoginPanelMobile: {
     flexDirection: 'column',
+    width: '100%',
+    borderRadius: 8,
   },
   webLoginArrow: {
     position: 'absolute',
@@ -1536,8 +1546,9 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   webLoginColumnMobile: {
+    width: '100%',
     borderRightWidth: 0,
-    padding: 18,
+    padding: 16,
   },
   webLoginPanelTitle: {
     color: '#41495A',
@@ -1567,8 +1578,9 @@ const styles = StyleSheet.create({
     marginTop: 18,
   },
   webLoginBenefitText: {
+    flex: 1,
     color: '#4B5260',
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '500',
   },
   webLoginLabel: {
@@ -1627,6 +1639,9 @@ const styles = StyleSheet.create({
     gap: 28,
     justifyContent: 'center',
   },
+  webSocialRowMobile: {
+    gap: 10,
+  },
   webSocialButton: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -1636,6 +1651,10 @@ const styles = StyleSheet.create({
     borderColor: '#E1E5EA',
     borderRadius: 5,
     backgroundColor: '#FFFFFF',
+  },
+  webSocialButtonMobile: {
+    flex: 1,
+    width: 'auto',
   },
   webSocialIcon: {
     width: 28,
@@ -1656,6 +1675,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#EEF1F4',
   },
   webSignupHeaderMobile: {
+    flexDirection: 'column',
     alignItems: 'flex-start',
     gap: 14,
     paddingHorizontal: 18,
@@ -1704,6 +1724,7 @@ const styles = StyleSheet.create({
   },
   webSignupSocialCardMobile: {
     width: '100%',
+    alignSelf: 'stretch',
   },
   webSignupSocialTitle: {
     color: '#4B5260',
@@ -1842,6 +1863,10 @@ const styles = StyleSheet.create({
     marginTop: 24,
     borderRadius: 3,
     backgroundColor: '#159A57',
+  },
+  webSignupCreateButtonMobile: {
+    width: '100%',
+    maxWidth: '100%',
   },
   webSignupCreateButtonText: {
     color: '#FFFFFF',
