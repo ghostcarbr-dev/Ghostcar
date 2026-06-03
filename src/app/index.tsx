@@ -269,10 +269,6 @@ function WebHomeScreen() {
   const skipNextSuggestionFetch = useRef(false);
   const isMobileWeb = width < 720;
 
-  if (isWebSignupPageOpen) {
-    return <WebSignupPage onBack={() => setIsWebSignupPageOpen(false)} />;
-  }
-
   useEffect(() => {
     const query = destination.trim();
 
@@ -457,6 +453,10 @@ function WebHomeScreen() {
     } finally {
       setIsLoadingCars(false);
     }
+  }
+
+  if (isWebSignupPageOpen) {
+    return <WebSignupPage onBack={() => setIsWebSignupPageOpen(false)} />;
   }
 
   return (
