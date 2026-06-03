@@ -4,7 +4,7 @@ type GhostcarLogoProps = {
   align?: 'left' | 'center';
   color?: string;
   showTagline?: boolean;
-  size?: 'small' | 'medium' | 'large';
+  size?: 'small' | 'medium' | 'large' | 'hero';
   taglineColor?: string;
 };
 
@@ -29,6 +29,13 @@ const logoSizes = {
     titleLetterSpacing: -6.5,
     taglineFontSize: 11,
     taglineLetterSpacing: -0.45,
+  },
+  hero: {
+    titleFontSize: 54,
+    titleLineHeight: 58,
+    titleLetterSpacing: -7.3,
+    taglineFontSize: 11,
+    taglineLetterSpacing: -0.35,
   },
 } as const;
 

@@ -46,11 +46,7 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}>
         <SafeAreaView edges={['top', 'bottom']} style={styles.safeArea}>
           <View style={styles.brandBlock}>
-            <Image
-              contentFit="contain"
-              source={require('@/assets/images/ghostcar-wordmark-white.png')}
-              style={styles.mobileWordmark}
-            />
+            <GhostcarLogo align="center" color="#FFFFFF" size="hero" />
           </View>
 
           {!authMode && (
@@ -376,11 +372,6 @@ const styles = StyleSheet.create({
         marginTop: 28,
       },
     }),
-  },
-  mobileWordmark: {
-    width: 318,
-    height: 82,
-    maxWidth: '78%',
   },
   brand: {
     color: '#FFFFFF',
