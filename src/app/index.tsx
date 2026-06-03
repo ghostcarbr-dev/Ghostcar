@@ -11,6 +11,7 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -203,17 +204,19 @@ export default function HomeScreen() {
 
 function WebHomeScreen() {
   const router = useRouter();
+  const { width } = useWindowDimensions();
   const [destination, setDestination] = useState('');
+  const isMobileWeb = width < 720;
 
   return (
     <View style={styles.webPage}>
       <StatusBar style="dark" />
-      <View style={styles.webHeader}>
-        <GhostcarLogo color="#00102D" size="medium" />
-        <View style={styles.webNav}>
+      <View style={[styles.webHeader, isMobileWeb && styles.webHeaderMobile]}>
+        <GhostcarLogo color="#00102D" size={isMobileWeb ? 'small' : 'medium'} />
+        <View style={[styles.webNav, isMobileWeb && styles.webNavMobile]}>
           <Text style={styles.webNavLink}>Aluguel de carros</Text>
           <Text style={styles.webNavLink}>Publicar meu carro</Text>
-          <Text style={styles.webNavLink}>Ajuda</Text>
+          {!isMobileWeb && <Text style={styles.webNavLink}>Ajuda</Text>}
           <Pressable onPress={() => router.push('/client-home')} style={styles.webLoginButton}>
             <Ionicons color="#00102D" name="person-outline" size={18} />
             <Text style={styles.webLoginText}>Entrar</Text>
@@ -221,15 +224,17 @@ function WebHomeScreen() {
         </View>
       </View>
 
-      <View style={styles.webHero}>
-        <View style={styles.webSection}>
-          <Text style={styles.webHeroTitle}>Aluguel de carros simples, rápido e seguro.</Text>
-          <Text style={styles.webHeroSubtitle}>
+      <View style={[styles.webHero, isMobileWeb && styles.webHeroMobile]}>
+        <View style={[styles.webSection, isMobileWeb && styles.webSectionMobile]}>
+          <Text style={[styles.webHeroTitle, isMobileWeb && styles.webHeroTitleMobile]}>
+            Aluguel de carros simples, rápido e seguro.
+          </Text>
+          <Text style={[styles.webHeroSubtitle, isMobileWeb && styles.webHeroSubtitleMobile]}>
             Encontre carros publicados perto de você e aproveite cada trajeto com liberdade.
           </Text>
-          <View style={styles.webSearchCard}>
+          <View style={[styles.webSearchCard, isMobileWeb && styles.webSearchCardMobile]}>
             <Text style={styles.webSearchLabel}>Onde você deseja retirar o carro?</Text>
-            <View style={styles.webSearchRow}>
+            <View style={[styles.webSearchRow, isMobileWeb && styles.webSearchRowMobile]}>
               <View style={styles.webDestinationInput}>
                 <Ionicons color="#00102D" name="location-outline" size={22} />
                 <TextInput
@@ -240,7 +245,9 @@ function WebHomeScreen() {
                   value={destination}
                 />
               </View>
-              <Pressable onPress={() => router.push('/client-home')} style={styles.webSearchButton}>
+              <Pressable
+                onPress={() => router.push('/client-home')}
+                style={[styles.webSearchButton, isMobileWeb && styles.webSearchButtonMobile]}>
                 <Ionicons color="#FFFFFF" name="search" size={19} />
                 <Text style={styles.webSearchButtonText}>Pesquisar</Text>
               </Pressable>
@@ -250,20 +257,22 @@ function WebHomeScreen() {
         </View>
       </View>
 
-      <View style={[styles.webSection, styles.webBenefits]}>
+      <View style={[styles.webSection, styles.webBenefits, isMobileWeb && styles.webBenefitsMobile]}>
         <WebBenefit icon="pricetag-outline" title="Preços transparentes" text="Compare anúncios próximos e escolha a opção ideal para sua viagem." />
         <WebBenefit icon="location-outline" title="Carros perto de você" text="Pesquise por endereço e encontre veículos disponíveis na região." />
         <WebBenefit icon="shield-checkmark-outline" title="Experiência simples" text="Uma plataforma direta para publicar, pesquisar e reservar seu carro." />
       </View>
 
       <View style={styles.webSoftSection}>
-        <View style={styles.webSection}>
+        <View style={[styles.webSection, isMobileWeb && styles.webSectionMobile]}>
           <Text style={styles.webEyebrow}>DESCUBRA A GHOSTCAR</Text>
-          <Text style={styles.webSectionTitle}>Seu próximo carro está mais perto do que você imagina</Text>
+          <Text style={[styles.webSectionTitle, isMobileWeb && styles.webSectionTitleMobile]}>
+            Seu próximo carro está mais perto do que você imagina
+          </Text>
           <Text style={styles.webSectionSubtitle}>
             Escolha uma localização, encontre anúncios publicados por proprietários e prepare sua próxima viagem.
           </Text>
-          <View style={styles.webFeatureGrid}>
+          <View style={[styles.webFeatureGrid, isMobileWeb && styles.webFeatureGridMobile]}>
             <WebFeature icon="search-outline" title="Pesquise sua região" text="Use sua localização ou digite o destino desejado." />
             <WebFeature icon="car-sport-outline" title="Compare veículos" text="Veja categoria, preço diário e distância de cada anúncio." />
             <WebFeature icon="key-outline" title="Viaje com liberdade" text="Encontre a opção certa para cada momento." />
@@ -271,10 +280,12 @@ function WebHomeScreen() {
         </View>
       </View>
 
-      <View style={[styles.webSection, styles.webPublishSection]}>
+      <View style={[styles.webSection, styles.webPublishSection, isMobileWeb && styles.webPublishSectionMobile]}>
         <View style={styles.webPublishCopy}>
           <Text style={styles.webEyebrow}>PARA PROPRIETÁRIOS</Text>
-          <Text style={styles.webSectionTitle}>Seu carro parado pode gerar novas oportunidades</Text>
+          <Text style={[styles.webSectionTitle, isMobileWeb && styles.webSectionTitleMobile]}>
+            Seu carro parado pode gerar novas oportunidades
+          </Text>
           <Text style={styles.webSectionSubtitle}>
             Publique seu veículo na Ghostcar e permita que clientes próximos encontrem seu anúncio.
           </Text>
@@ -282,14 +293,14 @@ function WebHomeScreen() {
             <Text style={styles.webOutlineButtonText}>Publicar meu carro</Text>
           </Pressable>
         </View>
-        <View style={styles.webPublishVisual}>
+        <View style={[styles.webPublishVisual, isMobileWeb && styles.webPublishVisualMobile]}>
           <Ionicons color="#FFFFFF" name="car-sport" size={94} />
           <Text style={styles.webPublishVisualText}>Publique. Conecte. Viaje.</Text>
         </View>
       </View>
 
       <View style={styles.webFooter}>
-        <View style={[styles.webSection, styles.webFooterGrid]}>
+        <View style={[styles.webSection, styles.webFooterGrid, isMobileWeb && styles.webFooterGridMobile]}>
           <View>
             <GhostcarLogo color="#FFFFFF" size="small" taglineColor="#B9D0CA" />
             <Text style={styles.webFooterText}>Aluguel de carros de um jeito mais próximo.</Text>
@@ -851,6 +862,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 26,
     paddingVertical: 18,
   },
+  webHeaderMobile: {
+    alignItems: 'flex-start',
+    gap: 12,
+    paddingHorizontal: 18,
+    paddingVertical: 15,
+  },
   webLogo: {
     color: '#00102D',
     fontSize: 30,
@@ -867,6 +884,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 24,
+  },
+  webNavMobile: {
+    width: '100%',
+    flexWrap: 'wrap',
+    gap: 10,
   },
   webNavLink: {
     color: '#33413E',
@@ -892,11 +914,17 @@ const styles = StyleSheet.create({
     backgroundColor: '#00102D',
     paddingVertical: 58,
   },
+  webHeroMobile: {
+    paddingVertical: 38,
+  },
   webSection: {
     width: '100%',
     maxWidth: 1180,
     alignSelf: 'center',
     paddingHorizontal: 26,
+  },
+  webSectionMobile: {
+    paddingHorizontal: 18,
   },
   webHeroTitle: {
     maxWidth: 710,
@@ -906,12 +934,21 @@ const styles = StyleSheet.create({
     letterSpacing: -1.4,
     lineHeight: 48,
   },
+  webHeroTitleMobile: {
+    fontSize: 33,
+    letterSpacing: -1.1,
+    lineHeight: 41,
+  },
   webHeroSubtitle: {
     maxWidth: 660,
     marginTop: 10,
     color: '#D7F1EA',
     fontSize: 17,
     lineHeight: 25,
+  },
+  webHeroSubtitleMobile: {
+    fontSize: 15,
+    lineHeight: 23,
   },
   webSearchCard: {
     marginTop: 34,
@@ -923,6 +960,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.16,
     shadowRadius: 14,
   },
+  webSearchCardMobile: {
+    marginTop: 26,
+    padding: 16,
+  },
   webSearchLabel: {
     marginBottom: 10,
     color: '#283532',
@@ -932,6 +973,9 @@ const styles = StyleSheet.create({
   webSearchRow: {
     flexDirection: 'row',
     gap: 12,
+  },
+  webSearchRowMobile: {
+    flexDirection: 'column',
   },
   webDestinationInput: {
     flex: 1,
@@ -959,6 +1003,10 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: '#FFB21C',
   },
+  webSearchButtonMobile: {
+    width: '100%',
+    minHeight: 54,
+  },
   webSearchButtonText: {
     color: '#1C2926',
     fontSize: 15,
@@ -973,6 +1021,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 18,
     paddingVertical: 42,
+  },
+  webBenefitsMobile: {
+    flexDirection: 'column',
+    gap: 16,
+    paddingHorizontal: 18,
+    paddingVertical: 28,
   },
   webBenefit: {
     flex: 1,
@@ -1021,6 +1075,11 @@ const styles = StyleSheet.create({
     letterSpacing: -0.8,
     lineHeight: 38,
   },
+  webSectionTitleMobile: {
+    fontSize: 24,
+    letterSpacing: -0.5,
+    lineHeight: 31,
+  },
   webSectionSubtitle: {
     maxWidth: 680,
     marginTop: 10,
@@ -1032,6 +1091,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 18,
     marginTop: 32,
+  },
+  webFeatureGridMobile: {
+    flexDirection: 'column',
+    marginTop: 24,
   },
   webFeature: {
     flex: 1,
@@ -1060,6 +1123,11 @@ const styles = StyleSheet.create({
     gap: 28,
     paddingVertical: 68,
   },
+  webPublishSectionMobile: {
+    flexDirection: 'column',
+    paddingHorizontal: 18,
+    paddingVertical: 42,
+  },
   webPublishCopy: {
     flex: 1,
     justifyContent: 'center',
@@ -1086,6 +1154,10 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     backgroundColor: '#00102D',
   },
+  webPublishVisualMobile: {
+    width: '100%',
+    minHeight: 190,
+  },
   webPublishVisualText: {
     marginTop: 16,
     color: '#FFFFFF',
@@ -1102,6 +1174,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: 50,
     paddingBottom: 30,
+  },
+  webFooterGridMobile: {
+    flexDirection: 'column',
+    gap: 24,
+    paddingHorizontal: 18,
   },
   webFooterLogo: {
     color: '#FFFFFF',
