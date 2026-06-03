@@ -1,7 +1,7 @@
 :root {
   --font-display:
-    Spline Sans, Inter, ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji,
-    Segoe UI Symbol, Noto Color Emoji;
+    Roboto, Arial, Helvetica Neue, Helvetica, ui-sans-serif, system-ui, sans-serif,
+    Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
   --font-mono:
     ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
   --font-rounded: 'SF Pro Rounded', 'Hiragino Maru Gothic ProN', Meiryo, 'MS PGothic', sans-serif;
@@ -16,10 +16,18 @@ html {
 }
 
 body {
+  font-family: var(--font-display);
   min-height: 100%;
   margin: 0;
   background: #ffffff;
   overflow-y: visible !important;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: var(--font-display);
 }
 
 #root,
@@ -28,6 +36,7 @@ body {
 #root [data-reactroot],
 #root [style*='overflow'],
 #root [class*='r-1rnoaur'] {
+  font-family: var(--font-display);
   overflow-y: visible !important;
 }
 
