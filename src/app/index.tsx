@@ -68,6 +68,27 @@ type PhotonFeature = {
 };
 
 const apiUrl = 'https://ghostcar-api.onrender.com';
+const webSessionStorageKey = 'ghostcar_session_token';
+
+function getWebSessionToken() {
+  if (Platform.OS !== 'web') {
+    return null;
+  }
+
+  return window.localStorage.getItem(webSessionStorageKey);
+}
+
+function storeWebSessionToken(token: string) {
+  if (Platform.OS === 'web') {
+    window.localStorage.setItem(webSessionStorageKey, token);
+  }
+}
+
+function clearWebSessionToken() {
+  if (Platform.OS === 'web') {
+    window.localStorage.removeItem(webSessionStorageKey);
+  }
+}
 
 async function openGoogleSignIn(mode: 'login' | 'signup' = 'login') {
   const returnTo = Platform.OS === 'web' ? window.location.origin : 'https://ghostcar.com.br';
@@ -315,9 +336,22 @@ function WebHomeScreen() {
       return;
     }
 
+    const url = new URL(window.location.href);
+    const sessionToken = url.searchParams.get('session');
+
+    if (sessionToken) {
+      storeWebSessionToken(sessionToken);
+      url.searchParams.delete('session');
+      window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`);
+    }
+
     async function loadCurrentUser() {
       try {
-        const response = await fetch(`${apiUrl}/auth/me`, { credentials: 'include' });
+        const storedSessionToken = getWebSessionToken();
+        const response = await fetch(`${apiUrl}/auth/me`, {
+          credentials: 'include',
+          headers: storedSessionToken ? { Authorization: `Bearer ${storedSessionToken}` } : undefined,
+        });
         if (!response.ok) {
           setWebUser(null);
           return;
@@ -335,11 +369,14 @@ function WebHomeScreen() {
 
   async function handleWebLogout() {
     try {
+      const storedSessionToken = getWebSessionToken();
       await fetch(`${apiUrl}/auth/logout`, {
         credentials: 'include',
+        headers: storedSessionToken ? { Authorization: `Bearer ${storedSessionToken}` } : undefined,
         method: 'POST',
       });
     } finally {
+      clearWebSessionToken();
       setWebUser(null);
       setIsWebLoginOpen(false);
     }

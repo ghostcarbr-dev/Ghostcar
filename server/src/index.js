@@ -293,7 +293,11 @@ app.get('/auth/google/callback', async (request, response, next) => {
       secure: true,
     });
 
-    return response.redirect(`${stateValue.returnTo || webOrigin}?auth=google-ok`);
+    const redirectUrl = new URL(stateValue.returnTo || webOrigin);
+    redirectUrl.searchParams.set('auth', 'google-ok');
+    redirectUrl.searchParams.set('session', sessionToken);
+
+    return response.redirect(redirectUrl.toString());
   } catch (error) {
     return next(error);
   }
@@ -301,7 +305,10 @@ app.get('/auth/google/callback', async (request, response, next) => {
 
 app.get('/auth/me', async (request, response, next) => {
   const cookies = parseCookies(request.headers.cookie);
-  const session = verifySignedToken(cookies.ghostcar_session);
+  const bearerToken = request.headers.authorization?.startsWith('Bearer ')
+    ? request.headers.authorization.slice('Bearer '.length)
+    : null;
+  const session = verifySignedToken(cookies.ghostcar_session || bearerToken);
 
   if (!session) {
     return response.status(401).json({ user: null });
