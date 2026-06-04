@@ -497,7 +497,7 @@ function WebHomeScreen() {
       <View style={[styles.webHero, isMobileWeb && styles.webHeroMobile]}>
         <Image
           contentFit="cover"
-          contentPosition={{ left: '45%', top: '50%' }}
+          contentPosition={{ left: '45%', top: '42%' }}
           source={require('@/assets/images/ghostcar-hero-v2.png')}
           style={styles.webHeroImage}
         />
