@@ -494,96 +494,108 @@ function WebHomeScreen() {
   return (
     <View style={styles.webPage}>
       <StatusBar style="dark" />
-      <View style={[styles.webHeader, isMobileWeb && styles.webHeaderMobile]}>
-        <GhostcarLogo color="#00102D" size={isMobileWeb ? 'small' : 'medium'} />
-        <View style={[styles.webNav, isMobileWeb && styles.webNavMobile]}>
-          <Text style={styles.webNavLink}>Aluguel de carros</Text>
-          <Pressable onPress={openPublishForm}>
-            <Text style={styles.webNavLink}>Publicar meu carro</Text>
-          </Pressable>
-          {!isMobileWeb && <Text style={styles.webNavLink}>Ajuda</Text>}
-          <Pressable
-            onPress={() => setIsWebLoginOpen((isOpen) => !isOpen)}
-            style={[styles.webLoginButton, isMobileWeb && styles.webLoginButtonMobile]}>
-            <Ionicons color="#00102D" name="person-outline" size={18} />
-            <Text style={styles.webLoginText}>Entrar</Text>
-          </Pressable>
+      <View style={[styles.webHero, isMobileWeb && styles.webHeroMobile]}>
+        <Image
+          contentFit="cover"
+          contentPosition={{ left: '45%', top: '50%' }}
+          source={require('@/assets/images/ghostcar-hero-v2.png')}
+          style={styles.webHeroImage}
+        />
+        <View style={styles.webHeroShade} />
+        <View style={[styles.webHeader, styles.webHeaderOnHero, isMobileWeb && styles.webHeaderMobile]}>
+          <GhostcarLogo color="#FFFFFF" size={isMobileWeb ? 'small' : 'medium'} />
+          <View style={[styles.webNav, isMobileWeb && styles.webNavMobile]}>
+            <Text style={[styles.webNavLink, styles.webNavLinkOnHero]}>Aluguel de carros</Text>
+            <Pressable onPress={openPublishForm}>
+              <Text style={[styles.webNavLink, styles.webNavLinkOnHero]}>Publicar meu carro</Text>
+            </Pressable>
+            {!isMobileWeb && <Text style={[styles.webNavLink, styles.webNavLinkOnHero]}>Ajuda</Text>}
+            <Pressable
+              onPress={() => setIsWebLoginOpen((isOpen) => !isOpen)}
+              style={[styles.webLoginButton, styles.webLoginButtonOnHero, isMobileWeb && styles.webLoginButtonMobile]}>
+              <Ionicons color="#FFFFFF" name="person-outline" size={18} />
+              <Text style={[styles.webLoginText, styles.webLoginTextOnHero]}>Entrar</Text>
+            </Pressable>
+          </View>
         </View>
-      </View>
-      {isWebLoginOpen && (
-        <View style={[styles.webLoginPanelWrap, isMobileWeb && styles.webLoginPanelWrapMobile]}>
-          <View style={[styles.webLoginPanel, isMobileWeb && styles.webLoginPanelMobile]}>
-            <View style={styles.webLoginArrow} />
-            <View style={[styles.webSignupColumn, isMobileWeb && styles.webLoginColumnMobile]}>
-              <Text style={styles.webLoginPanelTitle}>Criar nova conta</Text>
-              <Pressable
-                onPress={openWebSignupPage}
-                style={styles.webSignupButton}>
-                <Text style={styles.webSignupButtonText}>Cadastre-se</Text>
-              </Pressable>
-              <View style={styles.webLoginBenefitRow}>
-                <Ionicons color="#00102D" name="checkmark" size={22} />
-                <Text style={styles.webLoginBenefitText}>Rápido e fácil reservar</Text>
+        {isWebLoginOpen && (
+          <View style={[styles.webLoginPanelWrap, isMobileWeb && styles.webLoginPanelWrapMobile]}>
+            <View style={[styles.webLoginPanel, isMobileWeb && styles.webLoginPanelMobile]}>
+              <View style={styles.webLoginArrow} />
+              <View style={[styles.webSignupColumn, isMobileWeb && styles.webLoginColumnMobile]}>
+                <Text style={styles.webLoginPanelTitle}>Criar nova conta</Text>
+                <Pressable
+                  onPress={openWebSignupPage}
+                  style={styles.webSignupButton}>
+                  <Text style={styles.webSignupButtonText}>Cadastre-se</Text>
+                </Pressable>
+                <View style={styles.webLoginBenefitRow}>
+                  <Ionicons color="#00102D" name="checkmark" size={22} />
+                  <Text style={styles.webLoginBenefitText}>Rápido e fácil reservar</Text>
+                </View>
+                <View style={styles.webLoginBenefitRow}>
+                  <Ionicons color="#00102D" name="checkmark" size={22} />
+                  <Text style={styles.webLoginBenefitText}>Descontos de até 30%</Text>
+                </View>
+                <View style={styles.webLoginBenefitRow}>
+                  <Ionicons color="#00102D" name="checkmark" size={22} />
+                  <Text style={styles.webLoginBenefitText}>Acesso a ofertas exclusivas</Text>
+                </View>
+                <View style={styles.webLoginBenefitRow}>
+                  <Ionicons color="#00102D" name="checkmark" size={22} />
+                  <Text style={styles.webLoginBenefitText}>Ganhe cashback</Text>
+                </View>
               </View>
-              <View style={styles.webLoginBenefitRow}>
-                <Ionicons color="#00102D" name="checkmark" size={22} />
-                <Text style={styles.webLoginBenefitText}>Descontos de até 30%</Text>
-              </View>
-              <View style={styles.webLoginBenefitRow}>
-                <Ionicons color="#00102D" name="checkmark" size={22} />
-                <Text style={styles.webLoginBenefitText}>Acesso a ofertas exclusivas</Text>
-              </View>
-              <View style={styles.webLoginBenefitRow}>
-                <Ionicons color="#00102D" name="checkmark" size={22} />
-                <Text style={styles.webLoginBenefitText}>Ganhe cashback</Text>
-              </View>
-            </View>
 
-            <View style={[styles.webLoginColumn, isMobileWeb && styles.webLoginColumnMobile]}>
-              <Text style={styles.webLoginPanelTitle}>Login</Text>
-              <Text style={styles.webLoginLabel}>E-mail</Text>
-              <TextInput
-                autoCapitalize="none"
-                keyboardType="email-address"
-                style={styles.webLoginInput}
-              />
-              <Text style={styles.webLoginLabel}>Senha</Text>
-              <TextInput secureTextEntry style={styles.webLoginInput} />
-              <Pressable>
-                <Text style={styles.webForgotText}>Esqueci minha senha</Text>
-              </Pressable>
-              <Pressable style={styles.webLoginSubmitButton}>
-                <Text style={styles.webLoginSubmitText}>Entrar</Text>
-              </Pressable>
-              <View style={styles.webLoginDividerRow}>
-                <View style={styles.webLoginDivider} />
-                <Text style={styles.webLoginDividerText}>ou</Text>
-                <View style={styles.webLoginDivider} />
-              </View>
-              <View style={[styles.webSocialRow, isMobileWeb && styles.webSocialRowMobile]}>
-                <Pressable style={[styles.webSocialButton, isMobileWeb && styles.webSocialButtonMobile]}>
-                  <Image
-                    contentFit="contain"
-                    source={require('@/assets/images/google-g-logo.png')}
-                    style={styles.webSocialIcon}
-                  />
+              <View style={[styles.webLoginColumn, isMobileWeb && styles.webLoginColumnMobile]}>
+                <Text style={styles.webLoginPanelTitle}>Login</Text>
+                <Text style={styles.webLoginLabel}>E-mail</Text>
+                <TextInput
+                  autoCapitalize="none"
+                  keyboardType="email-address"
+                  style={styles.webLoginInput}
+                />
+                <Text style={styles.webLoginLabel}>Senha</Text>
+                <TextInput secureTextEntry style={styles.webLoginInput} />
+                <Pressable>
+                  <Text style={styles.webForgotText}>Esqueci minha senha</Text>
                 </Pressable>
-                <Pressable style={[styles.webSocialButton, isMobileWeb && styles.webSocialButtonMobile]}>
-                  <Ionicons color="#00102D" name="logo-apple" size={27} />
+                <Pressable style={styles.webLoginSubmitButton}>
+                  <Text style={styles.webLoginSubmitText}>Entrar</Text>
                 </Pressable>
+                <View style={styles.webLoginDividerRow}>
+                  <View style={styles.webLoginDivider} />
+                  <Text style={styles.webLoginDividerText}>ou</Text>
+                  <View style={styles.webLoginDivider} />
+                </View>
+                <View style={[styles.webSocialRow, isMobileWeb && styles.webSocialRowMobile]}>
+                  <Pressable style={[styles.webSocialButton, isMobileWeb && styles.webSocialButtonMobile]}>
+                    <Image
+                      contentFit="contain"
+                      source={require('@/assets/images/google-g-logo.png')}
+                      style={styles.webSocialIcon}
+                    />
+                  </Pressable>
+                  <Pressable style={[styles.webSocialButton, isMobileWeb && styles.webSocialButtonMobile]}>
+                    <Ionicons color="#00102D" name="logo-apple" size={27} />
+                  </Pressable>
+                </View>
               </View>
             </View>
           </View>
-        </View>
-      )}
+        )}
 
-      <View style={[styles.webHero, isMobileWeb && styles.webHeroMobile]}>
-        <View style={[styles.webSection, isMobileWeb && styles.webSectionMobile]}>
+        <View style={[styles.webSection, styles.webHeroContent, isMobileWeb && styles.webSectionMobile]}>
+          <View style={styles.webHeroTabs}>
+            <Text style={[styles.webHeroTab, styles.webHeroTabActive]}>Aluguel de carros</Text>
+            <Text style={styles.webHeroTab}>Aluguel mensal</Text>
+            <Text style={styles.webHeroTab}>Carro por assinatura</Text>
+          </View>
           <Text style={[styles.webHeroTitle, isMobileWeb && styles.webHeroTitleMobile]}>
-            Aluguel de carros simples, rápido e seguro.
+            Aluguel de carros fácil e do seu jeito.
           </Text>
           <Text style={[styles.webHeroSubtitle, isMobileWeb && styles.webHeroSubtitleMobile]}>
-            Encontre carros publicados perto de você e aproveite cada trajeto com liberdade.
+            Viva as melhores experiências de aluguel de carro com a Ghostcar.
           </Text>
           <View style={[styles.webSearchCard, isMobileWeb && styles.webSearchCardMobile]}>
             <Text style={styles.webSearchLabel}>Onde você deseja retirar o carro?</Text>
@@ -1463,6 +1475,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 26,
     paddingVertical: 18,
   },
+  webHeaderOnHero: {
+    position: 'relative',
+    zIndex: 2,
+    paddingTop: 30,
+    paddingBottom: 18,
+  },
   webHeaderMobile: {
     flexDirection: 'column',
     alignItems: 'flex-start',
@@ -1497,6 +1515,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
   },
+  webNavLinkOnHero: {
+    color: '#FFFFFF',
+  },
   webLoginButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1512,10 +1533,17 @@ const styles = StyleSheet.create({
     minWidth: 104,
     paddingHorizontal: 12,
   },
+  webLoginButtonOnHero: {
+    borderColor: 'rgba(255, 255, 255, 0.58)',
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+  },
   webLoginText: {
     color: '#00102D',
     fontSize: 14,
     fontWeight: '700',
+  },
+  webLoginTextOnHero: {
+    color: '#FFFFFF',
   },
   webLoginPanelWrap: {
     position: 'absolute',
@@ -1903,11 +1931,27 @@ const styles = StyleSheet.create({
     fontWeight: '900',
   },
   webHero: {
+    position: 'relative',
+    overflow: 'hidden',
     backgroundColor: '#00102D',
-    paddingVertical: 58,
+    minHeight: 620,
+    paddingBottom: 70,
   },
   webHeroMobile: {
-    paddingVertical: 38,
+    minHeight: 680,
+    paddingBottom: 42,
+  },
+  webHeroImage: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  webHeroShade: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 16, 45, 0.62)',
+  },
+  webHeroContent: {
+    position: 'relative',
+    zIndex: 1,
+    paddingTop: 50,
   },
   webSection: {
     width: '100%',
@@ -1944,9 +1988,10 @@ const styles = StyleSheet.create({
   },
   webSearchCard: {
     marginTop: 34,
+    maxWidth: 1060,
     padding: 20,
     borderRadius: 12,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: 'rgba(255, 255, 255, 0.96)',
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 5 },
     shadowOpacity: 0.16,
@@ -1955,6 +2000,26 @@ const styles = StyleSheet.create({
   webSearchCardMobile: {
     marginTop: 26,
     padding: 16,
+  },
+  webHeroTabs: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+    marginBottom: 24,
+  },
+  webHeroTab: {
+    overflow: 'hidden',
+    paddingHorizontal: 16,
+    paddingVertical: 9,
+    borderRadius: 999,
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '800',
+    backgroundColor: 'rgba(255, 255, 255, 0.18)',
+  },
+  webHeroTabActive: {
+    color: '#1C2926',
+    backgroundColor: '#FFB21C',
   },
   webSearchLabel: {
     marginBottom: 10,
