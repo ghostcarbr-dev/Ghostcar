@@ -233,21 +233,47 @@ app.get('/auth/google/callback', async (request, response, next) => {
     }
 
     const profile = await profileResponse.json();
-    const result = await pool.query(
-      `
-        INSERT INTO users (provider, provider_id, email, name, picture_url)
-        VALUES ($1, $2, $3, $4, $5)
-        ON CONFLICT (provider, provider_id)
-        DO UPDATE SET
-          email = EXCLUDED.email,
-          name = EXCLUDED.name,
-          picture_url = EXCLUDED.picture_url,
-          updated_at = NOW()
-        RETURNING *
-      `,
-      ['google', profile.sub, profile.email, profile.name || null, profile.picture || null],
+
+    if (!profile.email || !profile.sub) {
+      throw new Error('Google profile is missing required account data');
+    }
+
+    const existingUserResult = await pool.query(
+      'SELECT * FROM users WHERE (provider = $1 AND provider_id = $2) OR email = $3 LIMIT 1',
+      ['google', profile.sub, profile.email],
     );
-    const user = result.rows[0];
+
+    let user;
+
+    if (existingUserResult.rowCount > 0) {
+      const updateResult = await pool.query(
+        `
+          UPDATE users
+          SET
+            provider = $1,
+            provider_id = $2,
+            email = $3,
+            name = $4,
+            picture_url = $5,
+            updated_at = NOW()
+          WHERE id = $6
+          RETURNING *
+        `,
+        ['google', profile.sub, profile.email, profile.name || null, profile.picture || null, existingUserResult.rows[0].id],
+      );
+      user = updateResult.rows[0];
+    } else {
+      const insertResult = await pool.query(
+        `
+          INSERT INTO users (provider, provider_id, email, name, picture_url)
+          VALUES ($1, $2, $3, $4, $5)
+          RETURNING *
+        `,
+        ['google', profile.sub, profile.email, profile.name || null, profile.picture || null],
+      );
+      user = insertResult.rows[0];
+    }
+
     const sessionToken = createSignedToken({
       email: user.email,
       exp: Date.now() + 30 * 24 * 60 * 60 * 1000,
