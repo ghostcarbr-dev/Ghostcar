@@ -270,6 +270,21 @@ function WebHomeScreen() {
   const isMobileWeb = width < 720;
 
   useEffect(() => {
+    if (Platform.OS !== 'web') {
+      return undefined;
+    }
+
+    function syncSignupPageWithHash() {
+      setIsWebSignupPageOpen(window.location.hash === '#cadastro');
+    }
+
+    syncSignupPageWithHash();
+    window.addEventListener('hashchange', syncSignupPageWithHash);
+
+    return () => window.removeEventListener('hashchange', syncSignupPageWithHash);
+  }, []);
+
+  useEffect(() => {
     const query = destination.trim();
 
     if (skipNextSuggestionFetch.current) {
@@ -322,6 +337,23 @@ function WebHomeScreen() {
     setSelectedCoordinates(suggestion.coordinates);
     setSuggestions([]);
     setSearchError('');
+  }
+
+  function openWebSignupPage() {
+    setIsWebLoginOpen(false);
+    setIsWebSignupPageOpen(true);
+
+    if (Platform.OS === 'web' && window.location.hash !== '#cadastro') {
+      window.location.hash = 'cadastro';
+    }
+  }
+
+  function closeWebSignupPage() {
+    setIsWebSignupPageOpen(false);
+
+    if (Platform.OS === 'web' && window.location.hash === '#cadastro') {
+      history.back();
+    }
   }
 
   function updatePublishForm(field: keyof typeof publishForm, value: string) {
@@ -456,7 +488,7 @@ function WebHomeScreen() {
   }
 
   if (isWebSignupPageOpen) {
-    return <WebSignupPage onBack={() => setIsWebSignupPageOpen(false)} />;
+    return <WebSignupPage onBack={closeWebSignupPage} />;
   }
 
   return (
@@ -485,10 +517,7 @@ function WebHomeScreen() {
             <View style={[styles.webSignupColumn, isMobileWeb && styles.webLoginColumnMobile]}>
               <Text style={styles.webLoginPanelTitle}>Criar nova conta</Text>
               <Pressable
-                onPress={() => {
-                  setIsWebLoginOpen(false);
-                  setIsWebSignupPageOpen(true);
-                }}
+                onPress={openWebSignupPage}
                 style={styles.webSignupButton}>
                 <Text style={styles.webSignupButtonText}>Cadastre-se</Text>
               </Pressable>
