@@ -181,6 +181,7 @@ app.get('/auth/google', (request, response) => {
 
   const state = createSignedToken({
     exp: Date.now() + 10 * 60 * 1000,
+    mode: request.query.mode === 'signup' ? 'signup' : 'login',
     nonce: crypto.randomBytes(16).toString('hex'),
     returnTo: getSafeReturnTo(request.query.returnTo),
   });
@@ -263,6 +264,10 @@ app.get('/auth/google/callback', async (request, response, next) => {
       );
       user = updateResult.rows[0];
     } else {
+      if (stateValue.mode !== 'signup') {
+        return response.redirect(`${stateValue.returnTo || webOrigin}?auth=google-not-registered`);
+      }
+
       const insertResult = await pool.query(
         `
           INSERT INTO users (provider, provider_id, email, name, picture_url)

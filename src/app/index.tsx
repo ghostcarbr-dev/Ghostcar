@@ -69,9 +69,9 @@ type PhotonFeature = {
 
 const apiUrl = 'https://ghostcar-api.onrender.com';
 
-async function openGoogleSignIn() {
+async function openGoogleSignIn(mode: 'login' | 'signup' = 'login') {
   const returnTo = Platform.OS === 'web' ? window.location.origin : 'https://ghostcar.com.br';
-  const googleSignInUrl = `${apiUrl}/auth/google?returnTo=${encodeURIComponent(returnTo)}`;
+  const googleSignInUrl = `${apiUrl}/auth/google?mode=${mode}&returnTo=${encodeURIComponent(returnTo)}`;
 
   if (Platform.OS === 'web') {
     window.location.href = googleSignInUrl;
@@ -167,7 +167,7 @@ export default function HomeScreen() {
               </View>
 
               <Pressable
-                onPress={openGoogleSignIn}
+                onPress={() => openGoogleSignIn('signup')}
                 style={({ pressed }) => [styles.googleButton, styles.signupSocialButton, pressed && styles.pressed]}>
                 <Image
                   contentFit="contain"
@@ -197,7 +197,7 @@ export default function HomeScreen() {
               <Text style={styles.subtitle}>{t('accountInfo')}</Text>
 
               <Pressable
-                onPress={openGoogleSignIn}
+                onPress={() => openGoogleSignIn('login')}
                 style={({ pressed }) => [styles.googleButton, pressed && styles.pressed]}>
                 <Image
                   contentFit="contain"
@@ -621,7 +621,7 @@ function WebHomeScreen() {
                 </View>
                 <View style={[styles.webSocialRow, isMobileWeb && styles.webSocialRowMobile]}>
                   <Pressable
-                    onPress={openGoogleSignIn}
+                    onPress={() => openGoogleSignIn('login')}
                     style={[styles.webSocialButton, isMobileWeb && styles.webSocialButtonMobile]}>
                     <Image
                       contentFit="contain"
@@ -901,7 +901,7 @@ function WebSignupPage({ onBack }: { onBack: () => void }) {
           <Text style={styles.webSignupSocialTitle}>
             Acelere seu cadastro usando sua conta das redes sociais
           </Text>
-          <Pressable onPress={openGoogleSignIn} style={styles.webSignupGoogleButton}>
+          <Pressable onPress={() => openGoogleSignIn('signup')} style={styles.webSignupGoogleButton}>
             <Image
               contentFit="contain"
               source={require('@/assets/images/google-g-logo.png')}
