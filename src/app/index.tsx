@@ -38,6 +38,14 @@ type CarListing = {
   title: string;
 };
 
+type AuthUser = {
+  email: string;
+  id: number;
+  name: string | null;
+  pictureUrl: string | null;
+  provider: string;
+};
+
 type PlaceSuggestion = {
   coordinates: Coordinates;
   id: string;
@@ -60,11 +68,13 @@ type PhotonFeature = {
 };
 
 const apiUrl = 'https://ghostcar-api.onrender.com';
-const googleSignInUrl = 'https://accounts.google.com/signin/v2/identifier';
 
 async function openGoogleSignIn() {
+  const returnTo = Platform.OS === 'web' ? window.location.origin : 'https://ghostcar.com.br';
+  const googleSignInUrl = `${apiUrl}/auth/google?returnTo=${encodeURIComponent(returnTo)}`;
+
   if (Platform.OS === 'web') {
-    window.open(googleSignInUrl, '_blank', 'noopener,noreferrer');
+    window.location.href = googleSignInUrl;
     return;
   }
 
@@ -281,6 +291,7 @@ function WebHomeScreen() {
   const [searchError, setSearchError] = useState('');
   const [selectedCoordinates, setSelectedCoordinates] = useState<Coordinates | null>(null);
   const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([]);
+  const [webUser, setWebUser] = useState<AuthUser | null>(null);
   const skipNextSuggestionFetch = useRef(false);
   const isMobileWeb = width < 720;
 
@@ -297,6 +308,29 @@ function WebHomeScreen() {
     window.addEventListener('hashchange', syncSignupPageWithHash);
 
     return () => window.removeEventListener('hashchange', syncSignupPageWithHash);
+  }, []);
+
+  useEffect(() => {
+    if (Platform.OS !== 'web') {
+      return;
+    }
+
+    async function loadCurrentUser() {
+      try {
+        const response = await fetch(`${apiUrl}/auth/me`, { credentials: 'include' });
+        if (!response.ok) {
+          setWebUser(null);
+          return;
+        }
+
+        const data = (await response.json()) as { user: AuthUser | null };
+        setWebUser(data.user);
+      } catch {
+        setWebUser(null);
+      }
+    }
+
+    loadCurrentUser();
   }, []);
 
   useEffect(() => {
@@ -529,7 +563,9 @@ function WebHomeScreen() {
               onPress={() => setIsWebLoginOpen((isOpen) => !isOpen)}
               style={[styles.webLoginButton, styles.webLoginButtonOnHero, isMobileWeb && styles.webLoginButtonMobile]}>
               <Ionicons color="#FFFFFF" name="person-outline" size={18} />
-              <Text style={[styles.webLoginText, styles.webLoginTextOnHero]}>Entrar</Text>
+              <Text style={[styles.webLoginText, styles.webLoginTextOnHero]}>
+                {webUser?.name?.split(' ')[0] || 'Entrar'}
+              </Text>
             </Pressable>
           </View>
         </View>
