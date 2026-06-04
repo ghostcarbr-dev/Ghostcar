@@ -2,6 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import * as WebBrowser from 'expo-web-browser';
 import { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -59,6 +60,16 @@ type PhotonFeature = {
 };
 
 const apiUrl = 'https://ghostcar-api.onrender.com';
+const googleSignInUrl = 'https://accounts.google.com/signin/v2/identifier';
+
+async function openGoogleSignIn() {
+  if (Platform.OS === 'web') {
+    window.open(googleSignInUrl, '_blank', 'noopener,noreferrer');
+    return;
+  }
+
+  await WebBrowser.openBrowserAsync(googleSignInUrl);
+}
 
 export default function HomeScreen() {
   if (Platform.OS === 'web') {
@@ -145,7 +156,9 @@ export default function HomeScreen() {
                 <View style={styles.divider} />
               </View>
 
-              <Pressable style={({ pressed }) => [styles.googleButton, styles.signupSocialButton, pressed && styles.pressed]}>
+              <Pressable
+                onPress={openGoogleSignIn}
+                style={({ pressed }) => [styles.googleButton, styles.signupSocialButton, pressed && styles.pressed]}>
                 <Image
                   contentFit="contain"
                   source={require('@/assets/images/google-g-logo.png')}
@@ -173,7 +186,9 @@ export default function HomeScreen() {
               <Text style={styles.title}>{t('hello')}</Text>
               <Text style={styles.subtitle}>{t('accountInfo')}</Text>
 
-              <Pressable style={({ pressed }) => [styles.googleButton, pressed && styles.pressed]}>
+              <Pressable
+                onPress={openGoogleSignIn}
+                style={({ pressed }) => [styles.googleButton, pressed && styles.pressed]}>
                 <Image
                   contentFit="contain"
                   source={require('@/assets/images/google-g-logo.png')}
@@ -569,7 +584,9 @@ function WebHomeScreen() {
                   <View style={styles.webLoginDivider} />
                 </View>
                 <View style={[styles.webSocialRow, isMobileWeb && styles.webSocialRowMobile]}>
-                  <Pressable style={[styles.webSocialButton, isMobileWeb && styles.webSocialButtonMobile]}>
+                  <Pressable
+                    onPress={openGoogleSignIn}
+                    style={[styles.webSocialButton, isMobileWeb && styles.webSocialButtonMobile]}>
                     <Image
                       contentFit="contain"
                       source={require('@/assets/images/google-g-logo.png')}
@@ -848,7 +865,7 @@ function WebSignupPage({ onBack }: { onBack: () => void }) {
           <Text style={styles.webSignupSocialTitle}>
             Acelere seu cadastro usando sua conta das redes sociais
           </Text>
-          <Pressable style={styles.webSignupGoogleButton}>
+          <Pressable onPress={openGoogleSignIn} style={styles.webSignupGoogleButton}>
             <Image
               contentFit="contain"
               source={require('@/assets/images/google-g-logo.png')}
