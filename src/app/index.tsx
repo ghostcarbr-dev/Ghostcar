@@ -333,6 +333,18 @@ function WebHomeScreen() {
     loadCurrentUser();
   }, []);
 
+  async function handleWebLogout() {
+    try {
+      await fetch(`${apiUrl}/auth/logout`, {
+        credentials: 'include',
+        method: 'POST',
+      });
+    } finally {
+      setWebUser(null);
+      setIsWebLoginOpen(false);
+    }
+  }
+
   useEffect(() => {
     const query = destination.trim();
 
@@ -561,79 +573,106 @@ function WebHomeScreen() {
             {!isMobileWeb && <Text style={[styles.webNavLink, styles.webNavLinkOnHero]}>Ajuda</Text>}
             <Pressable
               onPress={() => setIsWebLoginOpen((isOpen) => !isOpen)}
-              style={[styles.webLoginButton, styles.webLoginButtonOnHero, isMobileWeb && styles.webLoginButtonMobile]}>
-              <Ionicons color="#FFFFFF" name="person-outline" size={18} />
+              style={[styles.webLoginButton, styles.webLoginButtonOnHero, webUser && styles.webAccountButtonOnHero, isMobileWeb && styles.webLoginButtonMobile]}>
+              {webUser ? (
+                <View style={styles.webAccountAvatar}>
+                  <Text style={styles.webAccountAvatarText}>{(webUser.name || webUser.email).charAt(0).toUpperCase()}</Text>
+                </View>
+              ) : (
+                <Ionicons color="#FFFFFF" name="person-outline" size={18} />
+              )}
               <Text style={[styles.webLoginText, styles.webLoginTextOnHero]}>
-                {webUser?.name?.split(' ')[0] || 'Entrar'}
+                {webUser ? 'Minha conta' : 'Entrar'}
               </Text>
             </Pressable>
           </View>
         </View>
         {isWebLoginOpen && (
-          <View style={[styles.webLoginPanelWrap, isMobileWeb && styles.webLoginPanelWrapMobile]}>
-            <View style={[styles.webLoginPanel, isMobileWeb && styles.webLoginPanelMobile]}>
+          <View style={[styles.webLoginPanelWrap, webUser && styles.webAccountPanelWrap, isMobileWeb && styles.webLoginPanelWrapMobile]}>
+            <View style={[webUser ? styles.webAccountPanel : styles.webLoginPanel, isMobileWeb && (webUser ? styles.webAccountPanelMobile : styles.webLoginPanelMobile)]}>
               <View style={styles.webLoginArrow} />
-              <View style={[styles.webSignupColumn, isMobileWeb && styles.webLoginColumnMobile]}>
-                <Text style={styles.webLoginPanelTitle}>Criar nova conta</Text>
-                <Pressable
-                  onPress={openWebSignupPage}
-                  style={styles.webSignupButton}>
-                  <Text style={styles.webSignupButtonText}>Cadastre-se</Text>
-                </Pressable>
-                <View style={styles.webLoginBenefitRow}>
-                  <Ionicons color="#00102D" name="checkmark" size={22} />
-                  <Text style={styles.webLoginBenefitText}>Rápido e fácil reservar</Text>
-                </View>
-                <View style={styles.webLoginBenefitRow}>
-                  <Ionicons color="#00102D" name="checkmark" size={22} />
-                  <Text style={styles.webLoginBenefitText}>Descontos de até 30%</Text>
-                </View>
-                <View style={styles.webLoginBenefitRow}>
-                  <Ionicons color="#00102D" name="checkmark" size={22} />
-                  <Text style={styles.webLoginBenefitText}>Acesso a ofertas exclusivas</Text>
-                </View>
-                <View style={styles.webLoginBenefitRow}>
-                  <Ionicons color="#00102D" name="checkmark" size={22} />
-                  <Text style={styles.webLoginBenefitText}>Ganhe cashback</Text>
-                </View>
-              </View>
+              {webUser ? (
+                <>
+                  <View style={styles.webAccountHeader}>
+                    <Text style={styles.webAccountName}>{webUser.name || 'Minha conta'}</Text>
+                    <Text style={styles.webAccountEmail}>{webUser.email}</Text>
+                  </View>
+                  <View style={styles.webAccountMenu}>
+                    <WebAccountMenuItem icon="person-circle-outline" label="Minha conta" />
+                    <WebAccountMenuItem icon="ticket-outline" label="Minhas reservas" />
+                    <WebAccountMenuItem icon="trophy-outline" label="RentRewards" />
+                    <WebAccountMenuItem icon="gift-outline" label="Promoções" />
+                    <Pressable onPress={handleWebLogout} style={styles.webAccountMenuItem}>
+                      <Ionicons color="#4B5260" name="log-out-outline" size={24} />
+                      <Text style={styles.webAccountMenuText}>Sair</Text>
+                    </Pressable>
+                  </View>
+                </>
+              ) : (
+                <>
+                  <View style={[styles.webSignupColumn, isMobileWeb && styles.webLoginColumnMobile]}>
+                    <Text style={styles.webLoginPanelTitle}>Criar nova conta</Text>
+                    <Pressable
+                      onPress={openWebSignupPage}
+                      style={styles.webSignupButton}>
+                      <Text style={styles.webSignupButtonText}>Cadastre-se</Text>
+                    </Pressable>
+                    <View style={styles.webLoginBenefitRow}>
+                      <Ionicons color="#00102D" name="checkmark" size={22} />
+                      <Text style={styles.webLoginBenefitText}>Rápido e fácil reservar</Text>
+                    </View>
+                    <View style={styles.webLoginBenefitRow}>
+                      <Ionicons color="#00102D" name="checkmark" size={22} />
+                      <Text style={styles.webLoginBenefitText}>Descontos de até 30%</Text>
+                    </View>
+                    <View style={styles.webLoginBenefitRow}>
+                      <Ionicons color="#00102D" name="checkmark" size={22} />
+                      <Text style={styles.webLoginBenefitText}>Acesso a ofertas exclusivas</Text>
+                    </View>
+                    <View style={styles.webLoginBenefitRow}>
+                      <Ionicons color="#00102D" name="checkmark" size={22} />
+                      <Text style={styles.webLoginBenefitText}>Ganhe cashback</Text>
+                    </View>
+                  </View>
 
-              <View style={[styles.webLoginColumn, isMobileWeb && styles.webLoginColumnMobile]}>
-                <Text style={styles.webLoginPanelTitle}>Login</Text>
-                <Text style={styles.webLoginLabel}>E-mail</Text>
-                <TextInput
-                  autoCapitalize="none"
-                  keyboardType="email-address"
-                  style={styles.webLoginInput}
-                />
-                <Text style={styles.webLoginLabel}>Senha</Text>
-                <TextInput secureTextEntry style={styles.webLoginInput} />
-                <Pressable>
-                  <Text style={styles.webForgotText}>Esqueci minha senha</Text>
-                </Pressable>
-                <Pressable style={styles.webLoginSubmitButton}>
-                  <Text style={styles.webLoginSubmitText}>Entrar</Text>
-                </Pressable>
-                <View style={styles.webLoginDividerRow}>
-                  <View style={styles.webLoginDivider} />
-                  <Text style={styles.webLoginDividerText}>ou</Text>
-                  <View style={styles.webLoginDivider} />
-                </View>
-                <View style={[styles.webSocialRow, isMobileWeb && styles.webSocialRowMobile]}>
-                  <Pressable
-                    onPress={() => openGoogleSignIn('login')}
-                    style={[styles.webSocialButton, isMobileWeb && styles.webSocialButtonMobile]}>
-                    <Image
-                      contentFit="contain"
-                      source={require('@/assets/images/google-g-logo.png')}
-                      style={styles.webSocialIcon}
+                  <View style={[styles.webLoginColumn, isMobileWeb && styles.webLoginColumnMobile]}>
+                    <Text style={styles.webLoginPanelTitle}>Login</Text>
+                    <Text style={styles.webLoginLabel}>E-mail</Text>
+                    <TextInput
+                      autoCapitalize="none"
+                      keyboardType="email-address"
+                      style={styles.webLoginInput}
                     />
-                  </Pressable>
-                  <Pressable style={[styles.webSocialButton, isMobileWeb && styles.webSocialButtonMobile]}>
-                    <Ionicons color="#00102D" name="logo-apple" size={27} />
-                  </Pressable>
-                </View>
-              </View>
+                    <Text style={styles.webLoginLabel}>Senha</Text>
+                    <TextInput secureTextEntry style={styles.webLoginInput} />
+                    <Pressable>
+                      <Text style={styles.webForgotText}>Esqueci minha senha</Text>
+                    </Pressable>
+                    <Pressable style={styles.webLoginSubmitButton}>
+                      <Text style={styles.webLoginSubmitText}>Entrar</Text>
+                    </Pressable>
+                    <View style={styles.webLoginDividerRow}>
+                      <View style={styles.webLoginDivider} />
+                      <Text style={styles.webLoginDividerText}>ou</Text>
+                      <View style={styles.webLoginDivider} />
+                    </View>
+                    <View style={[styles.webSocialRow, isMobileWeb && styles.webSocialRowMobile]}>
+                      <Pressable
+                        onPress={() => openGoogleSignIn('login')}
+                        style={[styles.webSocialButton, isMobileWeb && styles.webSocialButtonMobile]}>
+                        <Image
+                          contentFit="contain"
+                          source={require('@/assets/images/google-g-logo.png')}
+                          style={styles.webSocialIcon}
+                        />
+                      </Pressable>
+                      <Pressable style={[styles.webSocialButton, isMobileWeb && styles.webSocialButtonMobile]}>
+                        <Ionicons color="#00102D" name="logo-apple" size={27} />
+                      </Pressable>
+                    </View>
+                  </View>
+                </>
+              )}
             </View>
           </View>
         )}
@@ -872,6 +911,15 @@ function WebFeature({ icon, text, title }: { icon: keyof typeof Ionicons.glyphMa
       <Text style={styles.webFeatureTitle}>{title}</Text>
       <Text style={styles.webFeatureText}>{text}</Text>
     </View>
+  );
+}
+
+function WebAccountMenuItem({ icon, label }: { icon: keyof typeof Ionicons.glyphMap; label: string }) {
+  return (
+    <Pressable style={styles.webAccountMenuItem}>
+      <Ionicons color="#4B5260" name={icon} size={24} />
+      <Text style={styles.webAccountMenuText}>{label}</Text>
+    </Pressable>
   );
 }
 
@@ -1590,6 +1638,23 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 255, 255, 0.58)',
     backgroundColor: 'rgba(255, 255, 255, 0.08)',
   },
+  webAccountButtonOnHero: {
+    borderColor: 'transparent',
+    backgroundColor: 'transparent',
+  },
+  webAccountAvatar: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#F7B31A',
+  },
+  webAccountAvatarText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '800',
+  },
   webLoginText: {
     color: '#00102D',
     fontSize: 14,
@@ -1615,6 +1680,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingBottom: 12,
   },
+  webAccountPanelWrap: {
+    maxWidth: 320,
+  },
   webLoginPanel: {
     position: 'relative',
     flexDirection: 'row',
@@ -1632,6 +1700,55 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     width: '100%',
     borderRadius: 8,
+  },
+  webAccountPanel: {
+    position: 'relative',
+    overflow: 'visible',
+    width: 320,
+    borderWidth: 1,
+    borderColor: '#E3E6EA',
+    borderRadius: 10,
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 14 },
+    shadowOpacity: 0.18,
+    shadowRadius: 28,
+  },
+  webAccountPanelMobile: {
+    width: '100%',
+    borderRadius: 8,
+  },
+  webAccountHeader: {
+    paddingHorizontal: 24,
+    paddingVertical: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E7EAEE',
+  },
+  webAccountName: {
+    color: '#2E3542',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  webAccountEmail: {
+    marginTop: 4,
+    color: '#687180',
+    fontSize: 14,
+    fontWeight: '400',
+  },
+  webAccountMenu: {
+    paddingVertical: 14,
+  },
+  webAccountMenuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+    paddingHorizontal: 24,
+    paddingVertical: 14,
+  },
+  webAccountMenuText: {
+    color: '#4B5260',
+    fontSize: 16,
+    fontWeight: '600',
   },
   webLoginArrow: {
     position: 'absolute',
