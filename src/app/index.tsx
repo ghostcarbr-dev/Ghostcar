@@ -2143,7 +2143,7 @@ const styles = StyleSheet.create({
   },
   signupTitle: {
     color: '#111111',
-    fontSize: 25,
+    fontSize: 22,
     fontWeight: '800',
     letterSpacing: -0.8,
     ...Platform.select({
@@ -2168,18 +2168,18 @@ const styles = StyleSheet.create({
     }),
   },
   signupLabel: {
-    marginBottom: 9,
+    marginBottom: 7,
     color: '#555555',
-    fontSize: 15,
+    fontSize: 13,
   },
   signupInput: {
-    height: 64,
-    paddingHorizontal: 18,
+    height: 56,
+    paddingHorizontal: 16,
     borderWidth: 1,
     borderColor: '#C8CECC',
     borderRadius: 11,
     color: '#202020',
-    fontSize: 16,
+    fontSize: 14,
     ...Platform.select({
       web: {
         height: 52,
@@ -2188,7 +2188,7 @@ const styles = StyleSheet.create({
     }),
   },
   nativeSignupInput: {
-    marginBottom: 24,
+    marginBottom: 18,
   },
   emailContinueButton: {
     alignItems: 'center',
@@ -2196,7 +2196,7 @@ const styles = StyleSheet.create({
     height: 60,
     marginTop: 26,
     borderRadius: 10,
-    backgroundColor: '#C8E7DA',
+    backgroundColor: '#16865F',
     ...Platform.select({
       web: {
         height: 50,
@@ -2210,7 +2210,7 @@ const styles = StyleSheet.create({
   },
   emailContinueText: {
     color: '#FFFFFF',
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '700',
   },
   signupBackButton: {
@@ -2222,19 +2222,19 @@ const styles = StyleSheet.create({
     marginLeft: -6,
   },
   signupDescription: {
-    marginTop: 18,
-    marginBottom: 28,
+    marginTop: 14,
+    marginBottom: 22,
     color: '#222222',
-    fontSize: 16,
-    lineHeight: 24,
+    fontSize: 13,
+    lineHeight: 20,
   },
   verifiedEmailBox: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    height: 64,
-    marginBottom: 24,
-    paddingHorizontal: 18,
+    height: 56,
+    marginBottom: 18,
+    paddingHorizontal: 16,
     borderWidth: 1,
     borderColor: '#D0D0D0',
     borderRadius: 11,
@@ -2243,13 +2243,13 @@ const styles = StyleSheet.create({
   verifiedEmailText: {
     flex: 1,
     color: '#6E6E6E',
-    fontSize: 16,
+    fontSize: 13,
     fontWeight: '600',
   },
   phoneInputRow: {
     flexDirection: 'row',
-    height: 64,
-    marginBottom: 24,
+    height: 56,
+    marginBottom: 18,
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: '#C8CECC',
@@ -2260,24 +2260,24 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    width: 138,
+    width: 124,
     borderRightWidth: 1,
     borderRightColor: '#C8CECC',
     gap: 10,
   },
   phoneFlag: {
-    fontSize: 28,
+    fontSize: 24,
   },
   phonePrefixText: {
     color: '#333333',
-    fontSize: 16,
+    fontSize: 13,
     fontWeight: '700',
   },
   phoneNumberInput: {
     flex: 1,
-    paddingHorizontal: 18,
+    paddingHorizontal: 16,
     color: '#202020',
-    fontSize: 16,
+    fontSize: 13,
   },
   nativeSignupCheckboxRow: {
     flexDirection: 'row',
@@ -2302,7 +2302,7 @@ const styles = StyleSheet.create({
   nativeSignupCheckboxText: {
     flex: 1,
     color: '#606060',
-    fontSize: 15,
+    fontSize: 13,
   },
   nativeSignupSubmitButton: {
     marginTop: 28,
@@ -2317,8 +2317,8 @@ const styles = StyleSheet.create({
   nativeSignupTerms: {
     marginTop: 24,
     color: '#111111',
-    fontSize: 14,
-    lineHeight: 22,
+    fontSize: 12,
+    lineHeight: 18,
     textAlign: 'center',
   },
   nativeSignupLink: {
