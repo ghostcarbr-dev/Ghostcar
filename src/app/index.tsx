@@ -1745,6 +1745,7 @@ const styles = StyleSheet.create({
   brandBlock: {
     alignItems: 'center',
     marginTop: 22,
+    width: '100%',
     ...Platform.select({
       web: {
         marginTop: 28,

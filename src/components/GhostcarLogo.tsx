@@ -31,9 +31,9 @@ const logoSizes = {
     taglineLetterSpacing: -0.45,
   },
   hero: {
-    titleFontSize: 52,
-    titleLineHeight: 58,
-    titleLetterSpacing: -6,
+    titleFontSize: 48,
+    titleLineHeight: 54,
+    titleLetterSpacing: -5,
     taglineFontSize: 11,
     taglineLetterSpacing: -0.35,
   },
@@ -89,7 +89,10 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   heroContainer: {
-    paddingHorizontal: 10,
+    width: 360,
+    maxWidth: '94%',
+    overflow: 'visible',
+    paddingHorizontal: 18,
   },
   centered: {
     alignSelf: 'center',
@@ -98,6 +101,8 @@ const styles = StyleSheet.create({
   title: {
     fontStyle: 'italic',
     fontWeight: '900',
+    includeFontPadding: false,
+    paddingRight: 12,
     textTransform: 'uppercase',
     transform: [{ skewX: '-7deg' }],
   },
