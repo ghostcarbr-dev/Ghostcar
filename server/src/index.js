@@ -115,6 +115,34 @@ function formatUser(user) {
   };
 }
 
+function normalizeEmail(email) {
+  return String(email || '').trim().toLowerCase();
+}
+
+function hashPassword(password) {
+  const salt = crypto.randomBytes(16).toString('base64url');
+  const hash = crypto.scryptSync(password, salt, 64).toString('base64url');
+  return `scrypt:${salt}:${hash}`;
+}
+
+function createSessionToken(user) {
+  return createSignedToken({
+    email: user.email,
+    exp: Date.now() + 30 * 24 * 60 * 60 * 1000,
+    userId: user.id,
+  });
+}
+
+function setSessionCookie(response, sessionToken) {
+  response.cookie('ghostcar_session', sessionToken, {
+    httpOnly: true,
+    maxAge: 30 * 24 * 60 * 60 * 1000,
+    path: '/',
+    sameSite: 'none',
+    secure: true,
+  });
+}
+
 function getSafeReturnTo(returnTo) {
   try {
     const url = new URL(returnTo || webOrigin);
@@ -153,12 +181,23 @@ async function initializeDatabase() {
       email TEXT NOT NULL,
       name TEXT,
       picture_url TEXT,
+      password_hash TEXT,
+      country TEXT,
+      cpf TEXT,
+      birth_date TEXT,
+      phone TEXT,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       UNIQUE (provider, provider_id),
       UNIQUE (email)
     )
   `);
+
+  await pool.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS password_hash TEXT');
+  await pool.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS country TEXT');
+  await pool.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS cpf TEXT');
+  await pool.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS birth_date TEXT');
+  await pool.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS phone TEXT');
 }
 
 app.get('/', (_request, response) => {
@@ -279,25 +318,85 @@ app.get('/auth/google/callback', async (request, response, next) => {
       user = insertResult.rows[0];
     }
 
-    const sessionToken = createSignedToken({
-      email: user.email,
-      exp: Date.now() + 30 * 24 * 60 * 60 * 1000,
-      userId: user.id,
-    });
-
-    response.cookie('ghostcar_session', sessionToken, {
-      httpOnly: true,
-      maxAge: 30 * 24 * 60 * 60 * 1000,
-      path: '/',
-      sameSite: 'none',
-      secure: true,
-    });
+    const sessionToken = createSessionToken(user);
+    setSessionCookie(response, sessionToken);
 
     const redirectUrl = new URL(stateValue.returnTo || webOrigin);
     redirectUrl.searchParams.set('auth', 'google-ok');
     redirectUrl.searchParams.set('session', sessionToken);
 
     return response.redirect(redirectUrl.toString());
+  } catch (error) {
+    return next(error);
+  }
+});
+
+app.post('/auth/register', async (request, response, next) => {
+  const {
+    birthDate,
+    country,
+    cpf,
+    email,
+    firstName,
+    lastName,
+    password,
+    passwordConfirmation,
+    phone,
+  } = request.body || {};
+  const normalizedEmail = normalizeEmail(email);
+  const fullName = [firstName, lastName].map((value) => String(value || '').trim()).filter(Boolean).join(' ');
+
+  if (!firstName || !lastName || !normalizedEmail || !password || !passwordConfirmation) {
+    return response.status(400).json({ error: 'Required fields are missing' });
+  }
+
+  if (password !== passwordConfirmation) {
+    return response.status(400).json({ error: 'Passwords do not match' });
+  }
+
+  if (String(password).length < 8) {
+    return response.status(400).json({ error: 'Password must contain at least 8 characters' });
+  }
+
+  try {
+    const existingUserResult = await pool.query('SELECT id FROM users WHERE email = $1 LIMIT 1', [normalizedEmail]);
+    if (existingUserResult.rowCount > 0) {
+      return response.status(409).json({ error: 'Email is already registered' });
+    }
+
+    const result = await pool.query(
+      `
+        INSERT INTO users (
+          provider,
+          provider_id,
+          email,
+          name,
+          password_hash,
+          country,
+          cpf,
+          birth_date,
+          phone
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        RETURNING *
+      `,
+      [
+        'email',
+        normalizedEmail,
+        normalizedEmail,
+        fullName,
+        hashPassword(String(password)),
+        country || null,
+        cpf || null,
+        birthDate || null,
+        phone || null,
+      ],
+    );
+    const user = result.rows[0];
+    const sessionToken = createSessionToken(user);
+
+    setSessionCookie(response, sessionToken);
+    return response.status(201).json({ sessionToken, user: formatUser(user) });
   } catch (error) {
     return next(error);
   }

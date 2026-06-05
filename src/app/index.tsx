@@ -586,7 +586,7 @@ function WebHomeScreen() {
   }
 
   if (isWebSignupPageOpen) {
-    return <WebSignupPage onBack={closeWebSignupPage} />;
+    return <WebSignupPage onBack={closeWebSignupPage} onSignupComplete={setWebUser} />;
   }
 
   return (
@@ -960,9 +960,92 @@ function WebAccountMenuItem({ icon, label }: { icon: keyof typeof Ionicons.glyph
   );
 }
 
-function WebSignupPage({ onBack }: { onBack: () => void }) {
+function WebSignupPage({ onBack, onSignupComplete }: { onBack: () => void; onSignupComplete: (user: AuthUser) => void }) {
   const { width } = useWindowDimensions();
   const isMobileWeb = width < 820;
+  const [form, setForm] = useState({
+    birthDate: '',
+    country: 'Brasil',
+    cpf: '',
+    email: '',
+    emailConfirmation: '',
+    firstName: '',
+    lastName: '',
+    password: '',
+    passwordConfirmation: '',
+    phone: '',
+  });
+  const [signupError, setSignupError] = useState('');
+  const [isCreatingAccount, setIsCreatingAccount] = useState(false);
+
+  function updateSignupField(field: keyof typeof form, value: string) {
+    setForm((currentForm) => ({ ...currentForm, [field]: value }));
+    setSignupError('');
+  }
+
+  async function createAccount() {
+    const email = form.email.trim().toLowerCase();
+    const emailConfirmation = form.emailConfirmation.trim().toLowerCase();
+
+    if (!form.firstName.trim() || !form.lastName.trim() || !email || !form.password) {
+      setSignupError('Preencha os campos obrigatórios.');
+      return;
+    }
+
+    if (email !== emailConfirmation) {
+      setSignupError('Os e-mails não são iguais.');
+      return;
+    }
+
+    if (form.password !== form.passwordConfirmation) {
+      setSignupError('As senhas não são iguais.');
+      return;
+    }
+
+    if (form.password.length < 8) {
+      setSignupError('A senha deve ter pelo menos 8 caracteres.');
+      return;
+    }
+
+    setIsCreatingAccount(true);
+
+    try {
+      const response = await fetch(`${apiUrl}/auth/register`, {
+        body: JSON.stringify({
+          birthDate: form.birthDate,
+          country: form.country,
+          cpf: form.cpf,
+          email,
+          firstName: form.firstName,
+          lastName: form.lastName,
+          password: form.password,
+          passwordConfirmation: form.passwordConfirmation,
+          phone: form.phone,
+        }),
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        method: 'POST',
+      });
+      const data = (await response.json()) as { error?: string; sessionToken?: string; user?: AuthUser };
+
+      if (!response.ok || !data.user || !data.sessionToken) {
+        if (response.status === 409) {
+          setSignupError('Este e-mail já está cadastrado.');
+        } else {
+          setSignupError(data.error || 'Não foi possível criar a conta.');
+        }
+        return;
+      }
+
+      storeWebSessionToken(data.sessionToken);
+      onSignupComplete(data.user);
+      onBack();
+    } catch {
+      setSignupError('Não foi possível criar a conta. Tente novamente.');
+    } finally {
+      setIsCreatingAccount(false);
+    }
+  }
 
   return (
     <View style={styles.webSignupPage}>
@@ -1010,20 +1093,20 @@ function WebSignupPage({ onBack }: { onBack: () => void }) {
           <Text style={styles.webSignupTitle}>Crie sua conta</Text>
           <Text style={styles.webSignupSectionTitle}>Dados pessoais</Text>
           <View style={[styles.webSignupGrid, isMobileWeb && styles.webSignupGridMobile]}>
-            <WebSignupInput label="Nome do locatário:" placeholder="Nome do locatário" required />
-            <WebSignupInput label="Sobrenome:" placeholder="Sobrenome" required />
-            <WebSignupInput label="País de Residência:" placeholder="Brasil" required />
-            <WebSignupInput label="CPF:" required />
-            <WebSignupInput label="Data de Nascimento:" placeholder="DD/MM/AAAA" required />
-            <WebSignupInput label="Celular:" placeholder="Ex.: (11) 96123-4567" required />
+            <WebSignupInput label="Nome do locatário:" onChangeText={(value) => updateSignupField('firstName', value)} placeholder="Nome do locatário" required value={form.firstName} />
+            <WebSignupInput label="Sobrenome:" onChangeText={(value) => updateSignupField('lastName', value)} placeholder="Sobrenome" required value={form.lastName} />
+            <WebSignupInput label="País de Residência:" onChangeText={(value) => updateSignupField('country', value)} placeholder="Brasil" required value={form.country} />
+            <WebSignupInput label="CPF:" onChangeText={(value) => updateSignupField('cpf', value)} required value={form.cpf} />
+            <WebSignupInput label="Data de Nascimento:" onChangeText={(value) => updateSignupField('birthDate', value)} placeholder="DD/MM/AAAA" required value={form.birthDate} />
+            <WebSignupInput label="Celular:" onChangeText={(value) => updateSignupField('phone', value)} placeholder="Ex.: (11) 96123-4567" required value={form.phone} />
           </View>
 
           <Text style={styles.webSignupSectionTitle}>Dados de acesso à Ghostcar</Text>
           <View style={[styles.webSignupGrid, isMobileWeb && styles.webSignupGridMobile]}>
-            <WebSignupInput label="E-mail:" keyboardType="email-address" required />
-            <WebSignupInput label="Confirme seu E-mail:" keyboardType="email-address" required />
-            <WebSignupInput label="Crie uma Senha de Acesso:" secureTextEntry required />
-            <WebSignupInput label="Confirme sua Senha de Acesso:" secureTextEntry required />
+            <WebSignupInput label="E-mail:" keyboardType="email-address" onChangeText={(value) => updateSignupField('email', value)} required value={form.email} />
+            <WebSignupInput label="Confirme seu E-mail:" keyboardType="email-address" onChangeText={(value) => updateSignupField('emailConfirmation', value)} required value={form.emailConfirmation} />
+            <WebSignupInput label="Crie uma Senha de Acesso:" onChangeText={(value) => updateSignupField('password', value)} secureTextEntry required value={form.password} />
+            <WebSignupInput label="Confirme sua Senha de Acesso:" onChangeText={(value) => updateSignupField('passwordConfirmation', value)} secureTextEntry required value={form.passwordConfirmation} />
           </View>
 
           <View style={styles.webSignupCheckboxRow}>
@@ -1037,8 +1120,15 @@ function WebSignupPage({ onBack }: { onBack: () => void }) {
             <Text style={styles.webSignupLink}>Termos de Uso</Text> da Ghostcar.
           </Text>
 
-          <Pressable style={[styles.webSignupCreateButton, isMobileWeb && styles.webSignupCreateButtonMobile]}>
-            <Text style={styles.webSignupCreateButtonText}>Criar Conta</Text>
+          {signupError ? <Text style={styles.webSignupErrorText}>{signupError}</Text> : null}
+
+          <Pressable
+            disabled={isCreatingAccount}
+            onPress={createAccount}
+            style={[styles.webSignupCreateButton, isCreatingAccount && styles.webSignupCreateButtonDisabled, isMobileWeb && styles.webSignupCreateButtonMobile]}>
+            <Text style={styles.webSignupCreateButtonText}>
+              {isCreatingAccount ? 'Criando conta...' : 'Criar Conta'}
+            </Text>
           </Pressable>
         </View>
       </View>
@@ -1072,15 +1162,19 @@ function WebPublishInput({
 function WebSignupInput({
   keyboardType,
   label,
+  onChangeText,
   placeholder,
   required,
   secureTextEntry,
+  value,
 }: {
   keyboardType?: TextInputProps['keyboardType'];
   label: string;
+  onChangeText: (value: string) => void;
   placeholder?: string;
   required?: boolean;
   secureTextEntry?: boolean;
+  value: string;
 }) {
   return (
     <View style={styles.webSignupField}>
@@ -1089,11 +1183,14 @@ function WebSignupInput({
         {label}
       </Text>
       <TextInput
+        autoCapitalize={keyboardType === 'email-address' ? 'none' : 'sentences'}
         keyboardType={keyboardType}
+        onChangeText={onChangeText}
         placeholder={placeholder}
         placeholderTextColor="#8C9693"
         secureTextEntry={secureTextEntry}
         style={styles.webSignupInput}
+        value={value}
       />
     </View>
   );
@@ -2128,6 +2225,9 @@ const styles = StyleSheet.create({
     borderRadius: 3,
     backgroundColor: '#159A57',
   },
+  webSignupCreateButtonDisabled: {
+    backgroundColor: '#8FCBAE',
+  },
   webSignupCreateButtonMobile: {
     width: '100%',
     maxWidth: '100%',
@@ -2136,6 +2236,12 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 18,
     fontWeight: '900',
+  },
+  webSignupErrorText: {
+    marginTop: 18,
+    color: '#B42318',
+    fontSize: 13,
+    fontWeight: '700',
   },
   webHero: {
     position: 'relative',
