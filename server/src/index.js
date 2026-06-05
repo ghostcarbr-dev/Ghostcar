@@ -133,6 +133,24 @@ function hashPassword(password) {
   return `scrypt:${salt}:${hash}`;
 }
 
+function verifyPassword(password, passwordHash) {
+  if (!passwordHash || !passwordHash.startsWith('scrypt:')) {
+    return false;
+  }
+
+  const [, salt, expectedHash] = passwordHash.split(':');
+  if (!salt || !expectedHash) {
+    return false;
+  }
+
+  const hash = crypto.scryptSync(String(password || ''), salt, 64).toString('base64url');
+  const hashBuffer = Buffer.from(hash);
+  const expectedHashBuffer = Buffer.from(expectedHash);
+
+  return hashBuffer.length === expectedHashBuffer.length
+    && crypto.timingSafeEqual(hashBuffer, expectedHashBuffer);
+}
+
 function createSessionToken(user) {
   return createSignedToken({
     email: user.email,
@@ -383,6 +401,31 @@ app.post('/auth/session/exchange', (request, response) => {
     sessionToken: pendingSession.sessionToken,
     user: pendingSession.user,
   });
+});
+
+app.post('/auth/login', async (request, response, next) => {
+  const normalizedEmail = normalizeEmail(request.body?.email);
+  const password = String(request.body?.password || '');
+
+  if (!normalizedEmail || !password) {
+    return response.status(400).json({ error: 'Email and password are required' });
+  }
+
+  try {
+    const result = await pool.query('SELECT * FROM users WHERE email = $1 LIMIT 1', [normalizedEmail]);
+    const user = result.rows[0];
+
+    if (!user || !verifyPassword(password, user.password_hash)) {
+      return response.status(401).json({ error: 'Invalid email or password' });
+    }
+
+    const sessionToken = createSessionToken(user);
+    setSessionCookie(response, sessionToken);
+
+    return response.json({ sessionToken, user: formatUser(user) });
+  } catch (error) {
+    return next(error);
+  }
 });
 
 app.post('/auth/register', async (request, response, next) => {

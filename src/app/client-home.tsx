@@ -3,7 +3,7 @@ import { Image } from 'expo-image';
 import * as Location from 'expo-location';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Alert, Linking, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { GhostcarLogo } from '@/components/GhostcarLogo';
 import { languages, useLanguage } from '@/i18n';
@@ -88,6 +88,22 @@ export default function ClientHomeScreen() {
   const skipNextSuggestionFetch = useRef(false);
   const selectedLanguage =
     languages.find((language) => language.code === languageCode) ?? languages[0];
+
+  function showComingSoon(label: string) {
+    Alert.alert('Em breve', `${label} ainda não está disponível no aplicativo.`);
+  }
+
+  async function openWhatsApp() {
+    const url = 'https://wa.me/5500000000000';
+    const canOpen = await Linking.canOpenURL(url);
+
+    if (canOpen) {
+      await Linking.openURL(url);
+      return;
+    }
+
+    showComingSoon('WhatsApp');
+  }
 
   useEffect(() => {
     const query = destination.trim();
@@ -240,7 +256,7 @@ export default function ClientHomeScreen() {
               </View>
 
               <View style={styles.headerActions}>
-                <Pressable accessibilityLabel="Notificações">
+                <Pressable accessibilityLabel="Notificações" onPress={() => showComingSoon('Notificações')}>
                   <Ionicons color="#FFFFFF" name="notifications-outline" size={24} />
                 </Pressable>
                 <Pressable
@@ -312,7 +328,7 @@ export default function ClientHomeScreen() {
               <Text style={styles.promoEyebrow}>{t('planTrip')}</Text>
               <Text style={styles.promoTitle}>{t('nextPath')}</Text>
               <Text style={styles.promoSubtitle}>{t('idealCar')}</Text>
-              <Pressable style={({ pressed }) => [styles.promoButton, pressed && styles.pressed]}>
+              <Pressable onPress={() => showComingSoon(t('seeOffers'))} style={({ pressed }) => [styles.promoButton, pressed && styles.pressed]}>
                 <Text style={styles.promoButtonText}>{t('seeOffers')}</Text>
               </Pressable>
             </View>
@@ -324,7 +340,7 @@ export default function ClientHomeScreen() {
             </View>
             <Text style={styles.rewardsTitle}>{t('rewards')}</Text>
             <Text style={styles.rewardsSubtitle}>{t('rewardsInfo')}</Text>
-            <Pressable style={({ pressed }) => [styles.rewardsButton, pressed && styles.pressed]}>
+            <Pressable onPress={() => showComingSoon(t('discoverBenefits'))} style={({ pressed }) => [styles.rewardsButton, pressed && styles.pressed]}>
               <Text style={styles.rewardsButtonText}>{t('discoverBenefits')}</Text>
             </Pressable>
           </View>
@@ -332,7 +348,7 @@ export default function ClientHomeScreen() {
       </ScrollView>
       )}
 
-      <Pressable accessibilityLabel="WhatsApp" style={({ pressed }) => [styles.whatsapp, pressed && styles.pressed]}>
+      <Pressable accessibilityLabel="WhatsApp" onPress={openWhatsApp} style={({ pressed }) => [styles.whatsapp, pressed && styles.pressed]}>
         <Ionicons color="#FFFFFF" name="logo-whatsapp" size={36} />
       </Pressable>
     </View>
@@ -1020,6 +1036,29 @@ function ClientMenu({ languageCode, onBack, setLanguageCode, t }: ClientMenuProp
   const selectedCurrency =
     currencies.find((currency) => currency.code === selectedCurrencyCode) ?? currencies[0];
 
+  function showMenuComingSoon(label: string) {
+    Alert.alert('Em breve', `${label} ainda não está disponível no aplicativo.`);
+  }
+
+  function handleMenuAction(key: string) {
+    if (key === 'home') {
+      onBack();
+      return;
+    }
+
+    if (key === 'publishCar') {
+      setIsPublishScreenOpen(true);
+      return;
+    }
+
+    if (key === 'settings') {
+      setIsSettingsScreenOpen(true);
+      return;
+    }
+
+    showMenuComingSoon(t(key));
+  }
+
   if (isPublishScreenOpen) {
     return <PublishCarScreen onBack={() => setIsPublishScreenOpen(false)} t={t} />;
   }
@@ -1095,13 +1134,13 @@ function ClientMenu({ languageCode, onBack, setLanguageCode, t }: ClientMenuProp
             icon={item.icon}
             key={item.key}
             label={t(item.key)}
-            onPress={item.key === 'publishCar' ? () => setIsPublishScreenOpen(true) : undefined}
+            onPress={() => handleMenuAction(item.key)}
           />
         ))}
 
         <Text style={styles.menuSectionTitle}>Ghostcar</Text>
         {supportMenuItems.map((item) => (
-          <MenuRow icon={item.icon} key={item.key} label={t(item.key)} />
+          <MenuRow icon={item.icon} key={item.key} label={t(item.key)} onPress={() => showMenuComingSoon(t(item.key))} />
         ))}
 
         <View style={styles.followSection}>

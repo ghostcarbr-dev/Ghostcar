@@ -6,6 +6,7 @@ import * as WebBrowser from 'expo-web-browser';
 import { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   DimensionValue,
   KeyboardAvoidingView,
   Platform,
@@ -243,6 +244,10 @@ export default function HomeScreen() {
   const [acceptEmailCommunication, setAcceptEmailCommunication] = useState(false);
   const [nativeSignupError, setNativeSignupError] = useState('');
   const [isCreatingNativeAccount, setIsCreatingNativeAccount] = useState(false);
+  const [nativeLoginEmail, setNativeLoginEmail] = useState('');
+  const [nativeLoginPassword, setNativeLoginPassword] = useState('');
+  const [nativeLoginError, setNativeLoginError] = useState('');
+  const [isNativeLoginLoading, setIsNativeLoginLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   const normalizedSignupEmail = signupEmail.trim().toLowerCase();
@@ -327,6 +332,43 @@ export default function HomeScreen() {
     } finally {
       setIsCreatingNativeAccount(false);
     }
+  }
+
+  async function loginNativeAccount() {
+    const email = nativeLoginEmail.trim().toLowerCase();
+
+    if (!email || !nativeLoginPassword) {
+      setNativeLoginError('Digite seu e-mail e senha.');
+      return;
+    }
+
+    setIsNativeLoginLoading(true);
+    setNativeLoginError('');
+
+    try {
+      const response = await fetch(`${apiUrl}/auth/login`, {
+        body: JSON.stringify({ email, password: nativeLoginPassword }),
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        method: 'POST',
+      });
+      const data = (await response.json()) as { error?: string };
+
+      if (!response.ok) {
+        setNativeLoginError(response.status === 401 ? 'E-mail ou senha incorretos.' : data.error || 'Não foi possível entrar.');
+        return;
+      }
+
+      router.push('/client-home');
+    } catch {
+      setNativeLoginError('Não foi possível entrar. Verifique sua conexão.');
+    } finally {
+      setIsNativeLoginLoading(false);
+    }
+  }
+
+  function showUnavailableMessage(feature: string) {
+    Alert.alert('Em breve', `${feature} ainda não está disponível no aplicativo.`);
   }
 
   return (
@@ -431,7 +473,9 @@ export default function HomeScreen() {
                     <Text style={styles.socialButtonText}>{t('continueGoogle')}</Text>
                   </Pressable>
 
-                  <Pressable style={({ pressed }) => [styles.appleButton, pressed && styles.pressed]}>
+                  <Pressable
+                    onPress={() => showUnavailableMessage('Continuar com Apple')}
+                    style={({ pressed }) => [styles.appleButton, pressed && styles.pressed]}>
                     <Ionicons color="#FFFFFF" name="logo-apple" size={26} />
                     <Text style={styles.appleButtonText}>{t('continueApple')}</Text>
                   </Pressable>
@@ -582,7 +626,9 @@ export default function HomeScreen() {
                 <Text style={styles.socialButtonText}>{t('continueGoogle')}</Text>
               </Pressable>
 
-              <Pressable style={({ pressed }) => [styles.appleButton, pressed && styles.pressed]}>
+              <Pressable
+                onPress={() => showUnavailableMessage('Continuar com Apple')}
+                style={({ pressed }) => [styles.appleButton, pressed && styles.pressed]}>
                 <Ionicons color="#FFFFFF" name="logo-apple" size={26} />
                 <Text style={styles.appleButtonText}>{t('continueApple')}</Text>
               </Pressable>
@@ -601,6 +647,11 @@ export default function HomeScreen() {
                 placeholder={t('typeEmail')}
                 placeholderTextColor="#9B9B9B"
                 style={styles.input}
+                value={nativeLoginEmail}
+                onChangeText={(value) => {
+                  setNativeLoginEmail(value);
+                  setNativeLoginError('');
+                }}
               />
 
               <Text style={styles.label}>{t('password')}</Text>
@@ -612,6 +663,11 @@ export default function HomeScreen() {
                   placeholderTextColor="#9B9B9B"
                   secureTextEntry={!showPassword}
                   style={styles.passwordTextInput}
+                  value={nativeLoginPassword}
+                  onChangeText={(value) => {
+                    setNativeLoginPassword(value);
+                    setNativeLoginError('');
+                  }}
                 />
                 <Pressable
                   accessibilityLabel={
@@ -623,13 +679,20 @@ export default function HomeScreen() {
                 </Pressable>
               </View>
 
+              {!!nativeLoginError && <Text style={styles.nativeSignupErrorText}>{nativeLoginError}</Text>}
+
               <Pressable
-                onPress={() => router.push('/client-home')}
+                disabled={isNativeLoginLoading}
+                onPress={loginNativeAccount}
                 style={({ pressed }) => [styles.loginButton, pressed && styles.pressed]}>
-                <Text style={styles.loginButtonText}>{t('enter')}</Text>
+                {isNativeLoginLoading ? (
+                  <ActivityIndicator color="#FFFFFF" />
+                ) : (
+                  <Text style={styles.loginButtonText}>{t('enter')}</Text>
+                )}
               </Pressable>
 
-              <Pressable style={styles.forgotButton}>
+              <Pressable onPress={() => showUnavailableMessage(t('forgotPassword'))} style={styles.forgotButton}>
                 <Text style={styles.forgotText}>{t('forgotPassword')}</Text>
               </Pressable>
 
