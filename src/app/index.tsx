@@ -112,32 +112,28 @@ const brazilCarBrands = [
   'Caoa Chery',
   'GWM',
 ];
-const brazilPopularCarModels = [
-  'Onix',
-  'HB20',
-  'Gol',
-  'Mobi',
-  'Argo',
-  'Strada',
-  'Toro',
-  'T-Cross',
-  'Tracker',
-  'Creta',
-  'Corolla',
-  'Corolla Cross',
-  'Compass',
-  'Renegade',
-  'Kwid',
-  'Sandero',
-  'Fit',
-  'Civic',
-  'Kicks',
-  'Ka',
-  '208',
-  'C3',
-  'L200',
-  'Dolphin',
-];
+const brazilCarModelsByBrand: Record<string, string[]> = {
+  Chevrolet: ['Onix', 'Onix Plus', 'Tracker', 'Spin', 'S10', 'Montana', 'Cruze'],
+  Fiat: ['Mobi', 'Argo', 'Cronos', 'Pulse', 'Fastback', 'Strada', 'Toro'],
+  Volkswagen: ['Gol', 'Polo', 'Virtus', 'Nivus', 'T-Cross', 'Taos', 'Saveiro'],
+  Hyundai: ['HB20', 'HB20S', 'Creta', 'Tucson', 'Santa Fe', 'Azera'],
+  Toyota: ['Corolla', 'Corolla Cross', 'Hilux', 'SW4', 'Yaris', 'Etios', 'RAV4'],
+  Jeep: ['Renegade', 'Compass', 'Commander', 'Wrangler'],
+  Renault: ['Kwid', 'Sandero', 'Logan', 'Duster', 'Oroch', 'Captur'],
+  Honda: ['Fit', 'City', 'Civic', 'HR-V', 'WR-V', 'CR-V'],
+  Nissan: ['Kicks', 'Versa', 'Sentra', 'Frontier', 'March'],
+  Ford: ['Ka', 'Ka Sedan', 'EcoSport', 'Ranger', 'Territory', 'Fiesta'],
+  Peugeot: ['208', '2008', '3008', 'Partner', 'Expert'],
+  Citroën: ['C3', 'C3 Aircross', 'C4 Cactus', 'Jumpy', 'Berlingo'],
+  Mitsubishi: ['L200', 'Pajero', 'Outlander', 'ASX', 'Eclipse Cross'],
+  BMW: ['Série 1', 'Série 3', 'X1', 'X3', 'X5', '320i'],
+  'Mercedes-Benz': ['Classe A', 'Classe C', 'GLA', 'GLC', 'Sprinter'],
+  Audi: ['A3', 'A4', 'Q3', 'Q5', 'Q7'],
+  Volvo: ['XC40', 'XC60', 'XC90', 'S60'],
+  BYD: ['Dolphin', 'Dolphin Mini', 'Song Plus', 'Yuan Plus', 'Seal'],
+  'Caoa Chery': ['Tiggo 5X', 'Tiggo 7', 'Tiggo 8', 'Arrizo 6'],
+  GWM: ['Haval H6', 'Ora 03', 'Tank 300', 'Poer'],
+};
 const publishStepOrder: PublishStep[] = ['intro', 'plate', 'mileage', 'features', 'technical', 'photos'];
 const webInactivityLimitMs = 10 * 60 * 1000;
 const webLastActivityStorageKey = 'ghostcar_last_activity';
@@ -653,7 +649,19 @@ function WebHomeScreen() {
   }
 
   function updatePublishForm(field: keyof typeof publishForm, value: string) {
-    setPublishForm((currentForm) => ({ ...currentForm, [field]: value }));
+    setPublishForm((currentForm) => {
+      if (field === 'brand') {
+        const brandModels = brazilCarModelsByBrand[value] || [];
+
+        return {
+          ...currentForm,
+          brand: value,
+          model: brandModels.includes(currentForm.model) ? currentForm.model : '',
+        };
+      }
+
+      return { ...currentForm, [field]: value };
+    });
     setPublishFeedback('');
   }
 
@@ -1251,6 +1259,7 @@ function WebPublishWizard({
 }) {
   const currentStepIndex = publishStepOrder.indexOf(step);
   const progress = `${((currentStepIndex + 1) / publishStepOrder.length) * 100}%` as DimensionValue;
+  const selectedBrandModels = brazilCarModelsByBrand[form.brand] || [];
   const featureGroups = [
     {
       title: 'Segurança e Proteção',
@@ -1364,11 +1373,17 @@ function WebPublishWizard({
               <PublishChip key={brand} label={brand} selected={form.brand === brand} onPress={() => onUpdate('brand', brand)} />
             ))}
           </View>
-          <Text style={styles.webPublishFeatureTitle}>Modelos populares</Text>
+          <Text style={styles.webPublishFeatureTitle}>
+            {form.brand ? `Modelos ${form.brand}` : 'Modelos da marca selecionada'}
+          </Text>
           <View style={styles.webPublishChipRow}>
-            {brazilPopularCarModels.map((model) => (
-              <PublishChip key={model} label={model} selected={form.model === model} onPress={() => onUpdate('model', model)} />
-            ))}
+            {selectedBrandModels.length > 0 ? (
+              selectedBrandModels.map((model) => (
+                <PublishChip key={model} label={model} selected={form.model === model} onPress={() => onUpdate('model', model)} />
+              ))
+            ) : (
+              <Text style={styles.webPublishWizardSubtitle}>Selecione uma marca para ver os modelos disponíveis.</Text>
+            )}
           </View>
         </View>
       );
