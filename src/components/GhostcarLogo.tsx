@@ -31,9 +31,9 @@ const logoSizes = {
     taglineLetterSpacing: -0.45,
   },
   hero: {
-    titleFontSize: 54,
+    titleFontSize: 52,
     titleLineHeight: 58,
-    titleLetterSpacing: -7.3,
+    titleLetterSpacing: -6,
     taglineFontSize: 11,
     taglineLetterSpacing: -0.35,
   },
@@ -50,7 +50,7 @@ export function GhostcarLogo({
   const textAlign = align === 'center' ? 'center' : 'left';
 
   return (
-    <View style={[styles.container, align === 'center' && styles.centered]}>
+    <View style={[styles.container, size === 'hero' && styles.heroContainer, align === 'center' && styles.centered]}>
       <Text
         allowFontScaling={false}
         style={[
@@ -87,6 +87,9 @@ export function GhostcarLogo({
 const styles = StyleSheet.create({
   container: {
     alignSelf: 'flex-start',
+  },
+  heroContainer: {
+    paddingHorizontal: 10,
   },
   centered: {
     alignSelf: 'center',
