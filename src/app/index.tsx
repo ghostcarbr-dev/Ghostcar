@@ -6,6 +6,7 @@ import * as WebBrowser from 'expo-web-browser';
 import { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  DimensionValue,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -52,6 +53,27 @@ type PlaceSuggestion = {
   label: string;
 };
 
+type PublishStep = 'intro' | 'plate' | 'mileage' | 'features' | 'technical' | 'photos';
+
+type WebPublishFormState = {
+  brand: string;
+  category: string;
+  city: string;
+  color: string;
+  dailyPrice: string;
+  doors: string;
+  enginePower: string;
+  features: string[];
+  fuel: string;
+  mileage: string;
+  model: string;
+  ownerName: string;
+  photos: string[];
+  plate: string;
+  steering: string;
+  title: string;
+};
+
 type PhotonFeature = {
   geometry: {
     coordinates: [number, number];
@@ -68,6 +90,55 @@ type PhotonFeature = {
 };
 
 const apiUrl = 'https://ghostcar-api.onrender.com';
+const brazilCarBrands = [
+  'Chevrolet',
+  'Fiat',
+  'Volkswagen',
+  'Hyundai',
+  'Toyota',
+  'Jeep',
+  'Renault',
+  'Honda',
+  'Nissan',
+  'Ford',
+  'Peugeot',
+  'Citroën',
+  'Mitsubishi',
+  'BMW',
+  'Mercedes-Benz',
+  'Audi',
+  'Volvo',
+  'BYD',
+  'Caoa Chery',
+  'GWM',
+];
+const brazilPopularCarModels = [
+  'Onix',
+  'HB20',
+  'Gol',
+  'Mobi',
+  'Argo',
+  'Strada',
+  'Toro',
+  'T-Cross',
+  'Tracker',
+  'Creta',
+  'Corolla',
+  'Corolla Cross',
+  'Compass',
+  'Renegade',
+  'Kwid',
+  'Sandero',
+  'Fit',
+  'Civic',
+  'Kicks',
+  'Ka',
+  '208',
+  'C3',
+  'L200',
+  'Dolphin',
+];
+const publishStepOrder: PublishStep[] = ['intro', 'plate', 'mileage', 'features', 'technical', 'photos'];
 const webInactivityLimitMs = 10 * 60 * 1000;
 const webLastActivityStorageKey = 'ghostcar_last_activity';
 const webSessionStorageKey = 'ghostcar_session_token';
@@ -351,18 +422,30 @@ function WebHomeScreen() {
   const [isLoadingCars, setIsLoadingCars] = useState(false);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const [isPublishingCar, setIsPublishingCar] = useState(false);
-  const [isPublishFormOpen, setIsPublishFormOpen] = useState(false);
+  const [isPublishWizardOpen, setIsPublishWizardOpen] = useState(false);
   const [isWebSignupPageOpen, setIsWebSignupPageOpen] = useState(false);
   const [isWebLoginOpen, setIsWebLoginOpen] = useState(false);
   const [webLoginError, setWebLoginError] = useState('');
   const [publishFeedback, setPublishFeedback] = useState('');
-  const [publishForm, setPublishForm] = useState({
+  const [publishForm, setPublishForm] = useState<WebPublishFormState>({
+    brand: '',
     category: '',
     city: '',
+    color: 'Cinza',
     dailyPrice: '',
+    doors: '',
+    enginePower: '1.0',
+    features: [] as string[],
+    fuel: 'Flex',
+    mileage: '',
+    model: '',
     ownerName: '',
+    photos: [] as string[],
+    plate: '',
+    steering: '',
     title: '',
   });
+  const [publishStep, setPublishStep] = useState<PublishStep>('intro');
   const [searchError, setSearchError] = useState('');
   const [selectedCoordinates, setSelectedCoordinates] = useState<Coordinates | null>(null);
   const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([]);
@@ -570,27 +653,89 @@ function WebHomeScreen() {
   }
 
   function openPublishForm() {
-    setIsPublishFormOpen(true);
-    setPublishFeedback('');
+    if (!webUser) {
+      setWebLoginError('Entre na sua conta para publicar seu carro.');
+      setIsWebLoginOpen(true);
+      setIsPublishWizardOpen(false);
+      return;
+    }
 
-    if (Platform.OS === 'web') {
-      requestAnimationFrame(() => {
-        document
-          .getElementById('web-publish-section')
-          ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      });
+    setIsPublishWizardOpen(true);
+    setPublishStep('intro');
+    setPublishFeedback('');
+  }
+
+  function closePublishWizard() {
+    setIsPublishWizardOpen(false);
+    setPublishStep('intro');
+  }
+
+  function goToNextPublishStep() {
+    const currentIndex = publishStepOrder.indexOf(publishStep);
+    const nextStep = publishStepOrder[currentIndex + 1];
+
+    if (nextStep) {
+      setPublishStep(nextStep);
     }
   }
 
+  function goToPreviousPublishStep() {
+    const currentIndex = publishStepOrder.indexOf(publishStep);
+    const previousStep = publishStepOrder[currentIndex - 1];
+
+    if (previousStep) {
+      setPublishStep(previousStep);
+    } else {
+      closePublishWizard();
+    }
+  }
+
+  function togglePublishFeature(feature: string) {
+    setPublishForm((currentForm) => {
+      const hasFeature = currentForm.features.includes(feature);
+      return {
+        ...currentForm,
+        features: hasFeature
+          ? currentForm.features.filter((currentFeature) => currentFeature !== feature)
+          : [...currentForm.features, feature],
+      };
+    });
+  }
+
+  function addPublishPhoto() {
+    setPublishForm((currentForm) => {
+      if (currentForm.photos.length >= 4) {
+        return currentForm;
+      }
+
+      return {
+        ...currentForm,
+        photos: [...currentForm.photos, `Foto ${currentForm.photos.length + 1}`],
+      };
+    });
+  }
+
   async function publishWebCar() {
-    const ownerName = publishForm.ownerName.trim();
-    const title = publishForm.title.trim();
-    const category = publishForm.category.trim();
+    const ownerName = webUser?.name || webUser?.email || publishForm.ownerName.trim();
+    const title = `${publishForm.brand.trim()} ${publishForm.model.trim()}`.trim();
+    const category = publishForm.brand.trim();
     const city = publishForm.city.trim();
     const dailyPrice = Number(publishForm.dailyPrice.replace(',', '.'));
 
-    if (!ownerName || !title || !category || !city || !Number.isFinite(dailyPrice) || dailyPrice <= 0) {
-      setPublishFeedback('Preencha todos os campos com um preço válido.');
+    if (!webUser) {
+      setWebLoginError('Entre na sua conta para publicar seu carro.');
+      setIsWebLoginOpen(true);
+      setIsPublishWizardOpen(false);
+      return;
+    }
+
+    if (!publishForm.plate.trim() || !title || !category || !city || !Number.isFinite(dailyPrice) || dailyPrice <= 0) {
+      setPublishFeedback('Preencha placa, marca, modelo, cidade e preço válido.');
+      return;
+    }
+
+    if (publishForm.photos.length !== 4) {
+      setPublishFeedback('Adicione exatamente 4 fotos para publicar.');
       return;
     }
 
@@ -631,7 +776,26 @@ function WebHomeScreen() {
         throw new Error('Car publish failed');
       }
 
-      setPublishForm({ category: '', city: '', dailyPrice: '', ownerName: '', title: '' });
+      setPublishForm({
+        brand: '',
+        category: '',
+        city: '',
+        color: 'Cinza',
+        dailyPrice: '',
+        doors: '',
+        enginePower: '1.0',
+        features: [],
+        fuel: 'Flex',
+        mileage: '',
+        model: '',
+        ownerName: '',
+        photos: [],
+        plate: '',
+        steering: '',
+        title: '',
+      });
+      setPublishStep('intro');
+      setIsPublishWizardOpen(false);
       setPublishFeedback('Carro publicado com sucesso.');
     } catch {
       setPublishFeedback('Não foi possível publicar o carro agora. Tente novamente.');
@@ -697,6 +861,25 @@ function WebHomeScreen() {
 
   if (isWebSignupPageOpen) {
     return <WebSignupPage onBack={closeWebSignupPage} onSignupComplete={setWebUser} />;
+  }
+
+  if (isPublishWizardOpen) {
+    return (
+      <WebPublishWizard
+        feedback={publishFeedback}
+        form={publishForm}
+        isMobileWeb={isMobileWeb}
+        isPublishing={isPublishingCar}
+        onAddPhoto={addPublishPhoto}
+        onBack={goToPreviousPublishStep}
+        onClose={closePublishWizard}
+        onNext={goToNextPublishStep}
+        onPublish={publishWebCar}
+        onToggleFeature={togglePublishFeature}
+        onUpdate={updatePublishForm}
+        step={publishStep}
+      />
+    );
   }
 
   return (
@@ -968,50 +1151,7 @@ function WebHomeScreen() {
           <Pressable onPress={openPublishForm} style={styles.webOutlineButton}>
             <Text style={styles.webOutlineButtonText}>Publicar meu carro</Text>
           </Pressable>
-          {isPublishFormOpen && (
-            <View style={styles.webPublishForm}>
-              <Text style={styles.webPublishFormTitle}>Publique seu carro</Text>
-              <View style={[styles.webPublishFormGrid, isMobileWeb && styles.webPublishFormGridMobile]}>
-                <WebPublishInput
-                  onChangeText={(value) => updatePublishForm('ownerName', value)}
-                  placeholder="Seu nome"
-                  value={publishForm.ownerName}
-                />
-                <WebPublishInput
-                  onChangeText={(value) => updatePublishForm('title', value)}
-                  placeholder="Modelo do carro"
-                  value={publishForm.title}
-                />
-                <WebPublishInput
-                  onChangeText={(value) => updatePublishForm('category', value)}
-                  placeholder="Categoria"
-                  value={publishForm.category}
-                />
-                <WebPublishInput
-                  keyboardType="decimal-pad"
-                  onChangeText={(value) => updatePublishForm('dailyPrice', value)}
-                  placeholder="Preço por dia"
-                  value={publishForm.dailyPrice}
-                />
-                <WebPublishInput
-                  onChangeText={(value) => updatePublishForm('city', value)}
-                  placeholder="Cidade ou endereço do carro"
-                  value={publishForm.city}
-                />
-              </View>
-              {!!publishFeedback && <Text style={styles.webPublishFeedback}>{publishFeedback}</Text>}
-              <Pressable
-                disabled={isPublishingCar}
-                onPress={publishWebCar}
-                style={[styles.webSearchButton, styles.webPublishSubmitButton]}>
-                {isPublishingCar ? (
-                  <ActivityIndicator color="#FFFFFF" />
-                ) : (
-                  <Text style={styles.webSearchButtonText}>Publicar anúncio</Text>
-                )}
-              </Pressable>
-            </View>
-          )}
+          {!!publishFeedback && <Text style={styles.webPublishFeedback}>{publishFeedback}</Text>}
         </View>
         <View style={[styles.webPublishVisual, isMobileWeb && styles.webPublishVisualMobile]}>
           <Ionicons color="#FFFFFF" name="car-sport" size={94} />
@@ -1073,6 +1213,228 @@ function WebAccountMenuItem({ icon, label }: { icon: keyof typeof Ionicons.glyph
     <Pressable style={styles.webAccountMenuItem}>
       <Ionicons color="#4B5260" name={icon} size={24} />
       <Text style={styles.webAccountMenuText}>{label}</Text>
+    </Pressable>
+  );
+}
+
+function WebPublishWizard({
+  feedback,
+  form,
+  isMobileWeb,
+  isPublishing,
+  onAddPhoto,
+  onBack,
+  onClose,
+  onNext,
+  onPublish,
+  onToggleFeature,
+  onUpdate,
+  step,
+}: {
+  feedback: string;
+  form: WebPublishFormState;
+  isMobileWeb: boolean;
+  isPublishing: boolean;
+  onAddPhoto: () => void;
+  onBack: () => void;
+  onClose: () => void;
+  onNext: () => void;
+  onPublish: () => void;
+  onToggleFeature: (feature: string) => void;
+  onUpdate: (field: keyof WebPublishFormState, value: string) => void;
+  step: PublishStep;
+}) {
+  const currentStepIndex = publishStepOrder.indexOf(step);
+  const progress = `${((currentStepIndex + 1) / publishStepOrder.length) * 100}%` as DimensionValue;
+  const featureGroups = [
+    {
+      title: 'Segurança e Proteção',
+      items: ['Airbag', 'Alarme', 'Câmera de ré', 'Sensor de ré', 'Blindado'],
+    },
+    {
+      title: 'Conforto e Conveniência',
+      items: ['Ar Condicionado', 'Teto Solar', 'Bancos de Couro', 'Trava elétrica', 'Vidro elétrico'],
+    },
+    {
+      title: 'Tecnologia e Conectividade',
+      items: ['Conexão USB', 'Volante multifuncional', 'Interface Bluetooth', 'Som', 'Computador de bordo', 'Navegador GPS'],
+    },
+  ];
+
+  function renderStep() {
+    if (step === 'intro') {
+      return (
+        <View style={[styles.webPublishWizardIntro, isMobileWeb && styles.webPublishWizardIntroMobile]}>
+          <View style={styles.webPublishWizardCarCircle}>
+            <Ionicons color="#00102D" name="car-sport" size={86} />
+          </View>
+          <View style={styles.webPublishWizardIntroCopy}>
+            <Text style={styles.webPublishStepLabel}>Etapa 1 de 6</Text>
+            <Text style={styles.webPublishWizardTitle}>Primeiro, vamos inserir os dados do seu veículo.</Text>
+            <Text style={styles.webPublishWizardSubtitle}>
+              Vamos pedir placa, quilometragem, detalhes técnicos e 4 fotos para criar seu anúncio.
+            </Text>
+          </View>
+        </View>
+      );
+    }
+
+    if (step === 'plate') {
+      return (
+        <View style={styles.webPublishWizardCenter}>
+          <Text style={styles.webPublishWizardTitle}>Vamos começar pela placa do veículo.</Text>
+          <Text style={styles.webPublishWizardSubtitle}>Ela será usada apenas para validar informações e preencher alguns dados.</Text>
+          <View style={styles.webPublishPlateBox}>
+            <Text style={styles.webPublishPlateHeader}>PLACA DO VEÍCULO</Text>
+            <TextInput
+              autoCapitalize="characters"
+              maxLength={8}
+              onChangeText={(value) => onUpdate('plate', value.toUpperCase())}
+              placeholder="ABC1D23"
+              placeholderTextColor="#8C9693"
+              style={styles.webPublishPlateInput}
+              value={form.plate}
+            />
+          </View>
+          <View style={[styles.webPublishFormGrid, isMobileWeb && styles.webPublishFormGridMobile]}>
+            <WebPublishInput onChangeText={(value) => onUpdate('city', value)} placeholder="Cidade ou endereço do carro" value={form.city} />
+            <WebPublishInput keyboardType="decimal-pad" onChangeText={(value) => onUpdate('dailyPrice', value)} placeholder="Preço por dia" value={form.dailyPrice} />
+          </View>
+        </View>
+      );
+    }
+
+    if (step === 'mileage') {
+      return (
+        <View style={styles.webPublishWizardCenter}>
+          <Text style={styles.webPublishWizardTitle}>E qual a quilometragem dele?</Text>
+          <Text style={styles.webPublishWizardSubtitle}>Essa informação ajuda o cliente a entender o estado atual do veículo.</Text>
+          <Text style={styles.webPublishMileagePreview}>{form.mileage || '0'}km</Text>
+          <WebPublishInput keyboardType="numeric" onChangeText={(value) => onUpdate('mileage', value)} placeholder="Adicionar a quilometragem" value={form.mileage} />
+        </View>
+      );
+    }
+
+    if (step === 'features') {
+      return (
+        <View style={styles.webPublishWizardContent}>
+          <Text style={styles.webPublishWizardTitle}>Informe os itens de série do seu veículo.</Text>
+          <Text style={styles.webPublishWizardSubtitle}>Informe o máximo de detalhes para atrair ainda mais contatos.</Text>
+          {featureGroups.map((group) => (
+            <View key={group.title} style={styles.webPublishFeatureGroup}>
+              <Text style={styles.webPublishFeatureTitle}>{group.title}</Text>
+              <View style={styles.webPublishChipRow}>
+                {group.items.map((feature) => (
+                  <PublishChip
+                    key={feature}
+                    label={feature}
+                    selected={form.features.includes(feature)}
+                    onPress={() => onToggleFeature(feature)}
+                  />
+                ))}
+              </View>
+            </View>
+          ))}
+        </View>
+      );
+    }
+
+    if (step === 'technical') {
+      return (
+        <View style={styles.webPublishWizardContent}>
+          <Text style={styles.webPublishWizardTitle}>Últimos detalhes técnicos. <Text style={styles.webPublishOptional}>(Opcional)</Text></Text>
+          <Text style={styles.webPublishWizardSubtitle}>Essas informações ajudam os clientes a encontrar exatamente o que procuram.</Text>
+          <View style={[styles.webPublishFormGrid, isMobileWeb && styles.webPublishFormGridMobile]}>
+            <WebPublishInput onChangeText={(value) => onUpdate('brand', value)} placeholder="Marca do veículo" value={form.brand} />
+            <WebPublishInput onChangeText={(value) => onUpdate('model', value)} placeholder="Modelo do veículo" value={form.model} />
+            <WebPublishInput onChangeText={(value) => onUpdate('doors', value)} placeholder="Portas" value={form.doors} />
+            <WebPublishInput onChangeText={(value) => onUpdate('fuel', value)} placeholder="Combustível" value={form.fuel} />
+            <WebPublishInput onChangeText={(value) => onUpdate('steering', value)} placeholder="Direção" value={form.steering} />
+            <WebPublishInput onChangeText={(value) => onUpdate('enginePower', value)} placeholder="Potência do motor" value={form.enginePower} />
+            <WebPublishInput onChangeText={(value) => onUpdate('color', value)} placeholder="Cor" value={form.color} />
+          </View>
+          <Text style={styles.webPublishFeatureTitle}>Marcas usadas no Brasil</Text>
+          <View style={styles.webPublishChipRow}>
+            {brazilCarBrands.map((brand) => (
+              <PublishChip key={brand} label={brand} selected={form.brand === brand} onPress={() => onUpdate('brand', brand)} />
+            ))}
+          </View>
+          <Text style={styles.webPublishFeatureTitle}>Modelos populares</Text>
+          <View style={styles.webPublishChipRow}>
+            {brazilPopularCarModels.map((model) => (
+              <PublishChip key={model} label={model} selected={form.model === model} onPress={() => onUpdate('model', model)} />
+            ))}
+          </View>
+        </View>
+      );
+    }
+
+    return (
+      <View style={styles.webPublishWizardContent}>
+        <Text style={styles.webPublishWizardTitle}>Adicione 4 fotos do veículo.</Text>
+        <Text style={styles.webPublishWizardSubtitle}>Use fotos bem iluminadas e mostre o veículo por vários ângulos.</Text>
+        <View style={[styles.webPublishPhotoGrid, isMobileWeb && styles.webPublishPhotoGridMobile]}>
+          {[0, 1, 2, 3].map((photoIndex) => (
+            <Pressable key={photoIndex} onPress={onAddPhoto} style={styles.webPublishPhotoSlot}>
+              {form.photos[photoIndex] ? (
+                <>
+                  <Ionicons color="#159A57" name="checkmark-circle" size={30} />
+                  <Text style={styles.webPublishPhotoText}>{form.photos[photoIndex]}</Text>
+                </>
+              ) : (
+                <>
+                  <Ionicons color="#00102D" name="camera-outline" size={30} />
+                  <Text style={styles.webPublishPhotoText}>Adicionar foto</Text>
+                </>
+              )}
+            </Pressable>
+          ))}
+        </View>
+        <Text style={styles.webPublishPhotoHint}>{form.photos.length}/4 fotos adicionadas</Text>
+        {!!feedback && <Text style={styles.webPublishFeedback}>{feedback}</Text>}
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.webPublishWizardPage}>
+      <StatusBar style="dark" />
+      <View style={styles.webPublishWizardHeader}>
+        <Pressable onPress={onClose}>
+          <GhostcarLogo color="#00102D" size="small" />
+        </Pressable>
+        <Pressable onPress={onClose} style={styles.webPublishCloseButton}>
+          <Ionicons color="#00102D" name="close" size={26} />
+        </Pressable>
+      </View>
+      <View style={styles.webPublishWizardBody}>{renderStep()}</View>
+      <View style={styles.webPublishWizardFooter}>
+        <View style={styles.webPublishProgressTrack}>
+          <View style={[styles.webPublishProgressFill, { width: progress }]} />
+        </View>
+        <View style={styles.webPublishFooterActions}>
+          <Pressable onPress={onBack}>
+            <Text style={styles.webPublishBackText}>Voltar</Text>
+          </Pressable>
+          {step === 'photos' ? (
+            <Pressable disabled={isPublishing} onPress={onPublish} style={styles.webPublishNextButton}>
+              {isPublishing ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.webPublishNextText}>Publicar anúncio</Text>}
+            </Pressable>
+          ) : (
+            <Pressable onPress={onNext} style={styles.webPublishNextButton}>
+              <Text style={styles.webPublishNextText}>{step === 'intro' ? 'Entendi, vamos começar' : 'Continuar'}</Text>
+            </Pressable>
+          )}
+        </View>
+      </View>
+    </View>
+  );
+}
+
+function PublishChip({ label, onPress, selected }: { label: string; onPress: () => void; selected: boolean }) {
+  return (
+    <Pressable onPress={onPress} style={[styles.webPublishChip, selected && styles.webPublishChipSelected]}>
+      <Text style={[styles.webPublishChipText, selected && styles.webPublishChipTextSelected]}>{label} +</Text>
     </Pressable>
   );
 }
@@ -2780,6 +3142,221 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 50,
     marginTop: 14,
+  },
+  webPublishWizardPage: {
+    flex: 1,
+    minHeight: 720,
+    backgroundColor: '#F7F5FA',
+  },
+  webPublishWizardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 46,
+    paddingTop: 34,
+  },
+  webPublishCloseButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: '#FFFFFF',
+  },
+  webPublishWizardBody: {
+    flex: 1,
+    justifyContent: 'center',
+    width: '100%',
+    maxWidth: 880,
+    marginHorizontal: 'auto',
+    paddingHorizontal: 28,
+    paddingVertical: 48,
+  },
+  webPublishWizardIntro: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 50,
+  },
+  webPublishWizardIntroMobile: {
+    flexDirection: 'column',
+    gap: 24,
+  },
+  webPublishWizardCarCircle: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 210,
+    height: 210,
+    borderRadius: 105,
+    backgroundColor: '#FFFFFF',
+  },
+  webPublishWizardIntroCopy: {
+    maxWidth: 420,
+  },
+  webPublishStepLabel: {
+    color: '#59606D',
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  webPublishWizardTitle: {
+    color: '#252C3A',
+    fontSize: 30,
+    fontWeight: '900',
+    letterSpacing: -0.5,
+  },
+  webPublishWizardSubtitle: {
+    marginTop: 10,
+    color: '#69717F',
+    fontSize: 15,
+    lineHeight: 22,
+  },
+  webPublishWizardCenter: {
+    alignItems: 'center',
+    gap: 20,
+  },
+  webPublishWizardContent: {
+    width: '100%',
+  },
+  webPublishPlateBox: {
+    width: '100%',
+    maxWidth: 480,
+    overflow: 'hidden',
+    borderWidth: 3,
+    borderColor: '#00102D',
+    borderRadius: 28,
+    backgroundColor: '#FFFFFF',
+  },
+  webPublishPlateHeader: {
+    paddingVertical: 12,
+    textAlign: 'center',
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '900',
+    backgroundColor: '#00102D',
+  },
+  webPublishPlateInput: {
+    height: 86,
+    paddingHorizontal: 24,
+    color: '#00102D',
+    fontSize: 30,
+    fontWeight: '900',
+    letterSpacing: 5,
+    textAlign: 'center',
+  },
+  webPublishMileagePreview: {
+    color: '#252C3A',
+    fontSize: 58,
+    fontWeight: '900',
+  },
+  webPublishFeatureGroup: {
+    marginTop: 30,
+  },
+  webPublishFeatureTitle: {
+    marginTop: 20,
+    marginBottom: 12,
+    color: '#343B49',
+    fontSize: 15,
+    fontWeight: '800',
+  },
+  webPublishChipRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  webPublishChip: {
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    borderWidth: 1,
+    borderColor: '#D4DAE3',
+    borderRadius: 999,
+    backgroundColor: '#FFFFFF',
+  },
+  webPublishChipSelected: {
+    borderColor: '#00102D',
+    backgroundColor: '#00102D',
+  },
+  webPublishChipText: {
+    color: '#343B49',
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  webPublishChipTextSelected: {
+    color: '#FFFFFF',
+  },
+  webPublishOptional: {
+    color: '#A8AFBA',
+    fontWeight: '600',
+  },
+  webPublishPhotoGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 14,
+    marginTop: 28,
+  },
+  webPublishPhotoGridMobile: {
+    flexDirection: 'column',
+  },
+  webPublishPhotoSlot: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexBasis: '47%',
+    minHeight: 150,
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    borderColor: '#C5CBD5',
+    borderRadius: 14,
+    backgroundColor: '#FFFFFF',
+  },
+  webPublishPhotoText: {
+    marginTop: 10,
+    color: '#343B49',
+    fontSize: 14,
+    fontWeight: '800',
+  },
+  webPublishPhotoHint: {
+    marginTop: 12,
+    color: '#59606D',
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  webPublishWizardFooter: {
+    borderTopWidth: 1,
+    borderTopColor: '#D6D2DD',
+    backgroundColor: 'rgba(255, 255, 255, 0.86)',
+  },
+  webPublishProgressTrack: {
+    height: 5,
+    backgroundColor: '#D6D2DD',
+  },
+  webPublishProgressFill: {
+    height: 5,
+    backgroundColor: '#4B18D1',
+  },
+  webPublishFooterActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 42,
+    paddingVertical: 24,
+  },
+  webPublishBackText: {
+    color: '#4B18D1',
+    fontSize: 15,
+    fontWeight: '800',
+  },
+  webPublishNextButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 170,
+    height: 54,
+    paddingHorizontal: 24,
+    borderRadius: 27,
+    backgroundColor: '#D7552E',
+  },
+  webPublishNextText: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '900',
   },
   webPublishVisual: {
     alignItems: 'center',
