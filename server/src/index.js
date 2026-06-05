@@ -11,6 +11,7 @@ const googleClientId = process.env.GOOGLE_CLIENT_ID;
 const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
 const sessionSecret = process.env.SESSION_SECRET;
 const webOrigin = process.env.WEB_ORIGIN || 'https://ghostcar.com.br';
+const pendingWebSessions = new Map();
 
 if (!databaseUrl) {
   throw new Error('DATABASE_URL is required');
@@ -26,6 +27,13 @@ app.use(cors({
   origin: [webOrigin, 'https://www.ghostcar.com.br', 'http://localhost:8081', 'http://localhost:19006'],
 }));
 app.use(express.json({ limit: '1mb' }));
+app.use((_request, response, next) => {
+  response.setHeader('X-Content-Type-Options', 'nosniff');
+  response.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  response.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(self)');
+  response.setHeader('X-Frame-Options', 'DENY');
+  next();
+});
 
 function parseNumber(value) {
   const number = Number(value);
@@ -141,6 +149,37 @@ function setSessionCookie(response, sessionToken) {
     secure: true,
   });
 }
+
+function createPendingWebSession(sessionToken, user) {
+  const code = crypto.randomBytes(32).toString('base64url');
+  pendingWebSessions.set(code, {
+    expiresAt: Date.now() + 2 * 60 * 1000,
+    sessionToken,
+    user: formatUser(user),
+  });
+
+  return code;
+}
+
+function consumePendingWebSession(code) {
+  const session = pendingWebSessions.get(code);
+  pendingWebSessions.delete(code);
+
+  if (!session || Date.now() > session.expiresAt) {
+    return null;
+  }
+
+  return session;
+}
+
+setInterval(() => {
+  const now = Date.now();
+  for (const [code, session] of pendingWebSessions.entries()) {
+    if (now > session.expiresAt) {
+      pendingWebSessions.delete(code);
+    }
+  }
+}, 5 * 60 * 1000).unref?.();
 
 function getSafeReturnTo(returnTo) {
   try {
@@ -322,12 +361,28 @@ app.get('/auth/google/callback', async (request, response, next) => {
 
     const redirectUrl = new URL(stateValue.returnTo || webOrigin);
     redirectUrl.searchParams.set('auth', 'google-ok');
-    redirectUrl.searchParams.set('session', sessionToken);
+    redirectUrl.searchParams.set('sessionCode', createPendingWebSession(sessionToken, user));
 
     return response.redirect(redirectUrl.toString());
   } catch (error) {
     return next(error);
   }
+});
+
+app.post('/auth/session/exchange', (request, response) => {
+  const { code } = request.body || {};
+  const pendingSession = consumePendingWebSession(code);
+
+  if (!pendingSession) {
+    return response.status(400).json({ error: 'Invalid or expired session code' });
+  }
+
+  setSessionCookie(response, pendingSession.sessionToken);
+
+  return response.json({
+    sessionToken: pendingSession.sessionToken,
+    user: pendingSession.user,
+  });
 });
 
 app.post('/auth/register', async (request, response, next) => {

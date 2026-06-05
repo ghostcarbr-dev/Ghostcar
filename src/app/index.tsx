@@ -471,7 +471,7 @@ function WebHomeScreen() {
 
     const url = new URL(window.location.href);
     const authStatus = url.searchParams.get('auth');
-    const sessionToken = url.searchParams.get('session');
+    const sessionCode = url.searchParams.get('sessionCode');
 
     if (authStatus === 'google-not-registered') {
       setWebLoginError('Este e-mail ainda não está cadastrado. Crie uma conta antes de continuar com Google.');
@@ -485,17 +485,48 @@ function WebHomeScreen() {
       url.searchParams.delete('auth');
     }
 
-    if (sessionToken) {
-      storeWebSessionToken(sessionToken);
-      url.searchParams.delete('session');
+    if (sessionCode) {
+      url.searchParams.delete('sessionCode');
     }
 
-    if (authStatus || sessionToken) {
+    if (authStatus || sessionCode) {
       window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`);
+    }
+
+    async function exchangeGoogleSessionCode() {
+      if (!sessionCode) {
+        return null;
+      }
+
+      const response = await fetch(`${apiUrl}/auth/session/exchange`, {
+        body: JSON.stringify({ code: sessionCode }),
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        method: 'POST',
+      });
+
+      if (!response.ok) {
+        throw new Error('Session code exchange failed');
+      }
+
+      const data = (await response.json()) as { sessionToken?: string; user?: AuthUser };
+      if (!data.sessionToken || !data.user) {
+        throw new Error('Session code exchange returned invalid data');
+      }
+
+      storeWebSessionToken(data.sessionToken);
+      return data.user;
     }
 
     async function loadCurrentUser() {
       try {
+        const exchangedUser = await exchangeGoogleSessionCode();
+        if (exchangedUser) {
+          setWebUser(exchangedUser);
+          updateWebLastActivity();
+          return;
+        }
+
         if (isWebSessionInactive()) {
           clearWebSessionToken();
           await fetch(`${apiUrl}/auth/logout`, {
