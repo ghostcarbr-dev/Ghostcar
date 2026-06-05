@@ -330,6 +330,7 @@ function WebHomeScreen() {
   const [isPublishFormOpen, setIsPublishFormOpen] = useState(false);
   const [isWebSignupPageOpen, setIsWebSignupPageOpen] = useState(false);
   const [isWebLoginOpen, setIsWebLoginOpen] = useState(false);
+  const [webLoginError, setWebLoginError] = useState('');
   const [publishFeedback, setPublishFeedback] = useState('');
   const [publishForm, setPublishForm] = useState({
     category: '',
@@ -366,11 +367,27 @@ function WebHomeScreen() {
     }
 
     const url = new URL(window.location.href);
+    const authStatus = url.searchParams.get('auth');
     const sessionToken = url.searchParams.get('session');
+
+    if (authStatus === 'google-not-registered') {
+      setWebLoginError('Este e-mail ainda não está cadastrado. Crie uma conta antes de continuar com Google.');
+      setIsWebLoginOpen(true);
+      url.searchParams.delete('auth');
+    } else if (authStatus === 'google-error') {
+      setWebLoginError('Não foi possível entrar com Google. Tente novamente.');
+      setIsWebLoginOpen(true);
+      url.searchParams.delete('auth');
+    } else if (authStatus) {
+      url.searchParams.delete('auth');
+    }
 
     if (sessionToken) {
       storeWebSessionToken(sessionToken);
       url.searchParams.delete('session');
+    }
+
+    if (authStatus || sessionToken) {
       window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`);
     }
 
@@ -638,7 +655,10 @@ function WebHomeScreen() {
             </Pressable>
             {!isMobileWeb && <Text style={[styles.webNavLink, styles.webNavLinkOnHero]}>Ajuda</Text>}
             <Pressable
-              onPress={() => setIsWebLoginOpen((isOpen) => !isOpen)}
+              onPress={() => {
+                setWebLoginError('');
+                setIsWebLoginOpen((isOpen) => !isOpen);
+              }}
               style={[styles.webLoginButton, styles.webLoginButtonOnHero, webUser && styles.webAccountButtonOnHero, isMobileWeb && styles.webLoginButtonMobile]}>
               {webUser ? (
                 <View style={styles.webAccountAvatar}>
@@ -724,7 +744,10 @@ function WebHomeScreen() {
                     </View>
                     <View style={[styles.webSocialRow, isMobileWeb && styles.webSocialRowMobile]}>
                       <Pressable
-                        onPress={() => openGoogleSignIn('login')}
+                        onPress={() => {
+                          setWebLoginError('');
+                          openGoogleSignIn('login');
+                        }}
                         style={[styles.webSocialButton, isMobileWeb && styles.webSocialButtonMobile]}>
                         <Image
                           contentFit="contain"
@@ -736,6 +759,7 @@ function WebHomeScreen() {
                         <Ionicons color="#00102D" name="logo-apple" size={27} />
                       </Pressable>
                     </View>
+                    {webLoginError ? <Text style={styles.webLoginErrorText}>{webLoginError}</Text> : null}
                   </View>
                 </>
               )}
@@ -1994,6 +2018,13 @@ const styles = StyleSheet.create({
     color: '#2B6CB0',
     fontSize: 16,
     fontWeight: '500',
+  },
+  webLoginErrorText: {
+    marginTop: 14,
+    color: '#B42318',
+    fontSize: 13,
+    fontWeight: '700',
+    lineHeight: 19,
   },
   webLoginSubmitButton: {
     alignItems: 'center',
