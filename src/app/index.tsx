@@ -3146,7 +3146,7 @@ const styles = StyleSheet.create({
   webPublishWizardPage: {
     flex: 1,
     minHeight: 720,
-    backgroundColor: '#F7F5FA',
+    backgroundColor: '#FFFFFF',
   },
   webPublishWizardHeader: {
     flexDirection: 'row',
@@ -3161,6 +3161,8 @@ const styles = StyleSheet.create({
     width: 42,
     height: 42,
     borderRadius: 21,
+    borderWidth: 1,
+    borderColor: '#DDE6F2',
     backgroundColor: '#FFFFFF',
   },
   webPublishWizardBody: {
@@ -3188,7 +3190,9 @@ const styles = StyleSheet.create({
     width: 210,
     height: 210,
     borderRadius: 105,
-    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#DDE6F2',
+    backgroundColor: '#F4F8FC',
   },
   webPublishWizardIntroCopy: {
     maxWidth: 420,
@@ -3321,16 +3325,16 @@ const styles = StyleSheet.create({
   },
   webPublishWizardFooter: {
     borderTopWidth: 1,
-    borderTopColor: '#D6D2DD',
-    backgroundColor: 'rgba(255, 255, 255, 0.86)',
+    borderTopColor: '#DDE6F2',
+    backgroundColor: '#FFFFFF',
   },
   webPublishProgressTrack: {
     height: 5,
-    backgroundColor: '#D6D2DD',
+    backgroundColor: '#DDE6F2',
   },
   webPublishProgressFill: {
     height: 5,
-    backgroundColor: '#4B18D1',
+    backgroundColor: '#00102D',
   },
   webPublishFooterActions: {
     flexDirection: 'row',
@@ -3340,7 +3344,7 @@ const styles = StyleSheet.create({
     paddingVertical: 24,
   },
   webPublishBackText: {
-    color: '#4B18D1',
+    color: '#00102D',
     fontSize: 15,
     fontWeight: '800',
   },
@@ -3351,7 +3355,7 @@ const styles = StyleSheet.create({
     height: 54,
     paddingHorizontal: 24,
     borderRadius: 27,
-    backgroundColor: '#D7552E',
+    backgroundColor: '#00102D',
   },
   webPublishNextText: {
     color: '#FFFFFF',
