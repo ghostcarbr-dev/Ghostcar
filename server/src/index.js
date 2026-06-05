@@ -136,7 +136,6 @@ function createSessionToken(user) {
 function setSessionCookie(response, sessionToken) {
   response.cookie('ghostcar_session', sessionToken, {
     httpOnly: true,
-    maxAge: 30 * 24 * 60 * 60 * 1000,
     path: '/',
     sameSite: 'none',
     secure: true,

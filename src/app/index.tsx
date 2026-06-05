@@ -148,26 +148,26 @@ function getWebSessionToken() {
     return null;
   }
 
-  return window.localStorage.getItem(webSessionStorageKey);
+  return window.sessionStorage.getItem(webSessionStorageKey);
 }
 
 function storeWebSessionToken(token: string) {
   if (Platform.OS === 'web') {
-    window.localStorage.setItem(webSessionStorageKey, token);
+    window.sessionStorage.setItem(webSessionStorageKey, token);
     updateWebLastActivity();
   }
 }
 
 function clearWebSessionToken() {
   if (Platform.OS === 'web') {
-    window.localStorage.removeItem(webSessionStorageKey);
-    window.localStorage.removeItem(webLastActivityStorageKey);
+    window.sessionStorage.removeItem(webSessionStorageKey);
+    window.sessionStorage.removeItem(webLastActivityStorageKey);
   }
 }
 
 function updateWebLastActivity() {
   if (Platform.OS === 'web') {
-    window.localStorage.setItem(webLastActivityStorageKey, String(Date.now()));
+    window.sessionStorage.setItem(webLastActivityStorageKey, String(Date.now()));
   }
 }
 
@@ -176,7 +176,7 @@ function isWebSessionInactive() {
     return false;
   }
 
-  const lastActivity = Number(window.localStorage.getItem(webLastActivityStorageKey));
+  const lastActivity = Number(window.sessionStorage.getItem(webLastActivityStorageKey));
   if (!Number.isFinite(lastActivity) || lastActivity <= 0) {
     updateWebLastActivity();
     return false;
@@ -511,9 +511,14 @@ function WebHomeScreen() {
         }
 
         const storedSessionToken = getWebSessionToken();
+        if (!storedSessionToken) {
+          setWebUser(null);
+          return;
+        }
+
         const response = await fetch(`${apiUrl}/auth/me`, {
           credentials: 'include',
-          headers: storedSessionToken ? { Authorization: `Bearer ${storedSessionToken}` } : undefined,
+          headers: { Authorization: `Bearer ${storedSessionToken}` },
         });
         if (!response.ok) {
           setWebUser(null);
