@@ -102,6 +102,35 @@ async function openGoogleSignIn(mode: 'login' | 'signup' = 'login') {
   await WebBrowser.openBrowserAsync(googleSignInUrl);
 }
 
+function useStableWebWidth() {
+  const dimensions = useWindowDimensions();
+  const [webWidth, setWebWidth] = useState(() => {
+    if (Platform.OS === 'web') {
+      return window.innerWidth;
+    }
+
+    return dimensions.width;
+  });
+
+  useEffect(() => {
+    if (Platform.OS !== 'web') {
+      setWebWidth(dimensions.width);
+      return undefined;
+    }
+
+    function updateWebWidth() {
+      setWebWidth(window.innerWidth);
+    }
+
+    updateWebWidth();
+    window.addEventListener('resize', updateWebWidth);
+
+    return () => window.removeEventListener('resize', updateWebWidth);
+  }, [dimensions.width]);
+
+  return Platform.OS === 'web' ? webWidth : dimensions.width;
+}
+
 export default function HomeScreen() {
   if (Platform.OS === 'web') {
     return <WebHomeScreen />;
@@ -291,7 +320,7 @@ export default function HomeScreen() {
 }
 
 function WebHomeScreen() {
-  const { width } = useWindowDimensions();
+  const width = useStableWebWidth();
   const [destination, setDestination] = useState('');
   const [cars, setCars] = useState<CarListing[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
@@ -961,7 +990,7 @@ function WebAccountMenuItem({ icon, label }: { icon: keyof typeof Ionicons.glyph
 }
 
 function WebSignupPage({ onBack, onSignupComplete }: { onBack: () => void; onSignupComplete: (user: AuthUser) => void }) {
-  const { width } = useWindowDimensions();
+  const width = useStableWebWidth();
   const isMobileWeb = width < 820;
   const [form, setForm] = useState({
     birthDate: '',
