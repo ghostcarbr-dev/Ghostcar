@@ -68,6 +68,8 @@ type PhotonFeature = {
 };
 
 const apiUrl = 'https://ghostcar-api.onrender.com';
+const webInactivityLimitMs = 10 * 60 * 1000;
+const webLastActivityStorageKey = 'ghostcar_last_activity';
 const webSessionStorageKey = 'ghostcar_session_token';
 
 function getWebSessionToken() {
@@ -81,13 +83,35 @@ function getWebSessionToken() {
 function storeWebSessionToken(token: string) {
   if (Platform.OS === 'web') {
     window.localStorage.setItem(webSessionStorageKey, token);
+    updateWebLastActivity();
   }
 }
 
 function clearWebSessionToken() {
   if (Platform.OS === 'web') {
     window.localStorage.removeItem(webSessionStorageKey);
+    window.localStorage.removeItem(webLastActivityStorageKey);
   }
+}
+
+function updateWebLastActivity() {
+  if (Platform.OS === 'web') {
+    window.localStorage.setItem(webLastActivityStorageKey, String(Date.now()));
+  }
+}
+
+function isWebSessionInactive() {
+  if (Platform.OS !== 'web') {
+    return false;
+  }
+
+  const lastActivity = Number(window.localStorage.getItem(webLastActivityStorageKey));
+  if (!Number.isFinite(lastActivity) || lastActivity <= 0) {
+    updateWebLastActivity();
+    return false;
+  }
+
+  return Date.now() - lastActivity > webInactivityLimitMs;
 }
 
 async function openGoogleSignIn(mode: 'login' | 'signup' = 'login') {
@@ -393,6 +417,16 @@ function WebHomeScreen() {
 
     async function loadCurrentUser() {
       try {
+        if (isWebSessionInactive()) {
+          clearWebSessionToken();
+          await fetch(`${apiUrl}/auth/logout`, {
+            credentials: 'include',
+            method: 'POST',
+          });
+          setWebUser(null);
+          return;
+        }
+
         const storedSessionToken = getWebSessionToken();
         const response = await fetch(`${apiUrl}/auth/me`, {
           credentials: 'include',
@@ -405,6 +439,9 @@ function WebHomeScreen() {
 
         const data = (await response.json()) as { user: AuthUser | null };
         setWebUser(data.user);
+        if (data.user) {
+          updateWebLastActivity();
+        }
       } catch {
         setWebUser(null);
       }
@@ -427,6 +464,33 @@ function WebHomeScreen() {
       setIsWebLoginOpen(false);
     }
   }
+
+  useEffect(() => {
+    if (Platform.OS !== 'web' || !webUser) {
+      return undefined;
+    }
+
+    let inactivityTimeout: ReturnType<typeof setTimeout>;
+    const activityEvents = ['click', 'keydown', 'mousemove', 'scroll', 'touchstart'];
+
+    function disconnectInactiveUser() {
+      handleWebLogout();
+    }
+
+    function resetInactivityTimer() {
+      updateWebLastActivity();
+      clearTimeout(inactivityTimeout);
+      inactivityTimeout = setTimeout(disconnectInactiveUser, webInactivityLimitMs);
+    }
+
+    resetInactivityTimer();
+    activityEvents.forEach((eventName) => window.addEventListener(eventName, resetInactivityTimer, { passive: true }));
+
+    return () => {
+      clearTimeout(inactivityTimeout);
+      activityEvents.forEach((eventName) => window.removeEventListener(eventName, resetInactivityTimer));
+    };
+  }, [webUser]);
 
   useEffect(() => {
     const query = destination.trim();
