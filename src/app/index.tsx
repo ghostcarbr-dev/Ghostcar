@@ -230,7 +230,104 @@ export default function HomeScreen() {
   const router = useRouter();
   const { t } = useLanguage();
   const [authMode, setAuthMode] = useState<'login' | 'signup' | null>(null);
+  const [signupStep, setSignupStep] = useState<'email' | 'details'>('email');
+  const [signupEmail, setSignupEmail] = useState('');
+  const [nativeSignupForm, setNativeSignupForm] = useState({
+    birthDate: '',
+    cpf: '',
+    firstName: '',
+    lastName: '',
+    password: '',
+    phone: '',
+  });
+  const [acceptEmailCommunication, setAcceptEmailCommunication] = useState(false);
+  const [nativeSignupError, setNativeSignupError] = useState('');
+  const [isCreatingNativeAccount, setIsCreatingNativeAccount] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  const normalizedSignupEmail = signupEmail.trim().toLowerCase();
+  const isSignupEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedSignupEmail);
+
+  function updateNativeSignupField(field: keyof typeof nativeSignupForm, value: string) {
+    setNativeSignupForm((currentForm) => ({ ...currentForm, [field]: value }));
+    setNativeSignupError('');
+  }
+
+  function resetNativeSignup() {
+    setAuthMode(null);
+    setSignupStep('email');
+    setSignupEmail('');
+    setNativeSignupForm({
+      birthDate: '',
+      cpf: '',
+      firstName: '',
+      lastName: '',
+      password: '',
+      phone: '',
+    });
+    setAcceptEmailCommunication(false);
+    setNativeSignupError('');
+  }
+
+  async function createNativeAccount() {
+    if (!isSignupEmailValid) {
+      setNativeSignupError('Digite um e-mail válido.');
+      setSignupStep('email');
+      return;
+    }
+
+    if (
+      !nativeSignupForm.firstName.trim()
+      || !nativeSignupForm.lastName.trim()
+      || !nativeSignupForm.birthDate.trim()
+      || !nativeSignupForm.phone.trim()
+      || !nativeSignupForm.cpf.trim()
+      || !nativeSignupForm.password
+    ) {
+      setNativeSignupError('Preencha todos os campos.');
+      return;
+    }
+
+    if (nativeSignupForm.password.length < 8) {
+      setNativeSignupError('A senha deve ter pelo menos 8 caracteres.');
+      return;
+    }
+
+    setIsCreatingNativeAccount(true);
+    setNativeSignupError('');
+
+    try {
+      const response = await fetch(`${apiUrl}/auth/register`, {
+        body: JSON.stringify({
+          birthDate: nativeSignupForm.birthDate,
+          country: 'Brasil',
+          cpf: nativeSignupForm.cpf,
+          email: normalizedSignupEmail,
+          firstName: nativeSignupForm.firstName,
+          lastName: nativeSignupForm.lastName,
+          password: nativeSignupForm.password,
+          passwordConfirmation: nativeSignupForm.password,
+          phone: nativeSignupForm.phone,
+        }),
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        method: 'POST',
+      });
+
+      const data = (await response.json()) as { error?: string };
+
+      if (!response.ok) {
+        setNativeSignupError(response.status === 409 ? 'Este e-mail já está cadastrado.' : data.error || 'Não foi possível criar a conta.');
+        return;
+      }
+
+      router.push('/client-home');
+    } catch {
+      setNativeSignupError('Não foi possível criar a conta. Tente novamente.');
+    } finally {
+      setIsCreatingNativeAccount(false);
+    }
+  }
 
   return (
     <KeyboardAvoidingView
@@ -256,7 +353,10 @@ export default function HomeScreen() {
           {!authMode && (
             <View style={styles.welcomeActions}>
               <Pressable
-                onPress={() => setAuthMode('signup')}
+                onPress={() => {
+                  setSignupStep('email');
+                  setAuthMode('signup');
+                }}
                 style={({ pressed }) => [styles.openAccountButton, pressed && styles.pressed]}>
                 <Text style={styles.openAccountText}>{t('openAccount')}</Text>
               </Pressable>
@@ -277,51 +377,185 @@ export default function HomeScreen() {
                 </View>
                 <Pressable
                   accessibilityLabel="Fechar"
-                  onPress={() => setAuthMode(null)}
+                  onPress={resetNativeSignup}
                   style={styles.closeButton}>
                   <Ionicons color="#737373" name="close" size={30} />
                 </Pressable>
               </View>
 
-              <Text style={styles.signupTitle}>{t('enterOrCreate')}</Text>
-              <Text style={styles.signupSubtitle}>{t('signupInfo')}</Text>
+              {signupStep === 'email' ? (
+                <>
+                  <Text style={styles.signupTitle}>{t('enterOrCreate')}</Text>
+                  <Text style={styles.signupSubtitle}>{t('signupInfo')}</Text>
 
-              <Text style={styles.signupLabel}>{t('email')}</Text>
-              <TextInput
-                autoCapitalize="none"
-                autoComplete="email"
-                keyboardType="email-address"
-                placeholder={t('typeEmail')}
-                placeholderTextColor="#7B7B7B"
-                style={styles.signupInput}
-              />
+                  <Text style={styles.signupLabel}>{t('email')}</Text>
+                  <TextInput
+                    autoCapitalize="none"
+                    autoComplete="email"
+                    keyboardType="email-address"
+                    onChangeText={(value) => {
+                      setSignupEmail(value);
+                      setNativeSignupError('');
+                    }}
+                    placeholder={t('typeEmail')}
+                    placeholderTextColor="#7B7B7B"
+                    style={styles.signupInput}
+                    value={signupEmail}
+                  />
 
-              <Pressable
-                style={({ pressed }) => [styles.emailContinueButton, pressed && styles.pressed]}>
-                <Text style={styles.emailContinueText}>{t('continueEmail')}</Text>
-              </Pressable>
+                  <Pressable
+                    disabled={!isSignupEmailValid}
+                    onPress={() => setSignupStep('details')}
+                    style={({ pressed }) => [
+                      styles.emailContinueButton,
+                      !isSignupEmailValid && styles.emailContinueButtonDisabled,
+                      pressed && styles.pressed,
+                    ]}>
+                    <Text style={styles.emailContinueText}>{t('continueEmail')}</Text>
+                  </Pressable>
 
-              <View style={styles.dividerRow}>
-                <View style={styles.divider} />
-                <Text style={styles.dividerText}>{t('or')}</Text>
-                <View style={styles.divider} />
-              </View>
+                  <View style={styles.dividerRow}>
+                    <View style={styles.divider} />
+                    <Text style={styles.dividerText}>{t('or')}</Text>
+                    <View style={styles.divider} />
+                  </View>
 
-              <Pressable
-                onPress={() => openGoogleSignIn('signup')}
-                style={({ pressed }) => [styles.googleButton, styles.signupSocialButton, pressed && styles.pressed]}>
-                <Image
-                  contentFit="contain"
-                  source={require('@/assets/images/google-g-logo.png')}
-                  style={styles.googleIcon}
-                />
-                <Text style={styles.socialButtonText}>{t('continueGoogle')}</Text>
-              </Pressable>
+                  <Pressable
+                    onPress={() => openGoogleSignIn('signup')}
+                    style={({ pressed }) => [styles.googleButton, styles.signupSocialButton, pressed && styles.pressed]}>
+                    <Image
+                      contentFit="contain"
+                      source={require('@/assets/images/google-g-logo.png')}
+                      style={styles.googleIcon}
+                    />
+                    <Text style={styles.socialButtonText}>{t('continueGoogle')}</Text>
+                  </Pressable>
 
-              <Pressable style={({ pressed }) => [styles.appleButton, pressed && styles.pressed]}>
-                <Ionicons color="#FFFFFF" name="logo-apple" size={26} />
-                <Text style={styles.appleButtonText}>{t('continueApple')}</Text>
-              </Pressable>
+                  <Pressable style={({ pressed }) => [styles.appleButton, pressed && styles.pressed]}>
+                    <Ionicons color="#FFFFFF" name="logo-apple" size={26} />
+                    <Text style={styles.appleButtonText}>{t('continueApple')}</Text>
+                  </Pressable>
+                </>
+              ) : (
+                <>
+                  <Pressable
+                    accessibilityLabel="Voltar"
+                    onPress={() => setSignupStep('email')}
+                    style={styles.signupBackButton}>
+                    <Ionicons color="#333333" name="arrow-back" size={28} />
+                  </Pressable>
+                  <Text style={styles.signupTitle}>Crie sua conta</Text>
+                  <Text style={styles.signupDescription}>
+                    Lembre-se que os dados devem corresponder às informações do condutor responsável pela retirada do veículo.
+                  </Text>
+
+                  <Text style={styles.signupLabel}>E-mail</Text>
+                  <View style={styles.verifiedEmailBox}>
+                    <Text style={styles.verifiedEmailText}>{normalizedSignupEmail}</Text>
+                    <Ionicons color="#2CBF7A" name="checkmark-circle" size={28} />
+                  </View>
+
+                  <Text style={styles.signupLabel}>Nome</Text>
+                  <TextInput
+                    onChangeText={(value) => updateNativeSignupField('firstName', value)}
+                    placeholder="Informe seu nome"
+                    placeholderTextColor="#B8B8B8"
+                    style={[styles.signupInput, styles.nativeSignupInput]}
+                    value={nativeSignupForm.firstName}
+                  />
+
+                  <Text style={styles.signupLabel}>Sobrenome</Text>
+                  <TextInput
+                    onChangeText={(value) => updateNativeSignupField('lastName', value)}
+                    placeholder="Informe seu sobrenome"
+                    placeholderTextColor="#B8B8B8"
+                    style={[styles.signupInput, styles.nativeSignupInput]}
+                    value={nativeSignupForm.lastName}
+                  />
+
+                  <Text style={styles.signupLabel}>Data de nascimento</Text>
+                  <TextInput
+                    keyboardType="numbers-and-punctuation"
+                    onChangeText={(value) => updateNativeSignupField('birthDate', value)}
+                    placeholder="DD/MM/AAAA"
+                    placeholderTextColor="#B8B8B8"
+                    style={[styles.signupInput, styles.nativeSignupInput]}
+                    value={nativeSignupForm.birthDate}
+                  />
+
+                  <Text style={styles.signupLabel}>Telefone</Text>
+                  <View style={styles.phoneInputRow}>
+                    <View style={styles.phonePrefix}>
+                      <Text style={styles.phoneFlag}>🇧🇷</Text>
+                      <Text style={styles.phonePrefixText}>+55</Text>
+                      <Ionicons color="#111111" name="chevron-down" size={22} />
+                    </View>
+                    <TextInput
+                      keyboardType="phone-pad"
+                      onChangeText={(value) => updateNativeSignupField('phone', value)}
+                      placeholder="(00) 00000-0000"
+                      placeholderTextColor="#B8B8B8"
+                      style={styles.phoneNumberInput}
+                      value={nativeSignupForm.phone}
+                    />
+                  </View>
+
+                  <Text style={styles.signupLabel}>CPF</Text>
+                  <TextInput
+                    keyboardType="numbers-and-punctuation"
+                    onChangeText={(value) => updateNativeSignupField('cpf', value)}
+                    placeholder="000.000.000-00"
+                    placeholderTextColor="#B8B8B8"
+                    style={[styles.signupInput, styles.nativeSignupInput]}
+                    value={nativeSignupForm.cpf}
+                  />
+
+                  <Text style={styles.signupLabel}>Senha</Text>
+                  <TextInput
+                    autoCapitalize="none"
+                    onChangeText={(value) => updateNativeSignupField('password', value)}
+                    placeholder="Informe uma senha"
+                    placeholderTextColor="#B8B8B8"
+                    secureTextEntry
+                    style={[styles.signupInput, styles.nativeSignupInput]}
+                    value={nativeSignupForm.password}
+                  />
+
+                  <Pressable
+                    onPress={() => setAcceptEmailCommunication((accepted) => !accepted)}
+                    style={styles.nativeSignupCheckboxRow}>
+                    <View style={[styles.nativeSignupCheckbox, acceptEmailCommunication && styles.nativeSignupCheckboxChecked]}>
+                      {acceptEmailCommunication && <Ionicons color="#FFFFFF" name="checkmark" size={18} />}
+                    </View>
+                    <Text style={styles.nativeSignupCheckboxText}>Aceito receber comunicações por e-mail</Text>
+                  </Pressable>
+
+                  {!!nativeSignupError && <Text style={styles.nativeSignupErrorText}>{nativeSignupError}</Text>}
+
+                  <Pressable
+                    disabled={isCreatingNativeAccount}
+                    onPress={createNativeAccount}
+                    style={({ pressed }) => [
+                      styles.emailContinueButton,
+                      styles.nativeSignupSubmitButton,
+                      isCreatingNativeAccount && styles.emailContinueButtonDisabled,
+                      pressed && styles.pressed,
+                    ]}>
+                    {isCreatingNativeAccount ? (
+                      <ActivityIndicator color="#FFFFFF" />
+                    ) : (
+                      <Text style={styles.emailContinueText}>Continuar</Text>
+                    )}
+                  </Pressable>
+
+                  <Text style={styles.nativeSignupTerms}>
+                    Ao seguir utilizando nossas soluções você está ciente de que seus dados pessoais serão tratados conforme a{' '}
+                    <Text style={styles.nativeSignupLink}>Política de Privacidade</Text> da Ghostcar.
+                    {'\n\n'}Ao fazer login ou criar uma conta, você aceita os{' '}
+                    <Text style={styles.nativeSignupLink}>Termos e Condições</Text>.
+                  </Text>
+                </>
+              )}
             </View>
           )}
 
@@ -399,7 +633,12 @@ export default function HomeScreen() {
                 <Text style={styles.forgotText}>{t('forgotPassword')}</Text>
               </Pressable>
 
-              <Pressable style={({ pressed }) => [styles.createButton, pressed && styles.pressed]}>
+              <Pressable
+                onPress={() => {
+                  setSignupStep('email');
+                  setAuthMode('signup');
+                }}
+                style={({ pressed }) => [styles.createButton, pressed && styles.pressed]}>
                 <Text style={styles.createButtonText}>{t('createAccount')}</Text>
               </Pressable>
             </View>
@@ -1948,6 +2187,9 @@ const styles = StyleSheet.create({
       },
     }),
   },
+  nativeSignupInput: {
+    marginBottom: 24,
+  },
   emailContinueButton: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -1962,10 +2204,126 @@ const styles = StyleSheet.create({
       },
     }),
   },
+  emailContinueButtonDisabled: {
+    backgroundColor: '#B8DCCB',
+    opacity: 0.75,
+  },
   emailContinueText: {
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '700',
+  },
+  signupBackButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 42,
+    height: 42,
+    marginBottom: 14,
+    marginLeft: -6,
+  },
+  signupDescription: {
+    marginTop: 18,
+    marginBottom: 28,
+    color: '#222222',
+    fontSize: 16,
+    lineHeight: 24,
+  },
+  verifiedEmailBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    height: 64,
+    marginBottom: 24,
+    paddingHorizontal: 18,
+    borderWidth: 1,
+    borderColor: '#D0D0D0',
+    borderRadius: 11,
+    backgroundColor: '#F7F7F7',
+  },
+  verifiedEmailText: {
+    flex: 1,
+    color: '#6E6E6E',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  phoneInputRow: {
+    flexDirection: 'row',
+    height: 64,
+    marginBottom: 24,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#C8CECC',
+    borderRadius: 11,
+    backgroundColor: '#FFFFFF',
+  },
+  phonePrefix: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 138,
+    borderRightWidth: 1,
+    borderRightColor: '#C8CECC',
+    gap: 10,
+  },
+  phoneFlag: {
+    fontSize: 28,
+  },
+  phonePrefixText: {
+    color: '#333333',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  phoneNumberInput: {
+    flex: 1,
+    paddingHorizontal: 18,
+    color: '#202020',
+    fontSize: 16,
+  },
+  nativeSignupCheckboxRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 24,
+    gap: 12,
+  },
+  nativeSignupCheckbox: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 28,
+    height: 28,
+    borderWidth: 2,
+    borderColor: '#5E5E5E',
+    borderRadius: 3,
+    backgroundColor: '#FFFFFF',
+  },
+  nativeSignupCheckboxChecked: {
+    borderColor: '#00102D',
+    backgroundColor: '#00102D',
+  },
+  nativeSignupCheckboxText: {
+    flex: 1,
+    color: '#606060',
+    fontSize: 15,
+  },
+  nativeSignupSubmitButton: {
+    marginTop: 28,
+    backgroundColor: '#00102D',
+  },
+  nativeSignupErrorText: {
+    marginTop: 18,
+    color: '#B42318',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  nativeSignupTerms: {
+    marginTop: 24,
+    color: '#111111',
+    fontSize: 14,
+    lineHeight: 22,
+    textAlign: 'center',
+  },
+  nativeSignupLink: {
+    color: '#1976B8',
+    textDecorationLine: 'underline',
   },
   card: {
     width: '92%',
