@@ -1216,8 +1216,7 @@ function WebHomeScreen() {
                   <View style={styles.webAccountMenu}>
                     <WebAccountMenuItem icon="person-circle-outline" label="Minha conta" />
                     <WebAccountMenuItem icon="ticket-outline" label="Minhas reservas" />
-                    <WebAccountMenuItem icon="trophy-outline" label="RentRewards" />
-                    <WebAccountMenuItem icon="gift-outline" label="Promoções" />
+                    <WebAccountMenuItem icon="car-outline" label="Meus Carros" />
                     <Pressable onPress={handleWebLogout} style={styles.webAccountMenuItem}>
                       <Ionicons color="#4B5260" name="log-out-outline" size={24} />
                       <Text style={styles.webAccountMenuText}>Sair</Text>

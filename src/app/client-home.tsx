@@ -49,9 +49,8 @@ type PhotonFeature = {
 const personalMenuItems = [
   { icon: 'home-outline', key: 'home' },
   { icon: 'ticket-outline', key: 'bookings' },
+  { icon: 'car-outline', key: 'myCars' },
   { icon: 'car-sport-outline', key: 'publishCar' },
-  { icon: 'trophy-outline', key: 'rentRewards' },
-  { icon: 'gift-outline', key: 'promotions' },
   { icon: 'settings-outline', key: 'settings' },
 ] as const;
 
