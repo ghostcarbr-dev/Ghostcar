@@ -7,7 +7,6 @@
     "icon": "./assets/images/ghostcar-app-icon.png",
     "scheme": "ghostcar",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": false,
     "ios": {
       "icon": "./assets/images/ghostcar-app-icon.png"
     },
