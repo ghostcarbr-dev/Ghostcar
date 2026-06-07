@@ -2,16 +2,18 @@
   "expo": {
     "name": "Ghostcar",
     "slug": "Ghostcar",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/ghostcar-app-icon.png",
     "scheme": "ghostcar",
     "userInterfaceStyle": "automatic",
+    "newArchEnabled": false,
     "ios": {
       "icon": "./assets/images/ghostcar-app-icon.png"
     },
     "android": {
       "package": "com.ghostcarbr.ghostcar",
+      "versionCode": 2,
       "adaptiveIcon": {
         "backgroundColor": "#00102D",
         "foregroundImage": "./assets/images/ghostcar-app-icon.png",
