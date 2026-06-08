@@ -32,6 +32,15 @@ type CarListing = {
   title: string;
 };
 
+type ClientAccount = {
+  birthDate: string;
+  cpf: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  phone: string;
+};
+
 type PhotonFeature = {
   geometry: {
     coordinates: [number, number];
@@ -84,7 +93,15 @@ export default function ClientHomeScreen() {
   const [isSearching, setIsSearching] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isResultsOpen, setIsResultsOpen] = useState(false);
-  const params = useLocalSearchParams<{ clientName?: string }>();
+  const params = useLocalSearchParams<{
+    clientBirthDate?: string;
+    clientCpf?: string;
+    clientEmail?: string;
+    clientFirstName?: string;
+    clientLastName?: string;
+    clientName?: string;
+    clientPhone?: string;
+  }>();
   const { languageCode, setLanguageCode, t } = useLanguage();
   const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([]);
   const currentCoordinates = useRef<Coordinates | null>(null);
@@ -92,6 +109,14 @@ export default function ClientHomeScreen() {
   const selectedLanguage =
     languages.find((language) => language.code === languageCode) ?? languages[0];
   const clientName = typeof params.clientName === 'string' ? params.clientName.trim().split(' ')[0] : '';
+  const clientAccount = {
+    birthDate: typeof params.clientBirthDate === 'string' ? params.clientBirthDate : '',
+    cpf: typeof params.clientCpf === 'string' ? params.clientCpf : '',
+    email: typeof params.clientEmail === 'string' ? params.clientEmail : '',
+    firstName: typeof params.clientFirstName === 'string' ? params.clientFirstName : clientName,
+    lastName: typeof params.clientLastName === 'string' ? params.clientLastName : '',
+    phone: typeof params.clientPhone === 'string' ? params.clientPhone : '',
+  };
   const greetingBase = t('hello').replace(/[!！¡؟?]\s*$/u, '').trim();
   const greetingText = clientName ? `${greetingBase}, ${clientName}` : t('hello');
   const menuGreetingText = clientName ? `${greetingBase}, ${clientName}!` : t('hello');
@@ -240,6 +265,7 @@ export default function ClientHomeScreen() {
         />
       ) : isMenuOpen ? (
         <ClientMenu
+          account={clientAccount}
           clientName={clientName}
           greetingText={menuGreetingText}
           languageCode={languageCode}
@@ -862,6 +888,124 @@ const styles = StyleSheet.create({
     gap: 28,
     marginTop: 22,
   },
+  accountContent: {
+    paddingBottom: 34,
+  },
+  accountHero: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 164,
+    backgroundColor: '#E99A00',
+  },
+  accountHeroTitle: {
+    color: '#FFFFFF',
+    fontSize: 20,
+    fontWeight: '500',
+    marginBottom: 12,
+  },
+  accountHeroAvatar: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 82,
+    height: 82,
+    borderWidth: 5,
+    borderColor: '#FFFFFF',
+    borderRadius: 41,
+    backgroundColor: '#FDB01B',
+  },
+  accountHeroAvatarText: {
+    color: '#FFFFFF',
+    fontSize: 28,
+    fontWeight: '900',
+  },
+  accountInfoRow: {
+    minHeight: 78,
+    marginHorizontal: 24,
+    paddingTop: 18,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E2E2E2',
+  },
+  accountInfoLabel: {
+    color: '#8A8D9B',
+    fontSize: 15,
+  },
+  accountInfoValue: {
+    marginTop: 10,
+    color: '#111111',
+    fontSize: 15,
+    fontWeight: '500',
+  },
+  accountInfoPlaceholder: {
+    color: '#8A8D9B',
+    fontWeight: '600',
+  },
+  accountCountryValue: {
+    fontWeight: '800',
+  },
+  accountPhoneRow: {
+    flexDirection: 'row',
+    marginHorizontal: 24,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E2E2E2',
+  },
+  accountAreaCode: {
+    width: 118,
+    minHeight: 88,
+    paddingTop: 18,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E2E2E2',
+  },
+  accountPhoneNumber: {
+    flex: 1,
+    minHeight: 88,
+    marginLeft: 24,
+    paddingTop: 18,
+  },
+  accountPhonePrefix: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 10,
+    gap: 10,
+  },
+  accountPhoneFlag: {
+    fontSize: 20,
+  },
+  accountOffersRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 24,
+    marginTop: 44,
+    gap: 10,
+  },
+  accountOffersText: {
+    flex: 1,
+    color: '#111111',
+    fontSize: 15,
+    lineHeight: 21,
+  },
+  accountSaveButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 62,
+    marginHorizontal: 24,
+    marginTop: 22,
+    borderRadius: 31,
+    backgroundColor: '#FDB01B',
+  },
+  accountSaveButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '900',
+  },
+  accountDeleteButton: {
+    alignItems: 'center',
+    marginTop: 30,
+  },
+  accountDeleteText: {
+    color: '#333333',
+    fontSize: 15,
+    fontWeight: '600',
+  },
   settingsContent: {
     paddingHorizontal: 28,
     paddingTop: 24,
@@ -1066,6 +1210,7 @@ function SearchResultsScreen({ coordinates, destination, onBack, t }: { coordina
 }
 
 type ClientMenuProps = {
+  account: ClientAccount;
   clientName: string;
   greetingText: string;
   languageCode: (typeof languages)[number]['code'];
@@ -1074,7 +1219,8 @@ type ClientMenuProps = {
   t: (key: string) => string;
 };
 
-function ClientMenu({ clientName, greetingText, languageCode, onBack, setLanguageCode, t }: ClientMenuProps) {
+function ClientMenu({ account, clientName, greetingText, languageCode, onBack, setLanguageCode, t }: ClientMenuProps) {
+  const [isAccountScreenOpen, setIsAccountScreenOpen] = useState(false);
   const [isSettingsScreenOpen, setIsSettingsScreenOpen] = useState(false);
   const [isLanguageScreenOpen, setIsLanguageScreenOpen] = useState(false);
   const [isCurrencyScreenOpen, setIsCurrencyScreenOpen] = useState(false);
@@ -1104,6 +1250,11 @@ function ClientMenu({ clientName, greetingText, languageCode, onBack, setLanguag
       return;
     }
 
+    if (key === 'myAccount') {
+      setIsAccountScreenOpen(true);
+      return;
+    }
+
     showMenuComingSoon(t(key));
   }
 
@@ -1114,6 +1265,10 @@ function ClientMenu({ clientName, greetingText, languageCode, onBack, setLanguag
 
   if (isPublishScreenOpen) {
     return <PublishCarScreen onBack={() => setIsPublishScreenOpen(false)} t={t} />;
+  }
+
+  if (isAccountScreenOpen) {
+    return <ClientAccountScreen account={account} onBack={() => setIsAccountScreenOpen(false)} t={t} />;
   }
 
   if (isLanguageScreenOpen) {
@@ -1197,6 +1352,7 @@ function ClientMenu({ clientName, greetingText, languageCode, onBack, setLanguag
         {supportMenuItems.map((item) => (
           <MenuRow icon={item.icon} key={item.key} label={t(item.key)} onPress={() => showMenuComingSoon(t(item.key))} />
         ))}
+        <MenuRow icon="log-out-outline" label={t('logout')} onPress={handleLogout} />
 
         <View style={styles.followSection}>
           <Text style={styles.followTitle}>{t('followUs')}</Text>
@@ -1206,10 +1362,94 @@ function ClientMenu({ clientName, greetingText, languageCode, onBack, setLanguag
             <Ionicons color="#777777" name="logo-linkedin" size={26} />
           </View>
         </View>
-
-        <MenuRow icon="log-out-outline" label={t('logout')} onPress={handleLogout} />
       </ScrollView>
     </SafeAreaView>
+  );
+}
+
+function ClientAccountScreen({ account, onBack, t }: { account: ClientAccount; onBack: () => void; t: (key: string) => string }) {
+  const initials = `${account.firstName.charAt(0)}${account.lastName.charAt(0) || account.firstName.charAt(1) || ''}`.toLowerCase() || 'gc';
+
+  return (
+    <SafeAreaView edges={['top', 'bottom']} style={styles.menuScreen}>
+      <View style={styles.menuHeader}>
+        <Pressable accessibilityLabel="Voltar" onPress={onBack}>
+          <Ionicons color="#111111" name="arrow-back" size={30} />
+        </Pressable>
+        <Text style={styles.settingsHeaderTitle}>{t('myAccount')}</Text>
+        <Ionicons color="#111111" name="menu" size={31} />
+      </View>
+
+      <ScrollView contentContainerStyle={styles.accountContent}>
+        <View style={styles.accountHero}>
+          <Text style={styles.accountHeroTitle}>{t('myAccount')}</Text>
+          <View style={styles.accountHeroAvatar}>
+            <Text style={styles.accountHeroAvatarText}>{initials}</Text>
+          </View>
+        </View>
+
+        <AccountInfoRow label={t('firstName')} value={account.firstName} />
+        <AccountInfoRow label={t('lastName')} value={account.lastName} />
+        <AccountInfoRow
+          label={t('residenceCountry')}
+          value="🇧🇷  Brasil"
+          valueStyle={styles.accountCountryValue}
+        />
+        <AccountInfoRow label="CPF" placeholder="Nº Documento" value={account.cpf} />
+
+        <View style={styles.accountPhoneRow}>
+          <View style={styles.accountAreaCode}>
+            <Text style={styles.accountInfoLabel}>{t('areaCode')}</Text>
+            <View style={styles.accountPhonePrefix}>
+              <Text style={styles.accountPhoneFlag}>🇧🇷</Text>
+              <Text style={styles.accountInfoValue}>+55</Text>
+              <Ionicons color="#7D8293" name="caret-down" size={14} />
+            </View>
+          </View>
+          <View style={styles.accountPhoneNumber}>
+            <Text style={styles.accountInfoLabel}>{t('mobile')}</Text>
+            <Text style={styles.accountInfoValue}>{account.phone}</Text>
+          </View>
+        </View>
+
+        <AccountInfoRow label={t('birthDate')} value={account.birthDate} />
+        <AccountInfoRow label="E-mail" value={account.email} />
+
+        <Pressable style={styles.accountOffersRow}>
+          <Ionicons color="#FDB01B" name="checkbox-outline" size={26} />
+          <Text style={styles.accountOffersText}>{t('receiveOffers')}</Text>
+        </Pressable>
+
+        <Pressable style={({ pressed }) => [styles.accountSaveButton, pressed && styles.pressed]}>
+          <Text style={styles.accountSaveButtonText}>{t('save')}</Text>
+        </Pressable>
+
+        <Pressable style={styles.accountDeleteButton}>
+          <Text style={styles.accountDeleteText}>{t('deleteAccount')}</Text>
+        </Pressable>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+function AccountInfoRow({
+  label,
+  placeholder,
+  value,
+  valueStyle,
+}: {
+  label: string;
+  placeholder?: string;
+  value: string;
+  valueStyle?: object;
+}) {
+  return (
+    <View style={styles.accountInfoRow}>
+      <Text style={styles.accountInfoLabel}>{label}</Text>
+      <Text style={[styles.accountInfoValue, !value && styles.accountInfoPlaceholder, valueStyle]}>
+        {value || placeholder || ''}
+      </Text>
+    </View>
   );
 }
 

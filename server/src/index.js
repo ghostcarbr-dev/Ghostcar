@@ -115,10 +115,14 @@ function parseCookies(cookieHeader = '') {
 
 function formatUser(user) {
   return {
+    birthDate: user.birth_date,
+    country: user.country,
+    cpf: user.cpf,
     id: user.id,
     email: user.email,
     name: user.name,
     pictureUrl: user.picture_url,
+    phone: user.phone,
     provider: user.provider,
   };
 }

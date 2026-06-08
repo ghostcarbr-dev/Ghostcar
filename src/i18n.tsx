@@ -44,6 +44,9 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     completeCarForm: 'Preencha os campos e informe a localização do carro.',
     carPublished: 'Seu carro foi publicado com sucesso.', carPublishFailed: 'Não foi possível publicar o carro. Tente novamente.',
     logout: 'Sair',
+    firstName: 'Nome', lastName: 'Sobrenome', residenceCountry: 'País/Região de Residência',
+    areaCode: 'Código de área', mobile: 'Celular', birthDate: 'Data de Nascimento',
+    receiveOffers: 'Desejo receber ofertas e promoções exclusivas Ghostcar', deleteAccount: 'Excluir conta',
   },
   fr: {
     rentCars: 'LOCATION DE VOITURES', openAccount: 'Ouvrir un compte', haveAccount: "J'ai déjà un compte",
@@ -76,6 +79,9 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     completeCarForm: 'Complétez les champs et indiquez la localisation de la voiture.',
     carPublished: 'Votre voiture a bien été publiée.', carPublishFailed: 'Impossible de publier la voiture. Réessayez.',
     logout: 'Se déconnecter',
+    firstName: 'Prénom', lastName: 'Nom', residenceCountry: 'Pays/Région de résidence',
+    areaCode: 'Indicatif', mobile: 'Téléphone', birthDate: 'Date de naissance',
+    receiveOffers: 'Je souhaite recevoir des offres et promotions exclusives Ghostcar', deleteAccount: 'Supprimer le compte',
   },
   en: {
     rentCars: 'CAR RENTAL', openAccount: 'Open account', haveAccount: 'I already have an account',
@@ -107,6 +113,9 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     completeCarForm: 'Complete the fields and provide the car location.',
     carPublished: 'Your car has been published.', carPublishFailed: 'Unable to publish the car. Try again.',
     logout: 'Sign out',
+    firstName: 'First name', lastName: 'Last name', residenceCountry: 'Country/Region of residence',
+    areaCode: 'Area code', mobile: 'Mobile', birthDate: 'Date of birth',
+    receiveOffers: 'I want to receive exclusive Ghostcar offers and promotions', deleteAccount: 'Delete account',
   },
   es: {
     rentCars: 'ALQUILER DE COCHES', openAccount: 'Abrir cuenta', haveAccount: 'Ya tengo una cuenta',

@@ -41,10 +41,14 @@ type CarListing = {
 };
 
 type AuthUser = {
+  birthDate?: string | null;
+  country?: string | null;
+  cpf?: string | null;
   email: string;
   id: number;
   name: string | null;
   pictureUrl: string | null;
+  phone?: string | null;
   provider: string;
 };
 
@@ -328,7 +332,15 @@ export default function HomeScreen() {
 
       router.push({
         pathname: '/client-home',
-        params: { clientName: data.user?.name || nativeSignupForm.firstName.trim() },
+        params: {
+          clientBirthDate: data.user?.birthDate || nativeSignupForm.birthDate.trim(),
+          clientCpf: data.user?.cpf || nativeSignupForm.cpf.trim(),
+          clientEmail: normalizedSignupEmail,
+          clientFirstName: nativeSignupForm.firstName.trim(),
+          clientLastName: nativeSignupForm.lastName.trim(),
+          clientName: data.user?.name || nativeSignupForm.firstName.trim(),
+          clientPhone: data.user?.phone || nativeSignupForm.phone.trim(),
+        },
       });
     } catch {
       setNativeSignupError('Não foi possível criar a conta. Tente novamente.');
@@ -364,7 +376,15 @@ export default function HomeScreen() {
 
       router.push({
         pathname: '/client-home',
-        params: { clientName: data.user?.name || email },
+        params: {
+          clientBirthDate: data.user?.birthDate || '',
+          clientCpf: data.user?.cpf || '',
+          clientEmail: data.user?.email || email,
+          clientFirstName: data.user?.name?.trim().split(' ')[0] || email,
+          clientLastName: data.user?.name?.trim().split(' ').slice(1).join(' ') || '',
+          clientName: data.user?.name || email,
+          clientPhone: data.user?.phone || '',
+        },
       });
     } catch {
       setNativeLoginError('Não foi possível entrar. Verifique sua conexão.');
