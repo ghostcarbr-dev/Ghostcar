@@ -2,7 +2,7 @@
   "expo": {
     "name": "Ghostcar",
     "slug": "Ghostcar",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "orientation": "portrait",
     "icon": "./assets/images/ghostcar-app-icon.png",
     "scheme": "ghostcar",
@@ -12,7 +12,7 @@
     },
     "android": {
       "package": "com.ghostcarbr.ghostcar",
-      "versionCode": 4,
+      "versionCode": 5,
       "adaptiveIcon": {
         "backgroundColor": "#00102D",
         "foregroundImage": "./assets/images/ghostcar-app-icon.png",
