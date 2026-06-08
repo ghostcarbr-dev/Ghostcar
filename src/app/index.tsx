@@ -2124,7 +2124,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     height: 58,
     borderRadius: 18,
-    backgroundColor: '#FFCC2D',
+    backgroundColor: '#00102D',
     ...Platform.select({
       web: {
         height: 48,
@@ -2133,7 +2133,7 @@ const styles = StyleSheet.create({
     }),
   },
   openAccountText: {
-    color: '#171717',
+    color: '#FFFFFF',
     fontSize: 15,
     fontWeight: '500',
   },
@@ -2759,7 +2759,7 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: '#F7B31A',
+    backgroundColor: '#00102D',
   },
   webAccountAvatarText: {
     color: '#FFFFFF',
@@ -3315,8 +3315,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.18)',
   },
   webHeroTabActive: {
-    color: '#1C2926',
-    backgroundColor: '#FFB21C',
+    color: '#FFFFFF',
+    backgroundColor: '#00102D',
   },
   webSearchLabel: {
     marginBottom: 10,
@@ -3355,14 +3355,14 @@ const styles = StyleSheet.create({
     gap: 8,
     width: 166,
     borderRadius: 8,
-    backgroundColor: '#FFB21C',
+    backgroundColor: '#00102D',
   },
   webSearchButtonMobile: {
     width: '100%',
     minHeight: 54,
   },
   webSearchButtonText: {
-    color: '#1C2926',
+    color: '#FFFFFF',
     fontSize: 15,
     fontWeight: '900',
   },

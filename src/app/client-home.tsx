@@ -287,7 +287,7 @@ export default function ClientHomeScreen() {
           <SafeAreaView edges={['top']} style={styles.heroSafeArea}>
             <View style={styles.topBar}>
               <View>
-                <GhostcarLogo color="#FFFFFF" size="small" taglineColor="#FFCC2D" />
+                <GhostcarLogo color="#FFFFFF" size="small" taglineColor="#FFFFFF" />
               </View>
 
               <View style={styles.headerActions}>
@@ -525,7 +525,7 @@ const styles = StyleSheet.create({
     letterSpacing: -1.6,
   },
   logoTagline: {
-    color: '#FFCC2D',
+    color: '#FFFFFF',
     fontSize: 7,
     fontWeight: '800',
     letterSpacing: 2.2,
@@ -660,7 +660,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   promoEyebrow: {
-    color: '#FFCC2D',
+    color: '#FFFFFF',
     fontSize: 11,
     fontWeight: '900',
     letterSpacing: 1,
@@ -693,7 +693,7 @@ const styles = StyleSheet.create({
   },
   rewardsCard: {
     padding: 20,
-    backgroundColor: '#FFB51B',
+    backgroundColor: '#00102D',
   },
   rewardsIcon: {
     alignItems: 'center',
@@ -701,12 +701,12 @@ const styles = StyleSheet.create({
     width: 42,
     height: 42,
     borderRadius: 21,
-    backgroundColor: '#08735D',
+    backgroundColor: 'rgba(255, 255, 255, 0.16)',
   },
   rewardsTitle: {
     width: '82%',
     marginTop: 12,
-    color: '#18372E',
+    color: '#FFFFFF',
     fontSize: 20,
     fontWeight: '900',
     lineHeight: 25,
@@ -714,7 +714,7 @@ const styles = StyleSheet.create({
   rewardsSubtitle: {
     width: '82%',
     marginTop: 7,
-    color: '#313131',
+    color: '#DDE7F7',
     fontSize: 12,
     lineHeight: 17,
   },
@@ -791,7 +791,7 @@ const styles = StyleSheet.create({
     width: 58,
     height: 58,
     borderRadius: 29,
-    backgroundColor: '#FDB01B',
+    backgroundColor: '#00102D',
   },
   menuAvatarText: {
     color: '#FFFFFF',
@@ -895,7 +895,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     height: 164,
-    backgroundColor: '#E99A00',
+    backgroundColor: '#00102D',
   },
   accountHeroTitle: {
     color: '#FFFFFF',
@@ -911,7 +911,7 @@ const styles = StyleSheet.create({
     borderWidth: 5,
     borderColor: '#FFFFFF',
     borderRadius: 41,
-    backgroundColor: '#FDB01B',
+    backgroundColor: '#00102D',
   },
   accountHeroAvatarText: {
     color: '#FFFFFF',
@@ -990,7 +990,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 24,
     marginTop: 22,
     borderRadius: 31,
-    backgroundColor: '#FDB01B',
+    backgroundColor: '#00102D',
   },
   accountSaveButtonText: {
     color: '#FFFFFF',
@@ -1079,7 +1079,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     height: 58,
     borderRadius: 20,
-    backgroundColor: '#FFB21C',
+    backgroundColor: '#00102D',
   },
   saveLanguageButtonText: {
     color: '#FFFFFF',
@@ -1416,7 +1416,7 @@ function ClientAccountScreen({ account, onBack, t }: { account: ClientAccount; o
         <AccountInfoRow label="E-mail" value={account.email} />
 
         <Pressable style={styles.accountOffersRow}>
-          <Ionicons color="#FDB01B" name="checkbox-outline" size={26} />
+          <Ionicons color="#00102D" name="checkbox-outline" size={26} />
           <Text style={styles.accountOffersText}>{t('receiveOffers')}</Text>
         </Pressable>
 
