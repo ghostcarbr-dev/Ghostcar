@@ -1,5 +1,6 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Image } from 'expo-image';
+import { useLocalSearchParams } from 'expo-router';
 import * as Location from 'expo-location';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef, useState } from 'react';
@@ -82,12 +83,16 @@ export default function ClientHomeScreen() {
   const [isSearching, setIsSearching] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isResultsOpen, setIsResultsOpen] = useState(false);
+  const params = useLocalSearchParams<{ clientName?: string }>();
   const { languageCode, setLanguageCode, t } = useLanguage();
   const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([]);
   const currentCoordinates = useRef<Coordinates | null>(null);
   const skipNextSuggestionFetch = useRef(false);
   const selectedLanguage =
     languages.find((language) => language.code === languageCode) ?? languages[0];
+  const clientName = typeof params.clientName === 'string' ? params.clientName.trim().split(' ')[0] : '';
+  const greetingBase = t('hello').replace(/[!！¡؟?]\s*$/u, '').trim();
+  const greetingText = clientName ? `${greetingBase}, ${clientName}` : t('hello');
 
   function showComingSoon(label: string) {
     Alert.alert('Em breve', `${label} ainda não está disponível no aplicativo.`);
@@ -271,7 +276,7 @@ export default function ClientHomeScreen() {
               </View>
             </View>
 
-            <Text style={styles.greeting}>{t('hello')}</Text>
+            <Text style={styles.greeting}>{greetingText}</Text>
           </SafeAreaView>
         </View>
 
@@ -508,7 +513,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
   },
   greeting: {
-    marginTop: 76,
+    marginTop: 42,
     color: '#FFFFFF',
     fontSize: 27,
     fontWeight: '900',

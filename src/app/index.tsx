@@ -319,14 +319,17 @@ export default function HomeScreen() {
         method: 'POST',
       });
 
-      const data = (await response.json()) as { error?: string };
+      const data = (await response.json()) as { error?: string; user?: AuthUser };
 
       if (!response.ok) {
         setNativeSignupError(response.status === 409 ? 'Este e-mail já está cadastrado.' : data.error || 'Não foi possível criar a conta.');
         return;
       }
 
-      router.push('/client-home');
+      router.push({
+        pathname: '/client-home',
+        params: { clientName: data.user?.name || nativeSignupForm.firstName.trim() },
+      });
     } catch {
       setNativeSignupError('Não foi possível criar a conta. Tente novamente.');
     } finally {
@@ -352,14 +355,17 @@ export default function HomeScreen() {
         headers: { 'Content-Type': 'application/json' },
         method: 'POST',
       });
-      const data = (await response.json()) as { error?: string };
+      const data = (await response.json()) as { error?: string; user?: AuthUser };
 
       if (!response.ok) {
         setNativeLoginError(response.status === 401 ? 'E-mail ou senha incorretos.' : data.error || 'Não foi possível entrar.');
         return;
       }
 
-      router.push('/client-home');
+      router.push({
+        pathname: '/client-home',
+        params: { clientName: data.user?.name || email },
+      });
     } catch {
       setNativeLoginError('Não foi possível entrar. Verifique sua conexão.');
     } finally {
