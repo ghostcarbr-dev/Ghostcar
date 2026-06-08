@@ -1,6 +1,6 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Image } from 'expo-image';
-import { useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import * as Location from 'expo-location';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef, useState } from 'react';
@@ -52,6 +52,7 @@ const personalMenuItems = [
   { icon: 'ticket-outline', key: 'bookings' },
   { icon: 'car-outline', key: 'myCars' },
   { icon: 'car-sport-outline', key: 'publishCar' },
+  { icon: 'person-circle-outline', key: 'myAccount' },
   { icon: 'settings-outline', key: 'settings' },
 ] as const;
 
@@ -93,6 +94,7 @@ export default function ClientHomeScreen() {
   const clientName = typeof params.clientName === 'string' ? params.clientName.trim().split(' ')[0] : '';
   const greetingBase = t('hello').replace(/[!！¡؟?]\s*$/u, '').trim();
   const greetingText = clientName ? `${greetingBase}, ${clientName}` : t('hello');
+  const menuGreetingText = clientName ? `${greetingBase}, ${clientName}!` : t('hello');
 
   function showComingSoon(label: string) {
     Alert.alert('Em breve', `${label} ainda não está disponível no aplicativo.`);
@@ -238,6 +240,8 @@ export default function ClientHomeScreen() {
         />
       ) : isMenuOpen ? (
         <ClientMenu
+          clientName={clientName}
+          greetingText={menuGreetingText}
           languageCode={languageCode}
           onBack={() => setIsMenuOpen(false)}
           setLanguageCode={setLanguageCode}
@@ -745,6 +749,43 @@ const styles = StyleSheet.create({
   menuHeaderSpacer: {
     width: 30,
   },
+  menuProfileHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    minHeight: 122,
+    paddingHorizontal: 24,
+    paddingVertical: 24,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E6E6E6',
+    gap: 16,
+  },
+  menuAvatar: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 58,
+    height: 58,
+    borderRadius: 29,
+    backgroundColor: '#FDB01B',
+  },
+  menuAvatarText: {
+    color: '#FFFFFF',
+    fontSize: 24,
+    fontWeight: '900',
+  },
+  menuProfileGreeting: {
+    flex: 1,
+    color: '#111111',
+    fontSize: 25,
+    fontWeight: '900',
+  },
+  menuCloseButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: '#DDDDDD',
+  },
   menuContent: {
     paddingBottom: 86,
   },
@@ -1025,13 +1066,15 @@ function SearchResultsScreen({ coordinates, destination, onBack, t }: { coordina
 }
 
 type ClientMenuProps = {
+  clientName: string;
+  greetingText: string;
   languageCode: (typeof languages)[number]['code'];
   onBack: () => void;
   setLanguageCode: (code: (typeof languages)[number]['code']) => void;
   t: (key: string) => string;
 };
 
-function ClientMenu({ languageCode, onBack, setLanguageCode, t }: ClientMenuProps) {
+function ClientMenu({ clientName, greetingText, languageCode, onBack, setLanguageCode, t }: ClientMenuProps) {
   const [isSettingsScreenOpen, setIsSettingsScreenOpen] = useState(false);
   const [isLanguageScreenOpen, setIsLanguageScreenOpen] = useState(false);
   const [isCurrencyScreenOpen, setIsCurrencyScreenOpen] = useState(false);
@@ -1062,6 +1105,11 @@ function ClientMenu({ languageCode, onBack, setLanguageCode, t }: ClientMenuProp
     }
 
     showMenuComingSoon(t(key));
+  }
+
+  function handleLogout() {
+    onBack();
+    router.replace('/');
   }
 
   if (isPublishScreenOpen) {
@@ -1112,12 +1160,14 @@ function ClientMenu({ languageCode, onBack, setLanguageCode, t }: ClientMenuProp
 
   return (
     <SafeAreaView edges={['top']} style={styles.menuScreen}>
-      <View style={styles.menuHeader}>
-        <Pressable accessibilityLabel="Voltar" onPress={onBack}>
-          <Ionicons color="#242424" name="arrow-back" size={30} />
+      <View style={styles.menuProfileHeader}>
+        <View style={styles.menuAvatar}>
+          <Text style={styles.menuAvatarText}>{(clientName || 'GC').slice(0, 2).toUpperCase()}</Text>
+        </View>
+        <Text numberOfLines={1} style={styles.menuProfileGreeting}>{greetingText}</Text>
+        <Pressable accessibilityLabel="Fechar menu" onPress={onBack} style={styles.menuCloseButton}>
+          <Ionicons color="#777777" name="close" size={29} />
         </Pressable>
-        <Text style={styles.menuHeaderTitle}>Menu</Text>
-        <Ionicons color="#242424" name="menu" size={31} />
       </View>
 
       <ScrollView contentContainerStyle={styles.menuContent}>
@@ -1156,6 +1206,8 @@ function ClientMenu({ languageCode, onBack, setLanguageCode, t }: ClientMenuProp
             <Ionicons color="#777777" name="logo-linkedin" size={26} />
           </View>
         </View>
+
+        <MenuRow icon="log-out-outline" label={t('logout')} onPress={handleLogout} />
       </ScrollView>
     </SafeAreaView>
   );
